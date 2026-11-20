@@ -19,6 +19,7 @@ Copyright © 2026 The LinuxGroove team. Cinderkirk's own code is under the GNU G
 - World textures, the menu art, the console background, the icon and the first level are Cinderkirk's own, made for it in Blender and Python (`assets_src/`, `tools/`, `maps_src/`).
 - Stand-ins until Cinderkirk's own are made: the creature, weapon and item models, sounds, status bar, small fonts and the ammo and health boxes are from **LibreQuake** (BSD-3-Clause, see `build/librequake/COPYING.LibreQuake` after a build), fetched at a pinned commit by `tools/librequake.sh` and never stored here.
 - Menu lettering in **Cinzel** by Natanael Gama (SIL Open Font License 1.1, `assets_src/fonts/OFL-Cinzel.txt`).
+- Help text in **Barlow Condensed** by The Barlow Project Authors (SIL Open Font License 1.1, `assets_src/fonts/OFL-BarlowCondensed.txt`).
 - The LinuxGroove Games splash (`gfx/splash.png`) is shared by every LinuxGroove game.
 
 ## Tools

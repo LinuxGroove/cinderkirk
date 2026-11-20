@@ -21,6 +21,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 FONTS = os.path.join(HERE, "..", "assets_src", "fonts")
 HEAVY = os.path.join(FONTS, "cinzel-latin-900-normal.woff")
 BOLD = os.path.join(FONTS, "cinzel-latin-700-normal.woff")
+# Running text: Barlow Condensed, which stays readable small and on a TV.
+TEXT = os.path.join(FONTS, "barlow-condensed-latin-500-normal.woff")
+TEXT_BOLD = os.path.join(FONTS, "barlow-condensed-latin-700-normal.woff")
 
 # Menu titles: name -> text. Width follows the text; height is 24.
 TITLES = {
@@ -240,22 +243,22 @@ def help_page(tex_dir, n, heading, rows):
     page.alpha_composite(head, (0, 8 * SCALE))
     d.line((80 * SCALE, 36 * SCALE, 240 * SCALE, 36 * SCALE), fill=(214, 150, 70, 255), width=SCALE // 2)
 
-    body = ImageFont.truetype(BOLD, int(8.5 * SCALE))
-    label = ImageFont.truetype(HEAVY, int(8.5 * SCALE))
+    body = ImageFont.truetype(TEXT, int(11 * SCALE))
+    label = ImageFont.truetype(TEXT_BOLD, int(11 * SCALE))
     ink, gold = (236, 222, 200, 255), (246, 176, 82, 255)
-    y = 46 * SCALE
+    y = 43 * SCALE
     if rows and rows[0][0] is None:
         for _, text in rows:
             for line in wrap(d, text, body, 264 * SCALE):
                 d.text((28 * SCALE, y), line, font=body, fill=ink)
-                y += 12 * SCALE
+                y += 14 * SCALE
             y += 6 * SCALE
     else:
         for name, text in rows:
-            d.text((150 * SCALE, y), name.upper(), font=label, fill=gold, anchor="ra")
+            d.text((150 * SCALE, y), name, font=label, fill=gold, anchor="ra")
             d.text((162 * SCALE, y), text, font=body, fill=ink)
-            y += 12 * SCALE
-    foot = ImageFont.truetype(BOLD, 8 * SCALE)
+            y += 13 * SCALE
+    foot = ImageFont.truetype(TEXT_BOLD, 10 * SCALE)
     d.text((W // 2, H - 18 * SCALE), f"<   {n + 1} of {len(HELP)}   >", font=foot,
            fill=(214, 150, 70, 255), anchor="ma")
     return page.convert("RGB")
