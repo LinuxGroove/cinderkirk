@@ -1,0 +1,50 @@
+name: Snap
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  snap:
+    name: Build the snap (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Every commit and tag, so tools/version.sh can describe this one.
+          fetch-depth: 0
+      - uses: snapcore/action-build@v1
+        id: build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cinderkirk-snap-${{ matrix.arch }}
+          path: ${{ steps.build.outputs.snap }}
+      # Publishing needs the snap name registered and the STORE_LOGIN secret.
+      - name: Publish to the edge channel
+        if: github.event_name == 'push' && vars.PUBLISH_SNAP == 'true'
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: edge
+      - name: Publish to the candidate channel
+        if: github.event_name == 'release' && vars.PUBLISH_SNAP == 'true'
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: candidate

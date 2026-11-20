@@ -92,7 +92,9 @@ def build():
         L.light((x, 300, 64), 260, WARM)
     for x in (700, 1024, 1350):
         L.light((x, 0, 340), 220, COLD, wait=2)
-    L.light((1488, 0, 48), 120, (0.85, 0.85, 1.0))
+    L.light((1488, 0, 48), 200, (0.85, 0.85, 1.0))
+    for y in (-110, 110):
+        L.light((1540, y, 40), 220, WARM)
     for x in (960, 1088):
         L.light((x, 0, 40), 180, WARM)
 

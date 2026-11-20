@@ -366,8 +366,21 @@ def setup():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
+    # CYCLES_DEVICE=OPTIX (or CUDA, HIP, ONEAPI) bakes on the GPU; samples
+    # smooth the procedural detail (BAKE_SAMPLES, 4 on the CPU, 32 on a GPU).
+    device = os.environ.get("CYCLES_DEVICE", "CPU").upper()
     sc.cycles.device = "CPU"
-    sc.cycles.samples = 4
+    if device != "CPU":
+        prefs = bpy.context.preferences.addons["cycles"].preferences
+        prefs.compute_device_type = device
+        prefs.get_devices()
+        for d in prefs.devices:
+            d.use = d.type == device
+        if any(d.use for d in prefs.devices):
+            sc.cycles.device = "GPU"
+        else:
+            print(f"no {device} device, baking on the CPU", flush=True)
+    sc.cycles.samples = int(os.environ.get("BAKE_SAMPLES", 32 if sc.cycles.device == "GPU" else 4))
     sc.render.bake.margin = 0
     bpy.ops.mesh.primitive_plane_add(size=2.0)
     return bpy.context.active_object

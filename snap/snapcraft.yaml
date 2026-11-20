@@ -1,0 +1,125 @@
+name: cinderkirk
+title: Cinderkirk
+adopt-info: cinderkirk
+base: core24
+summary: A bell foundry over a burning pit. Fight your way down.
+description: |
+  Cinderkirk is a fast first person shooter in the old style: brush-built
+  halls, a heavy gun low in the view, a status bar with big numbers, keys
+  that float, and slag that kills. You're the last stoker at the bell
+  foundry of Cinderkirk, built over a pit that never stopped burning, and
+  something has come up out of it.
+
+  - Built on vkQuake for big screens: sharp at 4K, high frame rates, and
+    Vulkan lighting and ambient occlusion
+  - Made for controllers and handhelds: gyro aiming, flick stick and
+    rumble, and fully playable with a keyboard and mouse
+  - Comfortable by default: no view bob, roll or kick
+  - Early days: this build has the first level, The Foundry Gate, with
+    stand-in creatures and weapons from LibreQuake while Cinderkirk's own
+    are made
+icon: snap/gui/cinderkirk.png
+grade: devel
+confinement: strict
+compression: lzo
+license: GPL-2.0-or-later AND BSD-3-Clause AND OFL-1.1 AND Zlib AND Apache-2.0
+website: https://github.com/LinuxGroove/cinderkirk
+source-code: https://github.com/LinuxGroove/cinderkirk
+issues: https://github.com/LinuxGroove/cinderkirk/issues
+
+platforms:
+  amd64:
+  arm64:
+
+apps:
+  cinderkirk:
+    command: bin/cinderkirk-launch
+    extensions: [gnome]
+    plugs:
+      - audio-playback
+      - joystick
+      - network
+      - network-bind
+
+parts:
+  cinderkirk:
+    plugin: nil
+    source: .
+    build-packages:
+      - git
+      - ca-certificates
+      - cmake
+      - ninja-build
+      - meson
+      - pkg-config
+      - python3
+      - python3-pil
+      - python3-numpy
+      - glslang-tools
+      - bc
+      # ericw-tools
+      - libembree-dev
+      - libtbb-dev
+      - zlib1g-dev
+      # SDL3, built from source (Ubuntu 24.04 has none)
+      - libasound2-dev
+      - libpulse-dev
+      - libpipewire-0.3-dev
+      - libx11-dev
+      - libxext-dev
+      - libxrandr-dev
+      - libxcursor-dev
+      - libxfixes-dev
+      - libxi-dev
+      - libxss-dev
+      - libxtst-dev
+      - libxkbcommon-dev
+      - libdrm-dev
+      - libgbm-dev
+      - libegl-dev
+      - libdbus-1-dev
+      - libudev-dev
+      - libwayland-dev
+      - wayland-protocols
+      - libdecor-0-dev
+      # the engine's music codecs
+      - libvorbis-dev
+      - libopusfile-dev
+      - libflac-dev
+      - libmpg123-dev
+    stage-packages:
+      - libasound2t64
+      - libpulse0
+      - libdecor-0-0
+      - libudev1
+      - libwayland-client0
+      - libwayland-cursor0
+      - libwayland-egl1
+      - libxkbcommon0
+      - libx11-6
+      - libxcursor1
+      - libxext6
+      - libxfixes3
+      - libxi6
+      - libxrandr2
+      - libxss1
+      - libdbus-1-3
+      - libvorbisfile3
+      - libopusfile0
+      - libflac12t64
+      - libmpg123-0t64
+    override-pull: |
+      craftctl default
+      craftctl set version="$(tools/version.sh)"
+    override-build: |
+      # The engine and its libraries (SDL3, the Vulkan loader), the level and
+      # game code compilers, then the game data; see the Makefile.
+      export JOBS="$CRAFT_PARALLEL_BUILD_COUNT"
+      make -j1 engine game
+      install -D -m 755 dist/cinderkirk "$CRAFT_PART_INSTALL/bin/cinderkirk"
+      install -D -m 755 snap/local/cinderkirk "$CRAFT_PART_INSTALL/bin/cinderkirk-launch"
+      install -D -m 644 dist/cinder/pak0.pak "$CRAFT_PART_INSTALL/share/cinderkirk/cinder/pak0.pak"
+      mkdir -p "$CRAFT_PART_INSTALL/lib"
+      cp -a build/prefix/lib/libSDL3.so* build/prefix/lib/libvulkan.so* "$CRAFT_PART_INSTALL/lib/"
+      install -D -m 644 LICENSE "$CRAFT_PART_INSTALL/share/doc/cinderkirk/LICENSE"
+      install -D -m 644 CREDITS.md "$CRAFT_PART_INSTALL/share/doc/cinderkirk/CREDITS.md"
