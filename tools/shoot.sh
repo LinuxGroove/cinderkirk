@@ -12,7 +12,7 @@
 #
 #   tools/shoot.sh /tmp/ck "1 12" +map start
 set -eu
-OUT=$1; TIMES=$2; shift 2
+OUT=$(realpath -m "$1"); TIMES=$2; shift 2
 SIZE=${SIZE:-1280x720}
 W=${SIZE%x*}; H=${SIZE#*x}
 DISPLAY_NUM=${DISPLAY_NUM:-77}

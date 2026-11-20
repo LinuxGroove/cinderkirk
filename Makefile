@@ -30,6 +30,8 @@ TEXTURES := $(filter-out %_norm.png %_gloss.png %_rough.png,$(wildcard assets/te
 export PATH := $(abspath $(PREFIX))/bin:$(PATH)
 export PKG_CONFIG_PATH := $(abspath $(PREFIX))/lib/pkgconfig:$(abspath $(PREFIX))/share/pkgconfig
 export LD_LIBRARY_PATH := $(abspath $(PREFIX))/lib
+# build/prefix's headers first (the snap's gnome extension adds older Vulkan ones to CFLAGS).
+export CFLAGS := -I$(abspath $(PREFIX))/include $(CFLAGS)
 
 .PHONY: all engine game deps tools librequake maps map run clean textures models check
 

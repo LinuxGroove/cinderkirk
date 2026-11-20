@@ -14,6 +14,10 @@ PREFIX=$(realpath -m "${1:-build/prefix}")
 SRC=$(realpath -m "${DEPS_SRC:-build/src}")
 JOBS=${JOBS:-$(nproc)}
 mkdir -p "$PREFIX" "$SRC"
+# Our headers before any others: the snap's gnome extension puts its SDK's
+# include folder (with older Vulkan headers) in CFLAGS.
+export CFLAGS="-I$PREFIX/include ${CFLAGS:-}"
+export CXXFLAGS="-I$PREFIX/include ${CXXFLAGS:-}"
 
 if [ ! -f "$PREFIX/lib/pkgconfig/sdl3.pc" ]; then
     fetch "$SRC/sdl3" "$SDL3_REPO" "$SDL3_REF"
