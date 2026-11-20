@@ -115,7 +115,8 @@ parts:
       # The engine and its libraries (SDL3, the Vulkan loader), the level and
       # game code compilers, then the game data; see the Makefile.
       export JOBS="$CRAFT_PARALLEL_BUILD_COUNT"
-      make -j1 engine game
+      # Ubuntu's python3 (with numpy and Pillow), not the gnome SDK's.
+      make -j1 PYTHON=/usr/bin/python3 engine game
       install -D -m 755 dist/cinderkirk "$CRAFT_PART_INSTALL/bin/cinderkirk"
       install -D -m 755 snap/local/cinderkirk "$CRAFT_PART_INSTALL/bin/cinderkirk-launch"
       install -D -m 644 dist/cinder/pak0.pak "$CRAFT_PART_INSTALL/share/cinderkirk/cinder/pak0.pak"
