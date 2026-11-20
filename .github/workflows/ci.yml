@@ -42,7 +42,7 @@ jobs:
           tools/shoot.sh shots/splash "3"
           tools/shoot.sh shots/menu "12"
           SPAWN="notarget; god; setpos 660 -250 -40 8 25 0" tools/shoot.sh shots/casting-floor "25" +map start
-          grep -q "player entered the game" shots/casting-floor.log
+          grep -q "shoot.sh: in the level" shots/casting-floor.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

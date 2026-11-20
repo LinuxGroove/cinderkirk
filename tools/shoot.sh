@@ -8,7 +8,8 @@
 # time in SECONDS (from launch) into OUT_PREFIX-<seconds>.png, then stops it.
 # SIZE=1920x1080 sets the window, VK_ICD_FILENAMES picks the Vulkan driver.
 # SPAWN="notarget; god; setpos X Y Z PITCH YAW 0" runs console commands once
-# the player is in the level (through the engine's cl_spawncmd).
+# the player is in the level (through the engine's cl_spawncmd), then print
+# "shoot.sh: in the level" to OUT_PREFIX.log.
 #
 #   tools/shoot.sh /tmp/ck "1 12" +map start
 set -eu
@@ -27,7 +28,7 @@ trap 'kill $GPID $XPID 2>/dev/null || true' EXIT
 sleep 1
 cd "$ROOT/dist"
 if [ -n "${SPAWN:-}" ]; then
-    echo "$SPAWN" | tr ';' '\n' > cinder/_spawn.cfg
+    { echo "$SPAWN" | tr ';' '\n'; echo "echo shoot.sh: in the level"; } > cinder/_spawn.cfg
     # The command line loses quotes, so set the cvar from a file.
     echo 'cl_spawncmd "exec _spawn.cfg"' > cinder/_spawnset.cfg
     set -- +exec _spawnset.cfg "$@"
@@ -42,3 +43,6 @@ for t in $TIMES; do
     import -window root "$OUT-$t.png"
     echo "$OUT-$t.png"
 done
+# Let the game exit and finish writing its log before anyone reads it.
+kill "$GPID" 2>/dev/null || true
+wait "$GPID" 2>/dev/null || true

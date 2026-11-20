@@ -14,10 +14,16 @@ PREFIX=$(realpath -m "${1:-build/prefix}")
 SRC=$(realpath -m "${DEPS_SRC:-build/src}")
 JOBS=${JOBS:-$(nproc)}
 mkdir -p "$PREFIX" "$SRC"
-# Our headers before any others: the snap's gnome extension puts its SDK's
-# include folder (with older Vulkan headers) in CFLAGS.
-export CFLAGS="-I$PREFIX/include ${CFLAGS:-}"
-export CXXFLAGS="-I$PREFIX/include ${CXXFLAGS:-}"
+# The snap's gnome extension points CFLAGS, pkg-config and CMake at its SDK,
+# whose Vulkan headers are older than the loader's. These build only against
+# Ubuntu's own -dev packages and each other, so the SDK is dropped here.
+drop_sdk() { printf '%s' "$1" | tr ' :' '\n\n' | grep -v '^$' | grep -v '/snap/' | tr '\n' "$2" | sed "s/$2\$//"; }
+export CFLAGS="-I$PREFIX/include $(drop_sdk "${CFLAGS:-}" ' ')"
+export CXXFLAGS="-I$PREFIX/include $(drop_sdk "${CXXFLAGS:-}" ' ')"
+export CPPFLAGS="$(drop_sdk "${CPPFLAGS:-}" ' ')"
+export LDFLAGS="$(drop_sdk "${LDFLAGS:-}" ' ')"
+export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PREFIX/share/pkgconfig"
+unset CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH CPATH
 
 if [ ! -f "$PREFIX/lib/pkgconfig/sdl3.pc" ]; then
     fetch "$SRC/sdl3" "$SDL3_REPO" "$SDL3_REF"
@@ -35,7 +41,8 @@ if [ ! -f "$PREFIX/share/pkgconfig/vulkan.pc" ] && [ ! -f "$PREFIX/lib/pkgconfig
     fetch "$SRC/vulkan-loader" "$VULKAN_LOADER_REPO" "$VULKAN_LOADER_REF"
     cmake -S "$SRC/vulkan-loader" -B "$SRC/vulkan-loader/build" -G Ninja -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX="$PREFIX" -DCMAKE_INSTALL_LIBDIR=lib \
-        -DVULKAN_HEADERS_INSTALL_DIR="$PREFIX" -DBUILD_TESTS=OFF
+        -DVULKAN_HEADERS_INSTALL_DIR="$PREFIX" -DBUILD_TESTS=OFF \
+        -DVulkanHeaders_DIR="$PREFIX/share/cmake/VulkanHeaders" -DCMAKE_PREFIX_PATH="$PREFIX"
     ninja -C "$SRC/vulkan-loader/build" -j"$JOBS" install
 fi
 
