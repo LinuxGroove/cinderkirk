@@ -15,6 +15,7 @@ BIN      ?= $(BUILD)/bin
 LQ       ?= $(BUILD)/librequake
 STAGE    := $(BUILD)/stage
 PYTHON   ?= python3
+export PYTHON
 BLENDER  ?= blender
 TEXRES   ?= 1024
 LIGHT_FLAGS ?= -extra4 -bounce -lit
