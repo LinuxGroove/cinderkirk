@@ -1,0 +1,7 @@
+// Cinderkirk start-up: the defaults, the player's settings, their own
+// autoexec, then the command line. The engine opens the main menu after
+// this unless the command line starts a map.
+exec default.cfg
+exec cinderkirk.cfg
+exec autoexec.cfg
+stuffcmds

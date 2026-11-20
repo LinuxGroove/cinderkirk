@@ -1,0 +1,12 @@
+#!/bin/sh
+# Starts the engine on the game data in the snap.
+#
+# Settings, saves and screenshots go in the snap's common folder, which isn't
+# copied for every revision: -userdir for the engine's own files, and
+# XDG_DATA_HOME for SDL's (the gnome extension's launcher points it at the
+# versioned folder, so it's set again here, after it).
+data="$SNAP_USER_COMMON/.local/share"
+mkdir -p "$data" "$SNAP_USER_COMMON/cinderkirk"
+export XDG_DATA_HOME="$data"
+export LD_LIBRARY_PATH="$SNAP/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+exec "$SNAP/bin/cinderkirk" -basedir "$SNAP/share/cinderkirk" -userdir "$SNAP_USER_COMMON/cinderkirk" "$@"
