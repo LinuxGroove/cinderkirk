@@ -3288,7 +3288,7 @@ void M_Keys_Key (int k)
 /* HELP MENU */
 
 int help_page;
-#define NUM_HELP_PAGES 6
+#define NUM_HELP_PAGES 3 // Cinderkirk: How to Play, Controller, Keyboard and Mouse
 
 static void M_Menu_Help_f (void)
 {

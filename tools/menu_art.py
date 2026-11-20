@@ -36,7 +36,49 @@ TITLES = {
     "complete": "COMPLETE",
     "finale": "THE END",
     "vidmodes": "VIDEO",
+    "loading": "LOADING",
+    "pause": "PAUSED",
+    "ranking": "SCORES",
 }
+
+# The Pit Fights connection rows (the menu greys out a dim_* one it can't use).
+NET_ROWS = {"netmen3": "LAN (IPX)", "netmen4": "LAN AND INTERNET"}
+NET_DIM = {"dim_ipx": "LAN (IPX)", "dim_tcp": "LAN AND INTERNET"}
+
+# How to Play, one page each; the engine's NUM_HELP_PAGES must match.
+# Each page is a heading and lines of (label, text); a label of None is a paragraph.
+HELP = [
+    ("HOW TO PLAY", [
+        (None, "You're the last stoker at the bell foundry of Cinderkirk, built over a pit "
+               "that never stopped burning. Something has come up out of it. Fight your way down."),
+        (None, "Keys open the doors that match them. Find the key, then come back."),
+        (None, "Slag kills. Keep off the glowing floor of the channels."),
+        (None, "Some walls hide a way through: shoot or strike the ones that look wrong."),
+    ]),
+    ("CONTROLLER", [
+        ("Move", "Left stick"),
+        ("Look", "Right stick, or tilt the pad"),
+        ("Fire", "Right trigger"),
+        ("Jump", "A, or left trigger"),
+        ("Run", "Click the left stick"),
+        ("Change weapon", "Shoulder buttons"),
+        ("Pick a weapon", "D-pad"),
+        ("Scores", "Y"),
+        ("Menu", "Start"),
+    ]),
+    ("KEYBOARD AND MOUSE", [
+        ("Move", "W A S D, or the arrow keys"),
+        ("Look", "Mouse"),
+        ("Fire", "Left button"),
+        ("Jump", "Space, or right button"),
+        ("Run", "Shift"),
+        ("Change weapon", "Q, or the wheel"),
+        ("Pick a weapon", "1 to 8"),
+        ("Scores", "Tab"),
+        ("Quick save and load", "F6 and F9"),
+        ("Menu", "Esc"),
+    ]),
+]
 
 # Menu item lists: name -> (size, rows). Rows are 20 apart, as the menus expect.
 ITEMS = {
@@ -80,9 +122,11 @@ def ember_text(size, text, font_path, height, align="left"):
     mask = Image.new("L", (W, H))
     d = ImageDraw.Draw(mask)
     box = d.textbbox((0, 0), text, font=font)
-    tw, th = box[2] - box[0], box[3] - box[1]
+    tw = box[2] - box[0]
+    # Centre on the capitals' height, so a Q's tail doesn't lift its row.
+    cap = d.textbbox((0, 0), "H", font=font)
     x = {"left": 2 * SCALE, "center": (W - tw) // 2}[align] - box[0]
-    y = (H - th) // 2 - box[1]
+    y = (H - (cap[3] - cap[1])) // 2 - cap[1]
     d.text((x, y), text, font=font, fill=255)
     return mask
 
@@ -144,6 +188,79 @@ def plaque(tex_dir, glyph_mask):
     return out
 
 
+def net_row(text, dim):
+    row = colour_letters(ember_text((264, 20), text, BOLD, 15))
+    if dim:
+        grey = row.convert("LA").convert("RGBA")
+        grey.putalpha(row.getchannel("A").point(lambda v: v // 2))
+        row = grey
+    return row
+
+
+def inter():
+    """The intermission's labels, lined up with the numbers the engine draws
+    at 8, 48 and 88 below the picture's top."""
+    W, H = 128 * SCALE, 112 * SCALE
+    sheet = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    for i, text in enumerate(["TIME", "SECRETS", "KILLS"]):
+        row = colour_letters(ember_text((128, 24), text, HEAVY, 17))
+        sheet.alpha_composite(row, (0, (8 + 40 * i) * SCALE))
+    return sheet
+
+
+def wrap(draw, text, font, width):
+    lines, line = [], ""
+    for word in text.split():
+        trial = (line + " " + word).strip()
+        if draw.textlength(trial, font=font) <= width or not line:
+            line = trial
+        else:
+            lines.append(line)
+            line = word
+    return lines + [line] if line else lines
+
+
+def help_page(tex_dir, n, heading, rows):
+    """A How to Play page: a dark brick panel in a bronze frame."""
+    W, H = 320 * SCALE, 200 * SCALE
+    brick = Image.open(os.path.join(tex_dir, "kirk_brick1.png")).convert("RGB").resize((W // 3, W // 3))
+    wall = Image.new("RGB", (W, H))
+    for y in range(0, H, W // 3):
+        for x in range(0, W, W // 3):
+            wall.paste(brick, (x, y))
+    a = np.asarray(wall).astype(np.float32) / 255
+    ys = np.linspace(0, 1, H)[:, None, None]
+    a = np.clip(a * (0.16 + 0.22 * ys ** 2) * np.array([1.0, 0.62, 0.4]) * 1.6, 0, 1)
+    page = Image.fromarray((a * 255).astype(np.uint8)).convert("RGBA")
+    d = ImageDraw.Draw(page)
+    d.rectangle((0, 0, W - 1, H - 1), outline=(40, 22, 10, 255), width=3 * SCALE)
+    d.rectangle((4 * SCALE, 4 * SCALE, W - 1 - 4 * SCALE, H - 1 - 4 * SCALE),
+                outline=(214, 150, 70, 255), width=SCALE // 2)
+    head = colour_letters(ember_text((320, 26), heading, HEAVY, 18, "center"))
+    page.alpha_composite(head, (0, 8 * SCALE))
+    d.line((80 * SCALE, 36 * SCALE, 240 * SCALE, 36 * SCALE), fill=(214, 150, 70, 255), width=SCALE // 2)
+
+    body = ImageFont.truetype(BOLD, int(8.5 * SCALE))
+    label = ImageFont.truetype(HEAVY, int(8.5 * SCALE))
+    ink, gold = (236, 222, 200, 255), (246, 176, 82, 255)
+    y = 46 * SCALE
+    if rows and rows[0][0] is None:
+        for _, text in rows:
+            for line in wrap(d, text, body, 264 * SCALE):
+                d.text((28 * SCALE, y), line, font=body, fill=ink)
+                y += 12 * SCALE
+            y += 6 * SCALE
+    else:
+        for name, text in rows:
+            d.text((150 * SCALE, y), name.upper(), font=label, fill=gold, anchor="ra")
+            d.text((162 * SCALE, y), text, font=body, fill=ink)
+            y += 12 * SCALE
+    foot = ImageFont.truetype(BOLD, 8 * SCALE)
+    d.text((W // 2, H - 18 * SCALE), f"<   {n + 1} of {len(HELP)}   >", font=foot,
+           fill=(214, 150, 70, 255), anchor="ma")
+    return page.convert("RGB")
+
+
 def menudot(frame):
     """The menu cursor: a coal that breathes, six frames."""
     W, H = 16 * SCALE, 20 * SCALE
@@ -199,6 +316,13 @@ def main():
         save(out, f"menudot{f + 1}", menudot(f), palette)
     save(out, "qplaque", plaque(tex_dir, glyph_mask), palette)
     save(out, "conback", conback(tex_dir, glyph_mask), palette)
+    for name, text in NET_ROWS.items():
+        save(out, name, net_row(text, False), palette)
+    for name, text in NET_DIM.items():
+        save(out, name, net_row(text, True), palette)
+    save(out, "inter", inter(), palette)
+    for n, (heading, rows) in enumerate(HELP):
+        save(out, f"help{n}", help_page(tex_dir, n, heading, rows), palette)
     print(f"menu art in {out}")
 
 
