@@ -215,6 +215,7 @@ TILES = {
     "iron": ("iron_plate1", 0.8, (1.3, 1.3, 1.3)),
     "bronze": ("bronze1", 0.5, (1.0, 1.0, 1.0)),
     "oak": ("oak1", 0.6, (1.0, 1.0, 1.0)),
+    "firebrick": ("firebrick1", 0.5, (1.0, 1.0, 1.0)),
 }
 
 
@@ -1330,7 +1331,317 @@ def slag_hound():
     build(c, anims)
 
 
-CREATURES = {"ashen": ashen, "censer": censer_bearer, "deacon": deacon, "hound": slag_hound}
+# ------------------------------------------------------------------ gaugers
+
+def gauger():
+    """A Gauger: a foundry worker who stayed. Work clothes under a leather
+    apron, a riveted iron mask with a pressure gauge for a face, a boiler on
+    the back and a steam lance held low in both hands. About 1.8 m."""
+    J = dict(HUMAN)
+    # The arms already hold the lance at the hip, pointing ahead.
+    J.update({"elb_r": (-0.25, 0.04, 1.18), "wri_r": (-0.17, -0.20, 1.05), "fin_r": (-0.15, -0.29, 1.04),
+              "elb_l": (0.24, -0.06, 1.17), "wri_l": (0.04, -0.46, 1.10), "fin_l": (0.0, -0.55, 1.11)})
+    butt, tip = Vector((-0.13, 0.22, 1.08)), Vector((-0.06, -1.10, 1.13))
+    bones = humanoid(J, [("lance", "hand_r", J["wri_r"], tuple(tip))])
+    c = Creature("gauger", bones, hull_bottom=-24.0)
+    # Body: a stick figure in work clothes, boots and gloves.
+    body = {n: J[n] for n in ("pelvis", "spine", "chest", "neck", "hip_l", "knee_l", "ankle_l", "hip_r", "knee_r", "ankle_r",
+                              "sho_l", "elb_l", "wri_l", "sho_r", "elb_r", "wri_r")}
+    e = [("pelvis", "spine"), ("spine", "chest"), ("chest", "neck")]
+    rad = {"pelvis": (0.15, 0.11), "spine": (0.14, 0.11), "chest": (0.17, 0.12), "neck": 0.055}
+    for s in "lr":
+        e += [("pelvis", "hip_" + s), ("hip_" + s, "knee_" + s), ("knee_" + s, "ankle_" + s),
+              ("chest", "sho_" + s), ("sho_" + s, "elb_" + s), ("elb_" + s, "wri_" + s)]
+        rad.update({"hip_" + s: 0.075, "knee_" + s: 0.055, "ankle_" + s: 0.048,
+                    "sho_" + s: 0.065, "elb_" + s: 0.05, "wri_" + s: 0.04})
+    c.add(skin_body("body", body, e, rad, "pelvis", seed=4.0, lumps=0.004), "robe", power=4.0,
+          among=[b[0] for b in bones if b[0] not in ("lance", "head", "hand_l", "hand_r", "foot_l", "foot_r")])
+    for s in "lr":
+        ax, ay, az = J["ankle_" + s]
+        boot = prim("uv_sphere", radius=0.06, segments=14, ring_count=8, location=(ax, ay - 0.06, 0.05))
+        boot.scale = (0.85, 1.8, 0.8)
+        c.add(boot, "leather", "foot_" + s)
+        w, f = Vector(J["wri_" + s]), Vector(J["fin_" + s])
+        glove = skin_body("glove_" + s, {"w": tuple(w - (f - w) * 0.4), "f": tuple(f)}, [("w", "f")],
+                          {"w": 0.042, "f": (0.045, 0.03)}, "w", subdiv=1)
+        c.add(glove, "leather", "hand_" + s)
+    # The apron, from the chest to the knees, round the front.
+    apron = lathe("apron", [(0.13, 1.42), (0.17, 1.25), (0.185, 1.0), (0.2, 0.75), (0.21, 0.52)], segs=32,
+                  shape=lambda a, z, x, y: (x * 1.05, y * 0.8 - 0.01, z),
+                  skip=lambda a, z: math.sin(a) > -0.2)
+    c.add(thicken(apron, 0.01), "leather", among=["pelvis", "spine", "chest", "thigh_l", "thigh_r"], power=3.0,
+          anchor=("pelvis", 0.4))
+    belt = prim("torus", major_radius=0.165, minor_radius=0.016, major_segments=32, minor_segments=6, location=(0, 0.0, 1.0))
+    belt.scale = (1.05, 0.8, 1.0)
+    c.add(belt, "leather", among=["pelvis", "spine"])
+    # The boiler on the back, with gauges of its own and a hose up to the mask.
+    tank = lathe("tank", [(0.0, 1.0), (0.1, 1.01), (0.115, 1.06), (0.115, 1.45), (0.1, 1.5), (0.0, 1.52)], segs=20,
+                 at=(0.0, 0.2, 0.0))
+    c.add(tank, "iron", "chest")
+    for z in (1.08, 1.43):
+        band = prim("torus", major_radius=0.117, minor_radius=0.01, major_segments=24, minor_segments=5, location=(0, 0.2, z))
+        c.add(band, "bronze", "chest")
+    for sx in (-1, 1):
+        c.add(between("cylinder", (sx * 0.12, 0.08, 1.46), (sx * 0.1, 0.0, 1.2), radius=0.012, vertices=6), "leather", "chest")
+    hose = [Vector((0.0, 0.25, 1.52)), Vector((0.06, 0.18, 1.66)), Vector((0.1, 0.02, 1.70)), Vector((0.09, -0.08, 1.64))]
+    for a, b in zip(hose, hose[1:]):
+        c.add(between("cylinder", a, b, radius=0.016, vertices=8), "leather", among=["chest", "head"], power=6.0)
+    # The head: an iron mask, riveted, with a pressure gauge for a face.
+    hx, hy, hz = J["head"]
+    helm = prim("uv_sphere", radius=0.115, segments=20, ring_count=12, location=(hx, hy + 0.005, hz + 0.07))
+    helm.scale = (0.95, 1.05, 1.08)
+    c.add(helm, "iron", "head")
+    for i in range(10):
+        a = math.tau * i / 10
+        r = prim("uv_sphere", radius=0.009, segments=6, ring_count=4,
+                 location=(hx + 0.112 * math.cos(a) * 0.95, hy + 0.112 * math.sin(a), hz + 0.02))
+        c.add(r, "bronze", "head")
+    rim = between("cylinder", (hx, hy - 0.10, hz + 0.08), (hx, hy - 0.135, hz + 0.08), radius=0.07, vertices=24)
+    c.add(rim, "bronze", "head")
+    dial = between("cylinder", (hx, hy - 0.134, hz + 0.08), (hx, hy - 0.138, hz + 0.08), radius=0.058, vertices=24)
+    c.add(dial, "ember", "head")
+    c.add(between("cylinder", (hx, hy - 0.14, hz + 0.08), (hx + 0.035, hy - 0.142, hz + 0.115), radius=0.005, vertices=4),
+          "dark", "head")
+    for sx in (-1, 1):
+        c.add(between("cylinder", (hx + sx * 0.06, hy - 0.08, hz - 0.03), (hx + sx * 0.03, hy - 0.11, hz - 0.06),
+                      radius=0.022, vertices=8), "iron", "head")
+    # The lance: an iron pipe through both hands, a brass valve and nozzle.
+    c.add(between("cylinder", butt, tip, radius=0.024, vertices=10), "iron", "lance")
+    c.add(between("cylinder", butt + Vector((0, 0.04, 0)), butt, radius=0.034, vertices=10), "bronze", "lance")
+    v = butt + (tip - butt) * 0.35
+    c.add(between("cylinder", v + Vector((0, 0, 0.0)), v + Vector((0, 0, 0.08)), radius=0.01, vertices=6), "bronze", "lance")
+    wheel = prim("torus", major_radius=0.035, minor_radius=0.007, major_segments=12, minor_segments=4,
+                 location=tuple(v + Vector((0, 0, 0.08))))
+    c.add(wheel, "bronze", "lance")
+    noz = tip + (tip - butt).normalized() * 0.12
+    c.add(between("cone", tip, noz, radius1=0.03, radius2=0.045, vertices=12), "bronze", "lance")
+    c.add(between("cylinder", noz - (tip - butt).normalized() * 0.01, noz, radius=0.036, vertices=12), "coal", "lance")
+    hb = [Vector((0.0, 0.25, 1.05)), Vector((-0.08, 0.28, 1.0)), butt + Vector((0, 0.05, 0))]
+    for a, b in zip(hb, hb[1:]):
+        c.add(between("cylinder", a, b, radius=0.015, vertices=8), "leather", among=["chest", "hand_r"], power=6.0)
+
+    base = {"spine": (4, 0, 0), "neck": (-4, 0, 0), "thigh_l": (-4, 0, 0), "thigh_r": (4, 0, 0)}
+    stand = [(0.0, base), (0.5, pose_of(base, chest=(3, 0, 0), head=(-3, 0, 4), move=(0, 0, -0.005))), (1.0, base)]
+    step = pose_of(base, thigh_l=(-24, 0, 0), shin_l=(8, 0, 0), thigh_r=(18, 0, 0), shin_r=(26, 0, 0), foot_r=(-8, 0, 0),
+                   pelvis=(0, 0, -5), chest=(0, 0, 4), move=(0, 0, -0.02))
+    mid = pose_of(base, thigh_l=(-4, 0, 0), shin_l=(4, 0, 0), thigh_r=(-10, 0, 0), shin_r=(40, 0, 0), move=(0, 0, 0.01))
+    walk = [(0.0, step), (0.25, mid), (0.5, mirror(step)), (0.75, mirror(mid)), (1.0, step)]
+    rbase = pose_of(base, spine=(14, 0, 0), chest=(4, 0, 0))
+    rstep = pose_of(rbase, thigh_l=(-38, 0, 0), shin_l=(20, 0, 0), thigh_r=(28, 0, 0), shin_r=(50, 0, 0), foot_r=(-10, 0, 0),
+                    move=(0, 0, -0.04))
+    rmid = pose_of(rbase, thigh_l=(-8, 0, 0), shin_l=(10, 0, 0), thigh_r=(-14, 0, 0), shin_r=(70, 0, 0), move=(0, 0, 0.03))
+    run = [(0.0, rstep), (0.25, rmid), (0.5, mirror(rstep)), (0.75, mirror(rmid)), (1.0, rstep)]
+    # Aim: brace, lift the lance to the shoulder; the valve hisses while it builds.
+    brace = pose_of(base, thigh_l=(-20, 0, 0), shin_l=(14, 0, 0), thigh_r=(14, 0, 0), shin_r=(10, 0, 0), spine=(8, 0, 0),
+                    upper_r=(-14, 0, 0), fore_r=(8, 0, 0), upper_l=(-12, 0, 0), fore_l=(6, 0, 0), move=(0, 0, -0.03))
+    aim = [(0.0, base), (0.4, brace), (0.7, pose_of(brace, chest=(-2, 0, 0))), (1.0, pose_of(brace, chest=(-3, 0, 0)))]
+    kick = pose_of(brace, spine=(0, 0, 0), chest=(-6, 0, 0), upper_r=(-4, 0, 0), upper_l=(-2, 0, 0), move=(0, 0.06, -0.03))
+    fire = [(0.0, brace), (0.25, kick), (1.0, base)]
+    back = pose_of(base, upper_r=(20, 0, 0), fore_r=(0, 0, 0), upper_l=(24, 0, 0), spine=(-4, 0, 0), move=(0, 0.05, 0))
+    thrust = pose_of(base, spine=(16, 0, 0), chest=(6, 0, 0), upper_r=(-40, 0, 0), fore_r=(10, 0, 0), upper_l=(-50, 0, 0),
+                     thigh_l=(-28, 0, 0), shin_l=(16, 0, 0), thigh_r=(18, 0, 0), move=(0, -0.12, -0.03))
+    jab = [(0.0, base), (0.35, back), (0.55, thrust), (0.7, thrust), (1.0, base)]
+    reel = pose_of(base, spine=(-12, 0, 8), chest=(-10, 0, 0), neck=(10, 0, 0), head=(12, 0, -10), upper_l=(10, 0, 20),
+                   move=(0, 0.05, 0))
+    pain = [(0.0, base), (0.3, reel), (1.0, base)]
+    kneel = pose_of(base, spine=(25, 0, 0), thigh_l=(-70, 0, 0), shin_l=(120, 0, 0), thigh_r=(-60, 0, 0), shin_r=(115, 0, 0),
+                    foot_l=(-40, 0, 0), foot_r=(-40, 0, 0), upper_r=(30, 0, 0), move=(0, 0.08, -0.38))
+    down = pose_of(base, pelvis=(70, 0, 0), spine=(10, 0, 0), thigh_l=(-80, 0, 0), shin_l=(60, 0, 0), thigh_r=(-75, 0, 8),
+                   shin_r=(50, 0, 0), upper_r=(-20, 0, -30), upper_l=(-60, 0, 40), move=(0, -0.2, -0.74))
+    death = [(0.0, base), (0.35, kneel), (0.8, down), (1.0, down)]
+    anims = [
+        ("stand", 8, stand, True, None),
+        ("walk", 12, walk, True, None),
+        ("run", 8, run, True, None),
+        ("aim", 8, aim, False, None),
+        ("fire", 5, fire, False, None),
+        ("jab", 8, jab, False, None),
+        ("pain", 6, pain, False, None),
+        ("death", 10, death, False, None),
+    ]
+    build(c, anims)
+
+
+# ------------------------------------------------------------------ crucible brutes
+
+def crucible_brute():
+    """A Crucible Brute: a huge bent furnace hand in iron and leather, its
+    head sunk between its shoulders, carrying a crucible of molten slag in a
+    pair of tongs. About 2.9 m standing: the large hull."""
+    k = 1.55
+    J = scaled(HUMAN, k, wide=1.35)
+    # Arms out front and low, the tongs' crossbar between the hands.
+    J.update({"elb_r": (-0.48, -0.10, 1.70), "wri_r": (-0.34, -0.50, 1.36), "fin_r": (-0.28, -0.60, 1.30),
+              "elb_l": (0.48, -0.10, 1.70), "wri_l": (0.34, -0.50, 1.36), "fin_l": (0.28, -0.60, 1.30)})
+    J["neck"], J["head"], J["crown"] = (0, -0.10, 2.30), (0, -0.16, 2.36), (0, -0.18, 2.62)
+    cx, cy, cz = 0.0, -0.66, 0.95          # the crucible, hanging in the tongs
+    bones = humanoid(J, [("crucible", "hand_r", J["fin_r"], (cx, cy, cz))])
+    c = Creature("brute", bones, hull_bottom=-24.0)
+    body = {n: J[n] for n in ("pelvis", "spine", "chest", "neck", "hip_l", "knee_l", "ankle_l", "hip_r", "knee_r", "ankle_r",
+                              "sho_l", "elb_l", "wri_l", "sho_r", "elb_r", "wri_r")}
+    e = [("pelvis", "spine"), ("spine", "chest"), ("chest", "neck")]
+    rad = {"pelvis": (0.30, 0.24), "spine": (0.34, 0.26), "chest": (0.44, 0.30), "neck": (0.17, 0.15)}
+    for s in "lr":
+        e += [("pelvis", "hip_" + s), ("hip_" + s, "knee_" + s), ("knee_" + s, "ankle_" + s),
+              ("chest", "sho_" + s), ("sho_" + s, "elb_" + s), ("elb_" + s, "wri_" + s)]
+        rad.update({"hip_" + s: 0.17, "knee_" + s: 0.13, "ankle_" + s: 0.10,
+                    "sho_" + s: 0.19, "elb_" + s: 0.14, "wri_" + s: 0.10})
+    c.add(skin_body("body", body, e, rad, "pelvis", seed=9.0, lumps=0.02), "crust", power=4.0,
+          among=[b[0] for b in bones if b[0] not in ("crucible", "head", "hand_l", "hand_r", "foot_l", "foot_r")])
+    # A leather apron and iron plates over the shoulders and forearms, a hump of a head.
+    apron = lathe("apron", [(0.30, 1.75), (0.34, 1.45), (0.36, 1.2), (0.38, 0.95), (0.40, 0.7)], segs=32,
+                  shape=lambda a, z, x, y: (x * 1.08, y * 0.82 - 0.02, z), skip=lambda a, z: math.sin(a) > -0.15)
+    c.add(thicken(apron, 0.02), "leather", among=["pelvis", "spine", "chest", "thigh_l", "thigh_r"], power=3.0,
+          anchor=("pelvis", 0.4))
+    for s, sx in (("l", 1), ("r", -1)):
+        sh = prim("uv_sphere", radius=0.2, segments=16, ring_count=8, location=(sx * 0.58, 0.02, 2.24))
+        sh.scale = (1.0, 1.1, 0.55)
+        c.add(sh, "iron", among=["chest", "upper_" + s], power=6.0)
+        a, b = Vector(J["elb_" + s]), Vector(J["wri_" + s])
+        c.add(between("cylinder", a + (b - a) * 0.15, a + (b - a) * 0.9, radius=0.13, vertices=12), "iron", "fore_" + s)
+        ax, ay, az = J["ankle_" + s]
+        boot = prim("uv_sphere", radius=0.13, segments=14, ring_count=8, location=(ax, ay - 0.1, 0.1))
+        boot.scale = (0.9, 1.6, 0.8)
+        c.add(boot, "leather", "foot_" + s)
+        fist = prim("uv_sphere", radius=0.1, segments=12, ring_count=8, location=J["fin_" + s])
+        c.add(fist, "leather", "hand_" + s)
+    hx, hy, hz = J["head"]
+    head = prim("uv_sphere", radius=0.21, segments=16, ring_count=10, location=(hx, hy - 0.04, hz + 0.14))
+    head.scale = (1.0, 1.1, 0.85)
+    c.add(head, "crust", "head")
+    for sx in (-1, 1):
+        eye = prim("uv_sphere", radius=0.03, segments=8, ring_count=6, location=(hx + sx * 0.08, hy - 0.25, hz + 0.16))
+        c.add(eye, "ember", "head")
+    visor = between("cylinder", (hx - 0.17, hy - 0.22, hz + 0.24), (hx + 0.17, hy - 0.22, hz + 0.24), radius=0.035, vertices=8)
+    c.add(visor, "iron", "head")
+    # The tongs: two iron arms from the fists that cross and grip the crucible's rim.
+    rim_z = cz + 0.30
+    for sx in (-1, 1):
+        f = Vector(J["fin_r" if sx < 0 else "fin_l"])
+        jaw = Vector((cx + sx * 0.30, cy, rim_z))
+        bend = Vector((cx + sx * 0.18, cy + 0.05, rim_z + 0.25))
+        c.add(between("cylinder", f, bend, radius=0.025, vertices=8), "iron", "crucible")
+        c.add(between("cylinder", bend, jaw, radius=0.025, vertices=8), "iron", "crucible")
+    c.add(between("cylinder", Vector(J["fin_r"]), Vector(J["fin_l"]), radius=0.02, vertices=8), "iron", "crucible")
+    pot = lathe("pot", [(0.0, cz - 0.30), (0.20, cz - 0.29), (0.27, cz - 0.15), (0.30, cz + 0.12), (0.31, rim_z),
+                        (0.27, rim_z), (0.26, cz + 0.10)], segs=28)
+    c.add(pot, "firebrick", "crucible")
+    melt = between("cylinder", (cx, cy, rim_z - 0.06), (cx, cy, rim_z - 0.03), radius=0.265, vertices=28)
+    melt.location = (cx, cy, rim_z - 0.045)
+    c.add(melt, "slag", "crucible")
+    lip = between("cone", (cx, cy - 0.27, rim_z - 0.02), (cx, cy - 0.40, rim_z + 0.02), radius1=0.06, radius2=0.02, vertices=8)
+    c.add(lip, "firebrick", "crucible")
+
+    base = {"spine": (18, 0, 0), "chest": (10, 0, 0), "neck": (-20, 0, 0), "head": (-8, 0, 0),
+            "thigh_l": (-8, 0, -4), "thigh_r": (-8, 0, 4), "shin_l": (14, 0, 0), "shin_r": (14, 0, 0), "move": (0, 0, -0.06)}
+    stand = [(0.0, base), (0.5, pose_of(base, chest=(12, 0, 0), crucible=(0, 0, 0), move=(0, 0, -0.08))), (1.0, base)]
+    step = pose_of(base, thigh_l=(-26, 0, -4), shin_l=(18, 0, 0), thigh_r=(10, 0, 4), shin_r=(26, 0, 0), pelvis=(0, 6, -6),
+                   chest=(10, -4, 6), move=(0, 0, -0.10))
+    mid = pose_of(base, thigh_l=(-10, 0, -4), shin_l=(14, 0, 0), thigh_r=(-16, 0, 4), shin_r=(50, 0, 0), pelvis=(0, 0, 0),
+                  move=(0, 0, -0.03))
+    walk = [(0.0, step), (0.25, mid), (0.5, mirror(step)), (0.75, mirror(mid)), (1.0, step)]
+    # The pour: tip the crucible forward and sweep it across.
+    tip = pose_of(base, spine=(26, 0, 0), chest=(16, 0, 0), upper_r=(-20, 0, 0), upper_l=(-20, 0, 0), crucible=(70, 0, 0),
+                  move=(0, -0.05, -0.12))
+    pour = [(0.0, base), (0.3, tip), (0.5, pose_of(tip, chest=(16, 0, -12), crucible=(80, 0, 0))),
+            (0.75, pose_of(tip, chest=(16, 0, 12), crucible=(80, 0, 0))), (1.0, base)]
+    # The swing: heave the crucible up and bring it down in front.
+    heave = pose_of(base, spine=(-6, 0, 0), chest=(-10, 0, 0), upper_r=(-110, 0, 0), upper_l=(-110, 0, 0),
+                    fore_r=(-30, 0, 0), fore_l=(-30, 0, 0), crucible=(-40, 0, 0), move=(0, 0.05, 0.0))
+    smash = pose_of(base, spine=(34, 0, 0), chest=(16, 0, 0), upper_r=(10, 0, 0), upper_l=(10, 0, 0), crucible=(30, 0, 0),
+                    thigh_l=(-30, 0, -4), shin_l=(30, 0, 0), move=(0, -0.15, -0.2))
+    swing = [(0.0, base), (0.4, heave), (0.6, smash), (0.75, smash), (1.0, base)]
+    reel = pose_of(base, spine=(4, 0, 10), chest=(0, 0, 8), head=(10, 0, -12), move=(0, 0.06, -0.06))
+    pain = [(0.0, base), (0.3, reel), (1.0, base)]
+    sag = pose_of(base, spine=(36, 0, 0), chest=(20, 0, 0), thigh_l=(-60, 0, -6), shin_l=(100, 0, 0), thigh_r=(-55, 0, 6),
+                  shin_r=(100, 0, 0), foot_l=(-30, 0, 0), foot_r=(-30, 0, 0), crucible=(40, 0, 0), move=(0, 0.1, -0.6))
+    fall = pose_of(sag, pelvis=(60, 0, 0), spine=(20, 0, 0), thigh_l=(-80, 0, -6), thigh_r=(-80, 0, 6), shin_l=(40, 0, 0),
+                   shin_r=(40, 0, 0), upper_r=(-60, 0, -20), upper_l=(-60, 0, 20), crucible=(90, 0, 0), move=(0, -0.4, -1.3))
+    death = [(0.0, base), (0.35, sag), (0.8, fall), (1.0, fall)]
+    anims = [
+        ("stand", 10, stand, True, None),
+        ("walk", 12, walk, True, None),
+        ("pour", 12, pour, False, None),
+        ("swing", 10, swing, False, None),
+        ("pain", 6, pain, False, None),
+        ("death", 12, death, False, None),
+    ]
+    build(c, anims)
+
+
+# ------------------------------------------------------------------ clinkers
+
+def clinker():
+    """A clinker: a crust of slag the size of a dog's head on six thin legs,
+    its middle still molten, that scuttles and bursts. Built at 0.5 m long."""
+    bones = [("body", None, (0, 0.0, 0.18), (0, -0.25, 0.20)), ("core", "body", (0, 0.0, 0.20), (0, 0.0, 0.32))]
+    feet = {}
+    for i, (y, spread) in enumerate(((-0.15, 0.28), (0.0, 0.32), (0.15, 0.28))):
+        for s, sx in (("l", 1), ("r", -1)):
+            hip = (sx * 0.12, y, 0.18)
+            knee = (sx * spread, y - 0.04 * (1 - i), 0.30)
+            foot = (sx * (spread + 0.08), y - 0.06 * (1 - i), 0.0)
+            n = "%s%d" % (s, i)
+            bones += [("thigh_" + n, "body", hip, knee), ("shin_" + n, "thigh_" + n, knee, foot)]
+            feet[n] = (hip, knee, foot)
+    c = Creature("clinker", bones, hull_bottom=-24.0)
+    shell = prim("uv_sphere", radius=0.2, segments=20, ring_count=12, location=(0, 0, 0.22))
+    shell.scale = (1.0, 1.25, 0.6)
+    apply_all(shell)
+    for v in shell.data.vertices:
+        q = v.co * 6.0
+        v.co += v.normal * 0.035 * (noise.noise(q) + 0.5 * noise.noise(q * 2.3))
+    c.add(shell, "crust", "body")
+    for i in range(7):
+        a = math.tau * i / 7
+        p = Vector((0.14 * math.cos(a), 0.18 * math.sin(a), 0.30))
+        c.add(between("cone", p, p + Vector((0.04 * math.cos(a), 0.05 * math.sin(a), 0.08)), radius1=0.04, radius2=0.004,
+                      vertices=5), "crust", "body")
+    core = prim("ico_sphere", radius=0.1, subdivisions=2, location=(0, 0, 0.32))
+    core.scale = (1.0, 1.2, 0.5)
+    c.add(core, "slag", "core")
+    for sx in (-1, 1):
+        eye = prim("uv_sphere", radius=0.018, segments=8, ring_count=6, location=(sx * 0.05, -0.23, 0.24))
+        c.add(eye, "ember", "body")
+        mand = between("cone", (sx * 0.06, -0.22, 0.17), (sx * 0.02, -0.34, 0.12), radius1=0.025, radius2=0.004, vertices=5)
+        c.add(mand, "bone", "body")
+    for n, (hip, knee, foot) in feet.items():
+        c.add(between("cylinder", hip, knee, radius=0.016, vertices=5), "crust", "thigh_" + n)
+        c.add(between("cone", knee, foot, radius1=0.014, radius2=0.003, vertices=5), "crust", "shin_" + n)
+
+    def legs(phase, lift):
+        """A tripod gait: legs l0, r1, l2 against r0, l1, r2."""
+        p = {}
+        for n in feet:
+            side, i = n[0], int(n[1])
+            group = (side == "l") == (i % 2 == 0)
+            up = lift if group == phase else 0.0
+            swing = (16 if group == phase else -16) * (1 if side == "l" else -1)
+            p["thigh_" + n] = (0, -up, swing)
+            p["shin_" + n] = (0, up * 0.5, 0)
+        return p
+    base = {}
+    stand = [(0.0, base), (0.5, pose_of(base, core=(0, 0, 0), move=(0, 0, 0.01))), (1.0, base)]
+    run = [(0.0, legs(True, 30)), (0.5, legs(False, 30)), (1.0, legs(True, 30))]
+    swell = pose_of(base, body=(-10, 0, 0), move=(0, 0, 0.06), **{"thigh_" + n: (0, 25 if n[0] == "l" else -25, 0) for n in feet})
+    burst = [(0.0, base), (0.5, swell), (0.75, pose_of(swell, body=(-6, 0, 4))), (1.0, pose_of(swell, body=(-12, 0, -4)))]
+    pain = [(0.0, base), (0.4, pose_of(base, body=(10, 0, 10), move=(0, 0.04, 0))), (1.0, base)]
+    curl = {"thigh_" + n: (0, -70 if n[0] == "l" else 70, 0) for n in feet}
+    curl.update({"shin_" + n: (0, -60 if n[0] == "l" else 60, 0) for n in feet})
+    curl["move"] = (0, 0, -0.1)
+    death = [(0.0, base), (0.5, pose_of(curl, body=(0, 40, 0))), (1.0, pose_of(curl, body=(0, 170, 0), move=(0, 0, 0.08)))]
+    anims = [
+        ("stand", 6, stand, True, None),
+        ("run", 4, run, True, None),
+        ("burst", 8, burst, False, None),
+        ("pain", 4, pain, False, None),
+        ("death", 8, death, False, None),
+    ]
+    build(c, anims)
+
+
+CREATURES = {"ashen": ashen, "censer": censer_bearer, "deacon": deacon, "hound": slag_hound,
+             "gauger": gauger, "brute": crucible_brute, "clinker": clinker}
 
 if __name__ == "__main__":  # weapons.py imports the rest
     for name, make in CREATURES.items():

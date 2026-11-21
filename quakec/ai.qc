@@ -502,6 +502,7 @@ float() FacingIdeal =
 float()	WizardCheckAttack;
 float()	DogCheckAttack;
 float()	HoundCheckAttack;
+float()	BruteCheckAttack;
 
 float() CheckAnyAttack =
 {
@@ -519,6 +520,8 @@ float() CheckAnyAttack =
 		return DogCheckAttack ();
 	if (self.classname == "monster_slag_hound")
 		return HoundCheckAttack ();
+	if (self.classname == "monster_crucible_brute")
+		return BruteCheckAttack ();
 	if (self.classname == "monster_wizard")
 		return WizardCheckAttack ();
 	return CheckAttack ();

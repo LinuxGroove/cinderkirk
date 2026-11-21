@@ -113,10 +113,14 @@ def build():
     for x in (500, 1000, 1400):
         L.add("monster_censer", (x, 560, GAL + 32), angle=270)
         L.add("monster_censer", (x, -560, GAL + 32), angle=90)
+    L.add("monster_crucible_brute", (1080, 260, FLOOR + 24), angle=180)
+    L.add("monster_crucible_brute", (1080, -260, FLOOR + 24), angle=180)
+    for x in (700, 1300):
+        L.add("monster_gauger", (x, 540, GAL + 32), angle=270)
     L.add("monster_deacon", (768, 300, FLOOR + 24), angle=270)
     L.add("monster_deacon", (768, -300, FLOOR + 24), angle=90)
     L.add("monster_deacon", (1350, 0, FLOOR + 24), angle=180, spawnflags=1)
-    for x, y in ((450, 250), (450, -250), (1000, 250), (1000, -250), (1200, 350), (1200, -350)):
+    for x, y in ((450, 250), (450, -250), (1200, 380), (1200, -380)):
         L.add("monster_ashen", (x, y, FLOOR + 24), angle=180)
     for x, y in ((900, 400), (900, -400), (1300, 200), (1300, -200)):
         L.add("monster_slag_hound", (x, y, FLOOR + 24), angle=180, spawnflags=1)

@@ -204,6 +204,46 @@ def sounds():
     tt = t(0.7)
     burst = np.sin(2 * np.pi * np.cumsum(np.geomspace(140, 45, len(tt))) / RATE) * np.exp(-tt * 10)
     yield "hound_burst", normalise(burst + crackle(0.7, 81, 0.03, 5) + 0.6 * steam(0.7, 82, 800, 7000, 0.002, 6))
+    # Gaugers: a man behind an iron mask, and a steam lance's valve and jet.
+    yield "gauger_idle", normalise(groan(0.8, 90, 110, 100, 0.6) * envelope(len(t(0.8)), 0.1, 4) +
+                                   0.2 * steam(0.8, 91, 1500, 3000, 0.2, 3), 0.5)
+    yield "gauger_sight", normalise(lay((groan(0.7, 92, 130, 180, 0.55) * envelope(len(t(0.7)), 0.03, 4, hold=0.2), 0),
+                                        (clank(0.5, [410, 1020], 93) * 0.4, 0.05)))
+    tt = t(0.8)
+    valve = steam(0.8, 94, 4000, 9000, 0.6, 1, hold=0.15) * (1 + 0.25 * np.sin(2 * np.pi * 31 * tt))
+    yield "gauger_hiss", normalise(lay((clank(0.2, [1600, 2850], 95) * 0.5, 0), (valve, 0.05)))
+    yield "gauger_fire", normalise(lay((steam(0.5, 96, 300, 8000, 0.003, 6), 0), (0.4 * clank(0.3, [220, 530], 97), 0)))
+    yield "gauger_jab", normalise(clank(0.3, [380, 910, 1760], 98) + 0.5 * steam(0.3, 99, 2000, 6000, 0.002, 12))
+    yield "gauger_pain", normalise(groan(0.35, 100, 170, 120, 0.4) * envelope(len(t(0.35)), 0.01, 7))
+    yield "gauger_death", normalise(lay((groan(0.9, 101, 150, 70, 0.5) * envelope(len(t(0.9)), 0.01, 3), 0),
+                                        (steam(1.2, 102, 6000, 800, 0.05, 2) * 0.5, 0.2)))
+    # Crucible Brutes: big, slow, the slag in the crucible slopping.
+    yield "brute_idle", normalise(groan(1.2, 110, 52, 46, 0.8) * envelope(len(t(1.2)), 0.2, 3), 0.6)
+    yield "brute_sight", normalise(lay((groan(1.3, 111, 55, 95, 0.75) * envelope(len(t(1.3)), 0.06, 2.5, hold=0.5), 0),
+                                       (crackle(1.0, 112, 0.01, 3), 0.2)))
+    tt = t(0.4)
+    yield "brute_step", normalise(lay((np.sin(2 * np.pi * 48 * tt) * np.exp(-tt * 14), 0), (0.2 * clank(0.4, [160, 370], 113), 0)), 0.6)
+    yield "brute_pour", normalise(lay((steam(1.4, 114, 600, 3500, 0.1, 1.5, hold=0.6), 0), (crackle(1.4, 115, 0.03, 1.5), 0),
+                                      (groan(1.0, 116, 60, 50, 0.9) * envelope(len(t(1.0)), 0.1, 3) * 0.5, 0)))
+    yield "brute_swing", normalise(steam(0.6, 117, 300, 1800, 0.2, 5) + 0.3 * crackle(0.6, 118, 0.01, 4))
+    tt = t(0.6)
+    yield "brute_hit", normalise(np.sin(2 * np.pi * np.cumsum(np.geomspace(90, 35, len(tt))) / RATE) * np.exp(-tt * 8)
+                                 + clank(0.6, [210, 480, 1130], 119) * 0.6 + crackle(0.6, 120, 0.03, 5))
+    yield "brute_pain", normalise(groan(0.5, 121, 90, 65, 0.6) * envelope(len(t(0.5)), 0.01, 5))
+    yield "brute_death", normalise(groan(1.6, 122, 80, 30, 0.7) * envelope(len(t(1.6)), 0.02, 2))
+    tt = t(1.0)
+    yield "brute_fall", normalise(lay((np.sin(2 * np.pi * 38 * tt) * np.exp(-tt * 6), 0), (clank(0.8, [140, 330], 123) * 0.5, 0),
+                                      (steam(1.0, 124, 400, 5000, 0.01, 3) * 0.5, 0.05), (crackle(1.0, 125, 0.03, 3), 0.05)))
+    # Clinkers: stone legs on stone, a hiss as they swell, and the burst.
+    yield "clinker_skitter", normalise(lay((crackle(0.4, 130, 0.05, 2), 0), (0.3 * clank(0.4, [2400, 3900], 131), 0)), 0.4)
+    yield "clinker_sight", normalise(lay((crackle(0.5, 132, 0.08, 3), 0), (steam(0.5, 133, 2000, 7000, 0.02, 6) * 0.4, 0)))
+    yield "clinker_drop", normalise(lay((crackle(0.3, 134, 0.06, 6), 0), (clank(0.3, [700, 1900], 135) * 0.6, 0.25)))
+    tt = t(0.8)
+    swell = steam(0.8, 136, 800, 7000, 0.7, 2, hold=0.1) * (1 + 0.5 * np.sin(2 * np.pi * np.cumsum(np.linspace(6, 22, len(tt))) / RATE))
+    yield "clinker_swell", normalise(swell + crackle(0.8, 137, 0.02, -1))
+    tt = t(0.8)
+    pop = np.sin(2 * np.pi * np.cumsum(np.geomspace(180, 50, len(tt))) / RATE) * np.exp(-tt * 12)
+    yield "clinker_burst", normalise(pop + crackle(0.8, 138, 0.05, 5) + 0.6 * steam(0.8, 139, 1000, 8000, 0.002, 7))
     yield "deacon_throw", normalise(steam(0.6, 60, 300, 2000, 0.2, 4) + crackle(0.6, 61, 0.01, 4) * 0.6)
 
 

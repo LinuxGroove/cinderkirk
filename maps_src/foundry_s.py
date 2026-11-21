@@ -61,8 +61,10 @@ def build():
     L.add("item_shells", (900, -464, 192))
     L.add("item_armor2", (1000, 464, 192))
     L.add("weapon_grenadelauncher", (700, 0, 0))
-    for i, (x, y) in enumerate(((600, -300), (650, 250), (850, 0), (900, 300), (1000, -300), (1100, 100))):
+    for i, (x, y) in enumerate(((600, -300), (850, 0), (1000, -300), (1100, 100))):
         L.add("monster_slag_hound", (x, y, 24), angle=180)
+    for x, y in ((500, 0), (700, -300), (900, 200), (1000, -100)):
+        L.add("monster_clinker", (x, y, 24), angle=180, spawnflags=2)
     L.add("monster_censer", (800, 460, 216), angle=270)
     L.add("monster_censer", (1100, -460, 216), angle=90)
     L.add("monster_deacon", (1150, 0, 24), angle=180)
