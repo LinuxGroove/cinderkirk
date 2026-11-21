@@ -289,6 +289,7 @@ void Sbar_Init (void)
 		extern cvar_t hud_scale;
 		Cvar_RegisterVariable (&hud_scale); // Cinderkirk
 		Wheel_Init ();
+		Glyph_Init ();
 	}
 
 	Sbar_LoadPics ();

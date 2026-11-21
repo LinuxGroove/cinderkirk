@@ -363,8 +363,8 @@ def wheel(out):
         write(out, f"wdesc{i + 1}", svg(180, 16 * len(lines) + 2, "".join(body)))
     d, w = text_path(LAB_FONT, "TIME SLOWS WHILE THE WHEEL IS OPEN", 12, 0.5, 9, spacing=12 * 0.23)
     write(out, "wheel_slow", svg(w + 1, 10.5, f'<path d="{d}" fill="#d9b880"/>'))
-    for key, text in (("wheel_hint_pad", "Right stick to choose, let go to equip"),
-                      ("wheel_hint_kbm", "Move the mouse to choose, let go to equip")):
+    # The engine puts the glyph of the stick or the mouse in front.
+    for key, text in (("wheel_hint", "to choose, let go to equip"),):
         d, w = text_path(TEXT_FONT, text, 17, 1, 14, spacing=0.6)
         write(out, key, svg(w + 2, 18, f'<path d="{d}" fill="none" stroke="#000" stroke-width="3" stroke-opacity="0.6" '
                                        f'stroke-linejoin="round"/><path d="{d}" fill="#efe1c4"/>'))

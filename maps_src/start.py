@@ -48,6 +48,12 @@ def build():
     L.light((256, 200, 120), 160, CANDLE)
     L.light((256, -200, 120), 160, CANDLE)
 
+    # First lessons as you cross the gatehouse, with the button for the device in hand.
+    for x0, x1, text in ((112, 144, "{impulse 20} Dash: a burst of steam that spends Pressure"),
+                         (272, 304, "Hold {+wheel} for the weapon wheel"),
+                         (464, 496, "{impulse 21} Overpressure: your weapon's second fire")):
+        L.brush_entity("trigger_once", [_box(x0, -224, 0, x1, 224, 128, "trigger")], message=text)
+
     # The arch down to the Casting Floor.
     L.opening(512, -96, 0, 544, 96, 192)
 

@@ -281,6 +281,7 @@ srcs = [
     'Quake/sbar_foundry.c',
     'Quake/hud_svg.c',
     'Quake/wheel.c',
+    'Quake/glyph.c',
     'Quake/snd_codec.c',
     'Quake/snd_dma.c',
     'Quake/snd_mem.c',

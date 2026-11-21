@@ -766,9 +766,7 @@ void M_Menu_Main_f (void)
 
 static qpic_t *Get_Menu2 ()
 {
-	qboolean base_game = COM_GetGameNames (false)[0] == 0;
-	// Check if user has actually installed vkquake.pak, otherwise fall back to old menu
-	return (base_game && registered.value) ? Draw_TryCachePic ("gfx/mainmenu2.lmp", TEXPREF_ALPHA | TEXPREF_PAD | TEXPREF_NOPICMIP, PICFLAG_AUTO) : NULL;
+	return NULL; // Cinderkirk: no Mods item (the only game folder is the game); custom levels will get their own
 }
 
 void M_Main_Draw (cb_context_t *cbx)

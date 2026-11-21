@@ -205,6 +205,22 @@ static void Wheel_Number (cb_context_t *cbx, const char *atlas, int value, float
 Wheel_Draw
 ================
 */
+// The glyph of the right stick (or the mouse) and what to do with it.
+static void Wheel_Hint (cb_context_t *cbx, float cx, float cy, float k)
+{
+	const char *set = Glyph_Set ();
+	const char *glyph = wheel_mouse_last ? "g/kbm/mouse" : va ("g/%s/rstick", strcmp (set, "kbm") ? set : "xbox");
+	float		w, h, gw, gh;
+	qpic_t	   *pic;
+
+	if (!HudSvg_Size ("wheel_hint", &w, &h) || !HudSvg_Size (glyph, &gw, &gh))
+		return;
+	gw = 34 * gw / gh;
+	if ((pic = HudSvg_Pic (glyph, 34 * k)))
+		Draw_SubPicLinearBlend (cbx, floorf (cx - (w + gw + 6) * k / 2 + 0.5f), floorf (cy - 17 * k + 0.5f), pic->width, pic->height, pic, 0, 0, 1, 1, NULL, 1);
+	Wheel_Pic (cbx, "wheel_hint", cx + (gw + 6) * k / 2, cy, k, 1, 0, 1);
+}
+
 void Wheel_Draw (cb_context_t *cbx)
 {
 	int		i;
@@ -259,5 +275,5 @@ void Wheel_Draw (cb_context_t *cbx)
 	}
 	if (Wheel_TimeScale () < 1.0f)
 		Wheel_Pic (cbx, "wheel_slow", cx, cy - (WHEEL_R1 + 60) * k, k, 1, 0, 1);
-	Wheel_Pic (cbx, wheel_mouse_last ? "wheel_hint_kbm" : "wheel_hint_pad", cx, cy + (WHEEL_R1 + 62) * k, k, 1, 0, 1);
+	Wheel_Hint (cbx, cx, cy + (WHEEL_R1 + 62) * k, k);
 }

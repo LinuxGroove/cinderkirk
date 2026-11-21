@@ -129,6 +129,54 @@ qboolean IN_GamepadInUse (void) // Cinderkirk: for the weapon wheel's hint
 	return IN_JoyActive ();
 }
 
+/*
+================
+IN_GamepadGlyphs
+
+Cinderkirk: which set of button glyphs fits the pad in use ("xbox", "ps",
+"switch" or "deck"), or NULL when the keyboard and mouse were used last.
+================
+*/
+const char *IN_GamepadGlyphs (void)
+{
+	if (!joy_active_controller || !gamepad_input_active)
+		return NULL;
+	if (getenv ("SteamDeck") && !strcmp (getenv ("SteamDeck"), "1"))
+		return "deck"; // Steam on a Deck hands games a virtual pad
+#ifdef USE_SDL3
+	if (SDL_GetGamepadVendor (joy_active_controller) == 0x28DE && SDL_GetGamepadProduct (joy_active_controller) == 0x1205)
+		return "deck";
+	switch (SDL_GetGamepadType (joy_active_controller))
+	{
+	case SDL_GAMEPAD_TYPE_PS3:
+	case SDL_GAMEPAD_TYPE_PS4:
+	case SDL_GAMEPAD_TYPE_PS5:
+		return "ps";
+	case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_PRO:
+	case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_LEFT:
+	case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT:
+	case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_PAIR:
+		return "switch";
+	default:
+		return "xbox";
+	}
+#else
+	if (SDL_GameControllerGetVendor (joy_active_controller) == 0x28DE && SDL_GameControllerGetProduct (joy_active_controller) == 0x1205)
+		return "deck";
+	switch (SDL_GameControllerGetType (joy_active_controller))
+	{
+	case SDL_CONTROLLER_TYPE_PS3:
+	case SDL_CONTROLLER_TYPE_PS4:
+	case SDL_CONTROLLER_TYPE_PS5:
+		return "ps";
+	case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO:
+		return "switch";
+	default:
+		return "xbox";
+	}
+#endif
+}
+
 /* total accumulated mouse movement since last frame,
    float because SDL3 reports relative motion in subpixel precision */
 static float total_dx, total_dy = 0;

@@ -35,7 +35,7 @@ See the GNU General Public License for more details.
 
 #include "hud_svg.h"
 
-#define MAX_HUD_SVG	  160
+#define MAX_HUD_SVG	  256
 #define MAX_HUD_SIZES 3
 
 typedef struct

@@ -21,6 +21,12 @@ void	 HudSvg_Flush (void);
 void  Sbar_DrawFoundry (cb_context_t *cbx);
 float Sbar_FoundryHeight (void); // pixels the bar covers at the bottom, 0 when hidden
 
+void		Glyph_Init (void);
+const char *Glyph_Set (void);
+const char *Glyph_Name (int key);
+int			Glyph_KeyFor (const char *command);
+float		Glyph_Text (cb_context_t *cbx, float x, float y, float size, const char *text, int len);
+
 void  Wheel_Init (void);
 void  Wheel_Draw (cb_context_t *cbx);
 qboolean Wheel_Open (void);

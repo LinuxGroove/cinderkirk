@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // screen.c -- master for refresh, status bar, console, chat, notify, etc
 
 #include "quakedef.h"
+#include "hud_svg.h" // Cinderkirk: button glyphs
 
 #include "cfgfile.h"
 
@@ -227,6 +228,11 @@ static void SCR_DrawCenterBackground (cb_context_t *cbx, const char *text, int y
 			cols = 0;
 			++lines;
 		}
+		else if (*p == '{' && !cl.intermission && memchr (p, '}', end - p)) // Cinderkirk: a glyph is about two letters wide
+		{
+			p = (const char *)memchr (p, '}', end - p);
+			cols += 2;
+		}
 		else
 			++cols;
 	}
@@ -284,8 +290,16 @@ static void SCR_DrawCenterText (cb_context_t *cbx, const char *text, int lines) 
 		for (l = 0; start[l]; l++)
 			if (start[l] == '\n')
 				break;
+		j = 0;
+		if (!cl.intermission && memchr (start, '{', l)) // Cinderkirk: {+command} shows a button glyph
+		{
+			x = (320 - Glyph_Text (NULL, 0, 0, CHARACTER_SIZE, start, l)) / 2;
+			Glyph_Text (cbx, x, y + 5, CHARACTER_SIZE, start, l);
+			y += 10; // the glyphs stand taller than the letters
+			j = l;
+		}
 		x = (320 - l * CHARACTER_SIZE) / 2; // johnfitz -- 320x200 coordinate system
-		for (j = 0; j < l; j++, x += CHARACTER_SIZE)
+		for (; j < l; j++, x += CHARACTER_SIZE)
 		{
 			Draw_Character (cbx, x, y, start[j]); // johnfitz -- stretch overlays
 			if (!remaining--)
