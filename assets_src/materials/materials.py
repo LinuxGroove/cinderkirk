@@ -347,6 +347,52 @@ def m_oak(g):
     g.finish(col, g.mixf(ring, 0.55, 0.7), g.add(g.mul(ring, 0.3), g.mul(pores, -0.2)), bump=0.5, dist=0.006)
 
 
+def m_water(g):
+    """Quench water: black and oily, with a dull sheen and the heat's glow
+    coming through where the slag was dropped in."""
+    ripple = g.noise(2.5, 6.0, 0.55, distort=0.4, seed=80)
+    film = g.noise(1.2, 4.0, 0.5, seed=81)
+    # Liquids are drawn unlit, so this is what the eye sees: keep it near black.
+    col = g.mixc(ripple, (0.002, 0.004, 0.005), (0.009, 0.013, 0.014))
+    col = g.mixc(g.remap(film, 0.55, 0.7), col, (0.018, 0.015, 0.011))
+    warm = g.remap(g.noise(0.9, 3.0, 0.5, seed=82), 0.62, 0.8)
+    emit = g.mixc(warm, (0.0, 0.0, 0.0), (0.30, 0.07, 0.01))
+    g.finish(col, 0.08, g.mul(ripple, 0.5), bump=0.35, emit=emit, emit_strength=1.5)
+
+
+def m_grate(g):
+    """A steam vent's grate: iron bars over a dark shaft that glows faintly."""
+    sep = g.node("ShaderNodeSeparateXYZ")
+    g.feed(sep.inputs[0], g.uv)
+    u8 = g.math("FRACT", g.mul(sep.outputs["X"], 8.0))
+    v2 = g.math("FRACT", g.mul(sep.outputs["Y"], 2.0))
+    bar = g.clamp(g.add(g.remap(g.math("ABSOLUTE", g.sub(u8, 0.5)), 0.30, 0.36),
+                        g.remap(g.math("ABSOLUTE", g.sub(v2, 0.5)), 0.44, 0.47)))
+    rustn = g.noise(3.0, 7.0, 0.62, seed=90)
+    rust = g.remap(rustn, 0.48, 0.66)
+    iron = g.mixc(rust, (0.08, 0.078, 0.082), (0.28, 0.12, 0.045))
+    deep = g.mixc(g.noise(1.5, 3.0, 0.5, seed=91), (0.006, 0.004, 0.004), (0.03, 0.012, 0.006))
+    col = g.mixc(bar, deep, iron)
+    emit = g.mixc(bar, (0.25, 0.06, 0.01), (0.0, 0.0, 0.0))
+    height = g.add(g.mul(bar, 0.9), g.mul(rustn, 0.1))
+    g.finish(col, g.mixf(rust, 0.45, 0.9), height, bump=1.0, emit=emit, emit_strength=1.2,
+             metal=g.mul(bar, g.sub(1.0, rust)))
+
+
+def m_cracked(g):
+    """Stone with a split running through it, wide enough to see from across
+    a room: the Pick's Overpressure breaks it."""
+    col, rough, height, _ = m_stone(g, seed=100.0)
+    d = g.voronoi(0.45, "DISTANCE_TO_EDGE", seed=101)
+    keep = g.remap(g.noise(0.6, 2.0, 0.5, seed=102), 0.46, 0.54)   # only some of the cell edges split
+    split = g.mul(g.remap(d, 0.0, 0.025, 1.0, 0.0), keep)
+    edge = g.mul(g.remap(d, 0.0, 0.08, 1.0, 0.0), keep)
+    col = g.mixc(g.mul(edge, 0.5), col, (0.16, 0.14, 0.12))
+    col = g.mixc(split, col, (0.012, 0.010, 0.009))
+    height = g.sub(height, g.mul(split, 0.9))
+    g.finish(col, rough, height, bump=1.1)
+
+
 MATERIALS = {
     "kirk_brick1": m_brick,
     "kirk_vbrick1": m_vein_brick,
@@ -359,6 +405,9 @@ MATERIALS = {
     "cloth_char1": m_cloth,
     "leather1": m_leather,
     "oak1": m_oak,
+    "*water1": m_water,
+    "vent_grate1": m_grate,
+    "kirk_crack1": m_cracked,
 }
 
 

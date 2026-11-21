@@ -6,7 +6,7 @@ It's idea 25 in [game-ideas](https://github.com/LinuxGroove/game-ideas/blob/main
 
 ![The Casting Floor](docs/screenshots/casting-floor.jpg)
 
-More in [docs/screenshots](docs/screenshots/): the splash, the main menu, the gatehouse, the Casting Floor from above and the silver key.
+More in [docs/screenshots](docs/screenshots/): the splash, the main menu, the gatehouse, the Casting Floor from above, the pattern shop, the pouring gallery and the quench pit.
 
 ## Where it's at
 
