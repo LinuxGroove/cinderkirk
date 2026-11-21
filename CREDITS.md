@@ -19,7 +19,7 @@ Copyright © 2026 The LinuxGroove team. Cinderkirk's own code is under the GNU G
 - World textures, the menu art, the console background, the icon and the first level are Cinderkirk's own, made for it in Blender and Python (`assets_src/`, `tools/`, `maps_src/`).
 - The music (`assets_src/music/`) was made for Cinderkirk with ACE-Step 1.5 (Apache-2.0) through acestep.cpp; `assets_src/music/GENERATED.md` lists each track's prompt and seed.
 - Button glyphs from **Kenney**'s Input Prompts (CC0, www.kenney.nl), in `assets/glyphs/`.
-- Stand-ins until Cinderkirk's own are made: some sounds (the player, doors, lifts and pickups), the classic status bar (HUD Style Classic), small fonts are from **LibreQuake** (BSD-3-Clause, see `build/librequake/COPYING.LibreQuake` after a build), fetched at a pinned commit by `tools/librequake.sh` and never stored here.
+- Stand-ins until Cinderkirk's own are made: the classic status bar (HUD Style Classic), small fonts are from **LibreQuake** (BSD-3-Clause, see `build/librequake/COPYING.LibreQuake` after a build), fetched at a pinned commit by `tools/librequake.sh` and never stored here.
 - **nanosvg** by Mikko Mononen (zlib licence, `engine/Quake/nanosvg/LICENSE.txt`) draws the HUD.
 - Menu and HUD lettering in **Cinzel** by Natanael Gama (SIL Open Font License 1.1, `assets_src/fonts/OFL-Cinzel.txt`).
 - Help text and the HUD's numbers in **Barlow Condensed** by The Barlow Project Authors (SIL Open Font License 1.1, `assets_src/fonts/OFL-BarlowCondensed.txt`).
