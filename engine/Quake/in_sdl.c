@@ -48,6 +48,8 @@ static cvar_t joy_swapmovelook = {"joy_swapmovelook", "0", CVAR_ARCHIVE_GAME};
 static cvar_t joy_enable = {"joy_enable", "1", CVAR_ARCHIVE_GAME};
 static cvar_t joy_always_active = {"joy_always_active", "0", CVAR_ARCHIVE_GAME};
 static cvar_t joy_rumble = {"joy_rumble", "0.3", CVAR_ARCHIVE_GAME};
+void		 Rumble_Init (void);
+qboolean Rumble_Level (float *low, float *high, qboolean *from_sound);
 static cvar_t gyro_enable = {"gyro_enable", "1", CVAR_ARCHIVE_GAME};
 static cvar_t gyro_mode = {"gyro_mode", "2", CVAR_ARCHIVE_GAME};
 static cvar_t gyro_turning_axis = {"gyro_turning_axis", "0", CVAR_ARCHIVE_GAME};
@@ -437,6 +439,7 @@ void IN_Init (void)
 	Cvar_RegisterVariable (&joy_enable);
 	Cvar_RegisterVariable (&joy_always_active);
 	Cvar_RegisterVariable (&joy_rumble);
+	Rumble_Init ();
 	Cvar_RegisterVariable (&gyro_enable);
 	Cvar_RegisterVariable (&gyro_mode);
 	Cvar_RegisterVariable (&gyro_turning_axis);
@@ -767,11 +770,27 @@ void IN_Commands (void)
 
 	if (IN_JoyActive () && IN_HasRumble () && !gyro_calibration_samples && joy_rumble.value > 0.f)
 	{
+		// Cinderkirk: the game's patterns (rumble.c), and the loudness rumble only when asked for.
 		const float strength = CLAMP (0.f, joy_rumble.value, 1.f) * 65535.f;
-		const float low = IN_ClampedFraction (S_GetLoFreqLevel (), 0.067f, 0.45f);
-		float		high = IN_ClampedFraction (S_GetHiFreqLevel (), 0.061f, 0.45f);
-		high *= high;
-		IN_Rumble ((uint16_t)(low * strength), (uint16_t)(high * strength), 100);
+		float		low, high;
+		qboolean	from_sound;
+		static qboolean was_on;
+		if (Rumble_Level (&low, &high, &from_sound))
+		{
+			if (from_sound)
+			{
+				low = IN_ClampedFraction (S_GetLoFreqLevel (), 0.067f, 0.45f);
+				high = IN_ClampedFraction (S_GetHiFreqLevel (), 0.061f, 0.45f);
+				high *= high;
+			}
+			IN_Rumble ((uint16_t)(low * strength), (uint16_t)(high * strength), 100);
+			was_on = true;
+		}
+		else if (was_on)
+		{
+			IN_Rumble (0, 0, 0);
+			was_on = false;
+		}
 	}
 }
 

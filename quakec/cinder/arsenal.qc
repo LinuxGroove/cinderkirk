@@ -284,8 +284,10 @@ void() W_Overpressure =
 {
 	if (self.health <= 0)
 		return;
+	local float before;
 	makevectors (self.v_angle);
 	self.show_hostile = time + 1;
+	before = self.pressure;
 	if (self.weapon == IT_AXE)
 		W_OverpressurePick ();
 	else if (self.weapon == IT_SHOTGUN)
@@ -294,6 +296,8 @@ void() W_Overpressure =
 		W_OverpressureSpitter ();
 	else
 		sound (self, CHAN_ITEM, "cinder/empty.wav", 0.6, ATTN_NORM);
+	if (self.pressure < before)
+		Rumble (self, "overpressure");
 };
 
 /*QUAKED func_cracked (0 .5 .8) ?

@@ -62,6 +62,7 @@ local string    s;
 
 	sound (other, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
+	Rumble (other, "pickup");
 	self.solid = SOLID_NOT;
 	other.items = other.items | IT_QUAD;
 	self.model = string_null;
@@ -136,6 +137,7 @@ local string    s;
 
 	sound (other, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
+	Rumble (other, "pickup");
 	self.solid = SOLID_NOT;
 	other.items = other.items | IT_INVISIBILITY;
 	self.model = string_null;
@@ -344,6 +346,8 @@ void() health_touch =
 
 	stuffcmd (other, "bf\n");
 
+	Rumble (other, "pickup");
+
 	self.model = string_null;
 	self.solid = SOLID_NOT;
 
@@ -460,6 +464,7 @@ void() armor_touch =
 	// armor touch sound
 	sound(other, CHAN_ITEM, "items/armor1.wav", 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
+	Rumble (other, "pickup");
 
 	activator = other;
 	SUB_UseTargets();				// fire all targets / killtargets
@@ -719,6 +724,7 @@ void() weapon_touch =
 	// weapon touch sound
 	sound (other, CHAN_ITEM, "weapons/pkup.wav", 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
+	Rumble (other, "pickup");
 
 	bound_other_ammo ();
 
@@ -951,6 +957,7 @@ void() ammo_touch =
 	// ammo touch sound
 	sound (other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
+	Rumble (other, "pickup");
 
 	// change to a better weapon if appropriate
 	if ( other.weapon == best )
@@ -1223,6 +1230,7 @@ void() key_touch =
 
 	sound (other, CHAN_ITEM, self.noise, 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
+	Rumble (other, "key");
 	other.items = other.items | self.items;
 
 	if (!coop)
@@ -1394,6 +1402,7 @@ void() sigil_touch =
 
 	sound (other, CHAN_ITEM, self.noise, 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
+	Rumble (other, "pickup");
 	self.solid = SOLID_NOT;
 	self.model = string_null;
 	serverflags = serverflags | (self.spawnflags & 15);
@@ -1483,6 +1492,7 @@ void() powerup_touch =
 
 	sound (other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
+	Rumble (other, "pickup");
 	self.solid = SOLID_NOT;
 	other.items = other.items | self.items;
 	self.model = string_null;
@@ -1678,6 +1688,7 @@ void() BackpackTouch =
 		else
 			sound (other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
 		stuffcmd (other, "bf\n");
+		Rumble (other, "pickup");
 		remove(self);
 
 		if (other.health > 299)
@@ -1696,6 +1707,7 @@ void() BackpackTouch =
 
 				sound (other, CHAN_VOICE, "boss1/sight1.wav", 1, ATTN_NORM);
 				stuffcmd (other, "bf\n");
+				Rumble (other, "pickup");
 				bprint (PRINT_HIGH, other.netname);
 				bprint (PRINT_HIGH, LOC_BONUS_POWERS);
 				bprint (PRINT_HIGH, "\n");
@@ -1792,6 +1804,7 @@ void() BackpackTouch =
 	// backpack touch sound
 	sound (other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
+	Rumble (other, "pickup");
 
 	remove(self);
 	self = other;

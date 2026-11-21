@@ -1413,7 +1413,10 @@ void() PlayerPostThink =
 		}
 
 		else
+		{
 			sound (self, CHAN_VOICE, "player/land.wav", 1, ATTN_NORM);
+			Rumble (self, "land");
+		}
 
 		self.jump_flag = 0;
 	}

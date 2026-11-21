@@ -10,6 +10,7 @@ defs.qc
 localized_text.qc       // LQ: Localized strings, also applies to Quake
 deathmatch_settings.qc
 subs.qc
+cinder/rumble.qc        // Cinderkirk: rumble patterns on the pad
 
 #ifdef __QW__
 server.qc

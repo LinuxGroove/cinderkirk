@@ -616,7 +616,8 @@ void() PlayerDie =
 {
 	local	float	i;
 	local	string	s;
-	
+
+	Rumble (self, "death");	
 	if (deathmatch_drop_quad()) {
 		if (self.super_damage_finished > 0)
 		{

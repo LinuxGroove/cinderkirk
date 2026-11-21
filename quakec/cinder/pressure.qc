@@ -118,6 +118,7 @@ void() Pressure_Dash =
 	self.flags = self.flags - (self.flags & FL_ONGROUND);
 	self.dash_finished = time + DASH_COOLDOWN;
 	sound (self, CHAN_BODY, "cinder/dash.wav", 1, ATTN_NORM);
+	Rumble (self, "dash");
 	Pressure_Steam (self.origin - '0 0 16', dir * -60, 24);
 };
 
@@ -185,6 +186,7 @@ void() vent_touch =
 	other.flags = other.flags - (other.flags & FL_ONGROUND);
 	other.vent_finished = time + 0.5;
 	sound (other, CHAN_BODY, "cinder/vent.wav", 1, ATTN_NORM);
+	Rumble (other, "vent");
 	Pressure_Steam (other.origin - '0 0 24', '0 0 200', 32);
 };
 

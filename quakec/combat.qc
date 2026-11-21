@@ -244,6 +244,13 @@ void(entity targ, entity inflictor, entity attacker, float damage) T_Damage=
 
 	// do the damage
 	targ.health = targ.health - take;
+	if (targ.flags & FL_CLIENT && take > 0)
+	{
+		if (take >= 25)
+			Rumble (targ, "hurt_big");
+		else
+			Rumble (targ, "hurt");
+	}
 	Pressure_Damage (targ, attacker, take);
 
 	if (targ.health <= 0)
