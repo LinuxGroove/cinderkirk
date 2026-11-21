@@ -2,6 +2,8 @@
 """Makes Cinderkirk's music (and, later, voice lines and sound effects) with Lemonade.
 
     python3 tools/lemonade/generate.py [--only music|voices|sfx] [--force] [name ...]
+    python3 tools/lemonade/generate.py --only music --ace-server http://127.0.0.1:8093 \
+        --ace-flags "--vae-chunk 256"
 
 Reads tools/lemonade/audio.json and asks the Lemonade server named there (or
 --server) for every entry: ACE-Step for music, Kokoro for voice lines and
@@ -10,6 +12,15 @@ ThinkSound for sound effects. Each file is written as 44.1 kHz Ogg Vorbis
 and its peak at about -3 dBFS. Loops (music with "loop": true, sounds named
 *_loop) are cut where their end sounds most like their start, then the tail
 past that point is crossfaded into the head, so they repeat without a seam.
+
+With --ace-server, music goes straight to an acestep.cpp ace-server (the
+program Lemonade runs for ACE-Step) instead of through Lemonade. It gets the
+request Lemonade's ACE-Step backend would send it (the prompt as the caption,
+"[Instrumental]" as the lyrics, the seed and steps, 24-bit WAV back), so a take
+is the same music either way, but the server can be started with options
+Lemonade doesn't pass: a smaller --vae-chunk, say, for a GPU that runs out of
+memory decoding a long take. --ace-flags records how it was started, in
+generated.json and GENERATED.md.
 
 Music and sound effects are made in several takes with different seeds, and
 the take kept is the one whose length, loudness, ending and (for loops) seam
@@ -98,16 +109,73 @@ def post(server, path, body, timeout):
             time.sleep(2 ** (attempt + 1))
 
 
-def fetch(server, path, body, timeout, cache, use_cache):
-    """A take from Lemonade (the path of its WAV), from the cache when the same
-    request was made before."""
+def multipart_audio(data, content_type):
+    """The first audio part of a multipart/mixed body (b"" when there is none)."""
+    m = re.search(r'boundary="?([^";]+)"?', content_type)
+    if not m:
+        return b""
+    for part in data.split(b"--" + m.group(1).encode()):
+        head, _, body = part.partition(b"\r\n\r\n")
+        if b"content-type: audio/" in head.lower():
+            return body[:-2] if body.endswith(b"\r\n") else body
+    return b""
+
+
+def ace_post(base, body, timeout):
+    """Runs one /synth job on an acestep.cpp ace-server and returns the WAV bytes:
+    the server queues the job, it is polled until it ends, and the audio is taken
+    out of the multipart result, as Lemonade's ACE-Step backend does. Retries a
+    few times, like post()."""
+    base = base.rstrip("/")
+    for attempt in range(4):
+        try:
+            req = urllib.request.Request(base + "/synth", data=json.dumps(body).encode(),
+                                         headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                job = json.load(r)["id"]
+            url = "%s/job?id=%s" % (base, job)
+            start = time.time()
+            while True:
+                with urllib.request.urlopen(url, timeout=30) as r:
+                    status = json.load(r).get("status")
+                if status in ("done", "failed", "cancelled"):
+                    break
+                if time.time() - start > timeout:
+                    raise RuntimeError("job %s still %s after %d s" % (job, status, timeout))
+                time.sleep(1)
+            if status != "done":
+                raise RuntimeError("job %s %s (see the server's /logs)" % (job, status))
+            with urllib.request.urlopen(url + "&result=1", timeout=120) as r:
+                wav = multipart_audio(r.read(), r.headers.get("Content-Type", ""))
+            if not wav.startswith(b"RIFF"):
+                raise RuntimeError("no audio part in the synth result (see the server's /logs)")
+            return wav
+        except (urllib.error.URLError, RuntimeError, TimeoutError, KeyError, ValueError) as e:
+            if attempt == 3:
+                raise RuntimeError("ace-server /synth failed: %s" % e)
+            print("    retrying after: %s" % e, flush=True)
+            time.sleep(2 ** (attempt + 1))
+
+
+def ace_props(base):
+    """What an ace-server says about itself: its version and model files."""
+    try:
+        with urllib.request.urlopen(base.rstrip("/") + "/props", timeout=30) as r:
+            return json.load(r)
+    except Exception as e:
+        sys.exit("Can't reach ace-server at %s: %s" % (base, e))
+
+
+def fetch(server, path, body, timeout, cache, use_cache, ace=None):
+    """A take from Lemonade, or from the ace-server at `ace` (the path of its
+    WAV), from the cache when the same request was made before."""
     key = hashlib.sha256(json.dumps([path, body], sort_keys=True).encode()).hexdigest()[:16]
     cached = cache / (key + ".wav")
     if use_cache and cached.exists():
         return cached
     t = time.time()
-    out = post(server, path, body, timeout)
-    print("    %s%s: %.1f s" % (body["model"], " seed %d" % body["seed"] if "seed" in body else "",
+    out = ace_post(ace, body, timeout) if ace else post(server, path, body, timeout)
+    print("    %s%s: %.1f s" % (body.get("model", "ace-server"), " seed %d" % body["seed"] if "seed" in body else "",
                                 time.time() - t), flush=True)
     cache.mkdir(parents=True, exist_ok=True)
     cached.write_bytes(out)
@@ -475,7 +543,16 @@ def jobs(manifest):
     return out
 
 
-def request(job, seed):
+def request(job, seed, ace=False):
+    if ace:
+        # what Lemonade's ACE-Step backend sends ace-server for an instrumental
+        body = {"caption": job["prompt"], "lyrics": "[Instrumental]", "synth_model": "",
+                "output_format": "wav24", "duration": round(job["ask"], 1), "seed": seed}
+        if "steps" in job:
+            body["inference_steps"] = job["steps"]
+        if "cfg" in job:
+            body["guidance_scale"] = job["cfg"]
+        return "/synth", body
     if job["kind"] == "voices":
         return "/api/v1/audio/speech", {"model": job["model"], "input": job.get("say", job["text"]),
                                         "voice": job["voice"], "speed": job["speed"],
@@ -591,11 +668,12 @@ def verify(path, channels, kind):
 
 def render(record, manifest, version):
     r = record["files"]
+    aced = sorted({e["backend"] for e in r.values() if e.get("backend")})
     lines = ["# Generated audio", "",
-             "Made with [Lemonade](https://lemonade-server.ai)%s by `tools/lemonade/generate.py` from "
+             "Made with [Lemonade](https://lemonade-server.ai)%s%s by `tools/lemonade/generate.py` from "
              "`tools/lemonade/audio.json`; `tools/lemonade/generated.json` has the full record, including "
              "every take's numbers. Released under CC0. Make them again with"
-             % (" " + version if version else ""), "",
+             % (" " + version if version else "", "'s models and acestep.cpp's ace-server" if aced else ""), "",
              "```sh", "python3 tools/lemonade/generate.py --force [--only music|voices|sfx] [name ...]", "```", "",
              "Every file is 44.1 kHz Ogg Vorbis (music stereo, the rest mono), trimmed of silence and "
              "peaking at about -3 dBFS. Loops were cut where their end matches their start and "
@@ -608,8 +686,13 @@ def render(record, manifest, version):
     def model_line(model):
         return "Model `%s`%s." % (model, " (`%s`)" % ckpt[model] if model in ckpt else "")
 
+    music_via = ""
+    if aced:
+        music_via = (" Rendered by %s, given the request Lemonade's ACE-Step backend sends it (the prompt as "
+                     "the caption, `[Instrumental]` as the lyrics, 24-bit WAV) rather than through Lemonade "
+                     "(`--ace-server`)." % ", ".join("`%s`" % b for b in aced))
     lines += ["## Music", "", model_line(manifest["music"]["model"]) + " Instrumental (no lyrics), the "
-              "server's default steps.", "",
+              "server's default steps." + music_via, "",
               "| File | Prompt | Seed | Takes | Length | Settings |", "|---|---|---|---|---|---|"]
     for t in manifest["music"]["tracks"]:
         e = r.get(t["file"])
@@ -686,17 +769,28 @@ def main():
     ap.add_argument("--takes", type=int, help="takes per music track and sound (default: the manifest's, or 3)")
     ap.add_argument("--takes-dir", type=Path, default=CACHE, help="where raw takes are cached (default %(default)s)")
     ap.add_argument("--no-cache", action="store_true", help="ask Lemonade again even for cached takes")
+    ap.add_argument("--ace-server", help="make the music with this acestep.cpp ace-server instead of through "
+                    "Lemonade (see above)")
+    ap.add_argument("--ace-flags", default="", help="how that ace-server was started, for the record "
+                    "(e.g. \"--vae-chunk 256\")")
     args = ap.parse_args()
 
     manifest = json.loads(MANIFEST.read_text())
     server = args.server or manifest["server"]
-    have = models(server)
     record = json.loads(RECORD.read_text()) if RECORD.exists() else {"files": {}}
     record.setdefault("checkpoints", {})
     todo = [j for j in jobs(manifest)
             if (not args.only or j["kind"] == args.only)
             and (not args.names or stem(j["file"]) in args.names
                  or "%s/%s" % (j.get("who", ""), stem(j["file"])) in args.names)]
+    def via_ace(j):
+        return bool(args.ace_server) and j["kind"] == "music"
+
+    have = models(server) if any(not via_ace(j) for j in todo) else {}
+    if any(via_ace(j) for j in todo):
+        props = ace_props(args.ace_server)
+        ace_backend = " ".join(["ace-server", props.get("version", "")] + args.ace_flags.split())
+        ace_files = ", ".join(sum((props.get("models", {}).get(k, []) for k in ("dit", "vae", "embedding")), []))
     problems = []
     for job in todo:
         out = ROOT / job["file"]
@@ -707,16 +801,19 @@ def main():
         if out.exists() and not args.force:
             print("%s: exists" % job["file"])
             continue
-        if job["model"] not in have:
+        if via_ace(job):
+            record["checkpoints"][job["model"]] = ace_files
+        elif job["model"] not in have:
             sys.exit("Lemonade has no %s model" % job["model"])
-        record["checkpoints"][job["model"]] = have[job["model"]].get("checkpoint", "")
+        else:
+            record["checkpoints"][job["model"]] = have[job["model"]].get("checkpoint", "")
         print("%s:" % job["file"], flush=True)
         base = seed_for(job)
         takes = []
         for k in range(args.takes or job["takes"]):
-            path, body = request(job, base + k)
+            path, body = request(job, base + k, via_ace(job))
             cached = fetch(server, path, body, 1800, args.takes_dir / job["kind"] / stem(job["file"]),
-                                not args.no_cache)
+                           not args.no_cache, args.ace_server if via_ace(job) else None)
             try:
                 y, gain, info = process(job, cached)
             except RuntimeError as e:
@@ -751,6 +848,8 @@ def main():
             entry["prompt"] = job["prompt"]
         if "pick" in job:
             entry["picked"] = job.get("why", "picked by hand")
+        if via_ace(job):
+            entry["backend"] = ace_backend
         for kk in ("loop", "lufs", "faded_end"):
             if info.get(kk) is not None:
                 entry[kk] = info[kk]
