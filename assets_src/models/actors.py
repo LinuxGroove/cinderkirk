@@ -31,9 +31,12 @@ P = Vector
 pose_of = C.pose_of
 
 # The stoker's jacket and hood take a player's shirt colour in Pit fights and
-# co-op, and his long coat the trousers' (creatures.build bakes the mask).
+# co-op, and his long coat the trousers' (creatures.build bakes the mask). The
+# jacket and trousers leave out the charred cloth's embers: tinted, they read
+# as a pattern.
 C.TILES.update({
-    "jacket": ("cloth_char1", 0.45, (1.15, 1.1, 1.0)),
+    "jacket": ("cloth_char1", 0.45, (1.15, 1.1, 1.0), False),
+    "trousers": ("cloth_char1", 0.5, (0.6, 0.55, 0.5), False),
     "cowl": ("leather1", 0.4, (1.1, 1.05, 1.0)),
     "coat": ("leather1", 0.6, (1.2, 1.15, 1.05)),
 })
@@ -63,21 +66,30 @@ def stoker():
     c.team = TEAM
 
     # Body in a long leather coat over work clothes.
-    body = {n: J[n] for n in ("pelvis", "spine", "chest", "neck", "hip_l", "knee_l", "ankle_l", "hip_r", "knee_r", "ankle_r",
-                              "sho_l", "elb_l", "wri_l", "sho_r", "elb_r", "wri_r")}
+    body = {n: J[n] for n in ("pelvis", "spine", "chest", "neck", "sho_l", "elb_l", "wri_l", "sho_r", "elb_r", "wri_r")}
     e = [("pelvis", "spine"), ("spine", "chest"), ("chest", "neck")]
     rad = {"pelvis": (0.15, 0.11), "spine": (0.15, 0.115), "chest": (0.18, 0.125), "neck": 0.06}
+    legs = {n: J[n] for n in ("pelvis", "hip_l", "knee_l", "ankle_l", "hip_r", "knee_r", "ankle_r")}
+    le, lrad = [], {"pelvis": (0.13, 0.095)}
     for s in "lr":
-        e += [("pelvis", "hip_" + s), ("hip_" + s, "knee_" + s), ("knee_" + s, "ankle_" + s),
-              ("chest", "sho_" + s), ("sho_" + s, "elb_" + s), ("elb_" + s, "wri_" + s)]
-        rad.update({"hip_" + s: 0.08, "knee_" + s: 0.058, "ankle_" + s: 0.05,
-                    "sho_" + s: 0.07, "elb_" + s: 0.055, "wri_" + s: 0.045})
+        e += [("chest", "sho_" + s), ("sho_" + s, "elb_" + s), ("elb_" + s, "wri_" + s)]
+        rad.update({"sho_" + s: 0.07, "elb_" + s: 0.055, "wri_" + s: 0.045})
+        le += [("pelvis", "hip_" + s), ("hip_" + s, "knee_" + s), ("knee_" + s, "ankle_" + s)]
+        lrad.update({"hip_" + s: 0.08, "knee_" + s: 0.058, "ankle_" + s: 0.05})
     body_bones = [b[0] for b in bones if b[0] not in ("gun", "pick", "head", "hand_l", "hand_r", "foot_l", "foot_r")]
-    c.add(C.skin_body("body", body, e, rad, "pelvis", seed=7.0, lumps=0.004), "jacket", power=4.0, among=body_bones)
-    # The coat's skirt, split at the front, to just below the knee.
-    skirt = C.lathe("skirt", [(0.17, 1.02), (0.19, 0.9), (0.22, 0.7), (0.25, 0.5)], segs=36,
+    c.add(C.skin_body("body", body, e, rad, "pelvis", seed=7.0, lumps=0.004), "jacket", power=4.0,
+          among=[b for b in body_bones if not b.startswith(("thigh", "shin"))])
+    c.add(C.skin_body("legs", legs, le, lrad, "pelvis", seed=8.0, lumps=0.004), "trousers", power=4.0,
+          among=["pelvis", "thigh_l", "thigh_r", "shin_l", "shin_r"])
+    # The coat's skirt to just below the knee, open in front from the belt down
+    # (so the legs show as he walks) and split up the back.
+    def opening(a, z):
+        front = abs(math.sin(a) + 1) < 0.06 + 1.1 * max(0.0, 0.98 - z)
+        vent = abs(math.sin(a) - 1) < 0.03 and z < 0.75
+        return front or vent
+    skirt = C.lathe("skirt", [(0.17, 1.02), (0.185, 0.9), (0.205, 0.7), (0.225, 0.5)], segs=36,
                     shape=lambda a, z, x, y: (x * (1 + 0.04 * math.sin(7 * a)), y * 0.85, z + 0.015 * math.sin(5 * a)),
-                    skip=lambda a, z: abs(math.sin(a) + 1) < 0.08 and z < 0.95)
+                    skip=opening)
     c.add(C.thicken(skirt, 0.012), "coat", among=["pelvis", "thigh_l", "thigh_r"], power=3.0, anchor=("pelvis", 0.5))
     collar = C.prim("torus", major_radius=0.085, minor_radius=0.03, major_segments=24, minor_segments=8,
                     location=(0, -0.01, 1.52))
@@ -94,6 +106,10 @@ def stoker():
     flask = C.lathe("flask", [(0.0, 1.08), (0.07, 1.09), (0.08, 1.14), (0.08, 1.38), (0.06, 1.43), (0.0, 1.45)],
                     segs=18, at=(0.0, 0.17, 0.0))
     c.add(flask, "bronze", "chest")
+    for z in (1.15, 1.36):   # iron bands, and a pipe up to the shoulder from its valve
+        c.add(W.ring(P((0.0, 0.17, z)), (0, 0, 1), 0.083, 0.01, segs=18), "iron", "chest")
+    c.add(W.rod(P((0.0, 0.17, 1.44)), P((0.0, 0.17, 1.50)), 0.014, segs=8), "iron", "chest")
+    c.add(W.rod(P((0.0, 0.17, 1.49)), P((0.13, 0.08, 1.52)), 0.011, segs=8), "iron", "chest")
     for s in "lr":
         ax, ay, az = J["ankle_" + s]
         boot = C.prim("uv_sphere", radius=0.065, segments=14, ring_count=8, location=(ax, ay - 0.06, 0.055))

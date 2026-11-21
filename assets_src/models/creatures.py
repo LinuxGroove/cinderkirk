@@ -283,7 +283,7 @@ class Nodes:
         self.feed(nd.inputs[7], b)
         return nd.outputs[2]
 
-    def tile(self, image, size, tint):
+    def tile(self, image, size, tint, glow=True):
         img = bpy.data.images.load(os.path.join(TEXTURES, image + ".png"), check_existing=True)
         mp = self.node("ShaderNodeMapping")
         self.feed(mp.inputs["Vector"], self.co)
@@ -293,7 +293,7 @@ class Nodes:
         col = self.mixc(1.0, tx.outputs["Color"], tint, blend="MULTIPLY")
         luma = None
         lpath = os.path.join(TEXTURES, image + "_luma.png")
-        if os.path.exists(lpath):
+        if glow and os.path.exists(lpath):
             limg = bpy.data.images.load(lpath, check_existing=True)
             lt = self.node("ShaderNodeTexImage", image=limg, projection="BOX", projection_blend=0.25)
             self.t.links.new(mp.outputs["Vector"], lt.inputs["Vector"])
