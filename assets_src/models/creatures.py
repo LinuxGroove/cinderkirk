@@ -305,6 +305,17 @@ class Nodes:
 def shade(name):
     """(albedo, glow) sockets for one of the creature materials."""
     g = Nodes(bpy.data.materials[name])
+    if name == "cope":
+        # The mould's clay, burst along crooked seams with the iron showing.
+        col, _ = g.tile("sand_mould1", 0.9, (0.8, 0.8, 0.8))
+        crack = g.voronoi(2.2, seed=70.0)
+        wob = g.noise(6.0, 3.0, 0.5, seed=71.0)
+        c = g.ramp(g.mixc(0.05, crack, wob, blend="ADD"), [(0.03, (1, 1, 1)), (0.06, (0, 0, 0))])
+        burst = g.ramp(g.noise(1.2, 2.0, 0.5, seed=72.0), [(0.45, (0, 0, 0)), (0.6, (1, 1, 1))])
+        seam = g.mixc(burst, (0, 0, 0), c)
+        col = g.mixc(seam, col, (0.6, 0.18, 0.03))
+        glow = g.mixc(seam, (0, 0, 0), (1.0, 0.5, 0.12))
+        return g, col, glow
     if name in TILES:
         col, luma = g.tile(*TILES[name])
         return g, col, luma
@@ -1937,21 +1948,15 @@ def founder():
     px, py, pz = J["pelvis"]
     # The mould: a bell's cope from the floor to the waist, hooped in iron,
     # split where the iron inside shows through.
-    def split(a, z):                                    # jagged cracks, wider low down where it burst
-        n = noise.noise(Vector((math.cos(a) * 1.3, math.sin(a) * 1.3, z * 1.4)))
-        return z < pz - 0.15 and abs(n - 0.1) < 0.05 + 0.04 * (1.0 - z / pz)
     prof = [(1.06, 0.0), (1.08, 0.08), (1.0, 0.16)]
     for i in range(1, 15):                              # a bell's cope: flared at the lip, a waist, a shoulder
         z = 0.16 + (pz - 0.16) * i / 15
         u = z / pz
         prof.append((0.98 - 0.62 * u + 0.18 * u * u * (1 - u) * 4, z))
     prof += [(0.44, pz + 0.06), (0.32, pz + 0.12)]
-    cope = lathe("cope", prof, segs=64, shape=lambda a, z, x, y: (x, y * 0.92 + py, z), skip=split)
+    cope = lathe("cope", prof, segs=64, shape=lambda a, z, x, y: (x, y * 0.92 + py, z))
     thicken(cope, 0.05)
-    c.add(cope, "mould", "pelvis")
-    core = lathe("core", [(0.98, 0.02), (0.84, 0.5), (0.66, 1.1), (0.5, 1.6), (0.38, pz)], segs=36,
-                 shape=lambda a, z, x, y: (x, y * 0.92 + py, z))
-    c.add(core, "slag", "pelvis")
+    c.add(cope, "cope", "pelvis")
     for z, r in ((0.12, 1.06),):
         hoop = prim("torus", major_radius=r, minor_radius=0.04, major_segments=48, minor_segments=8, location=(0, py, z))
         hoop.scale = (1.0, 0.92, 1.0)
@@ -1978,6 +1983,15 @@ def founder():
         c.add(fist, "slag", "hand_" + sd)
         band = prim("torus", major_radius=0.13, minor_radius=0.03, major_segments=20, minor_segments=6, location=tuple(el.lerp(wr, 0.1)))
         c.add(band, "iron", "fore_" + sd)
+        hand = (fi - wr).normalized()
+        side = Vector((1, 0, 0)) if sd == "l" else Vector((-1, 0, 0))
+        for j, off in enumerate((-0.07, -0.02, 0.03, 0.08)):                  # thick fingers, curled
+            root = wr.lerp(fi, 0.95) + side * off * 0.9 + Vector((0, -0.03, 0))
+            tip = root + hand * 0.17 + Vector((0, -0.07, -0.02))
+            c.add(between("cone", root, tip, radius1=0.042, radius2=0.022, vertices=8), "slag", "hand_" + sd)
+        thumb = wr.lerp(fi, 0.6) - side * 0.11
+        c.add(between("cone", thumb, thumb + Vector((0, -0.14, -0.06)) - side * 0.03, radius1=0.045, radius2=0.025,
+                      vertices=8), "slag", "hand_" + sd)
         for i, (dx, dy) in enumerate(((0.05, -0.03), (-0.04, 0.02), (0.0, -0.06))):
             top = fi + Vector((dx, dy, -0.02))
             c.add(between("cone", top, top + Vector((0, 0, -0.22 - 0.08 * i)), radius1=0.035, radius2=0.004, vertices=6),
@@ -1991,12 +2005,12 @@ def founder():
                 shape=lambda a, z, x, y: (x + hx, y + hy - 0.02, z))
     c.add(thicken(cap, 0.02), "iron", "head")
     for sx in (-1, 1):
-        eye = prim("uv_sphere", radius=0.045, segments=10, ring_count=6, location=(hx + sx * 0.095, hy - 0.26, hz + 0.21))
-        eye.scale = (1.2, 0.6, 0.7)
+        eye = prim("uv_sphere", radius=0.06, segments=10, ring_count=6, location=(hx + sx * 0.1, hy - 0.26, hz + 0.17))
+        eye.scale = (1.3, 0.6, 0.8)
         c.add(eye, "ember", "head")
     # A beard of crust over the chest, run through with iron.
-    beard = prim("uv_sphere", radius=0.24, segments=14, ring_count=10, location=(hx, hy - 0.24, hz - 0.08))
-    beard.scale = (0.85, 0.45, 1.1)
+    beard = prim("uv_sphere", radius=0.24, segments=14, ring_count=10, location=(hx, hy - 0.2, hz - 0.2))
+    beard.scale = (1.0, 0.38, 1.3)
     for v in beard.data.vertices:
         if v.co.z < 0:
             v.co.y *= 1.0 + v.co.z * 1.5

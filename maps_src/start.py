@@ -99,6 +99,7 @@ def build():
     L.room(448, -64, -448, 576, 64, -32, wall="kirk_vbrick1", floor="kirk_stone1")
     L.opening(448, -64, -32, 576, 64, 0)
     L.liquid(448, -64, -448, 576, 64, -400)
+    L.brush_entity("trigger_changelevel", [Box(448, -64, -320, 576, 64, -160, "trigger")], map="throat1")
     L.brush_entity("func_bossgate", [Box(448, -64, -8, 576, 64, 0, "iron_grid1")])
     L.brush_entity("trigger_multiple", [Box(400, -112, 0, 624, 112, 96, "trigger")],
                    message="The Throat. The grate lifts when all four shafts are beaten", wait=6)
