@@ -190,6 +190,7 @@ World Types:
 void() worldspawn =
 {
 	lastspawn = world;
+	skill = cvar ("skill");		// Cinderkirk: so creatures spawn at this map's skill, not 0
 	InitBodyQueue ();
 
 	// custom map attributes

@@ -148,6 +148,7 @@ void() walkmonster_start =
 	self.nextthink = self.nextthink + random()*0.5 + 0.1; // Add 0.1 to fix statue bug
 	self.think = walkmonster_start_go;
 	total_monsters = total_monsters + 1;
+	Coop_Extra ();		// Cinderkirk: more creatures in co-op
 };
 
 
@@ -206,6 +207,7 @@ void() flymonster_start =
 	self.nextthink = self.nextthink + random()*0.5 + 0.1; // Add 0.1 to fix statue bug
 	self.think = flymonster_start_go;
 	total_monsters = total_monsters + 1;
+	Coop_Extra ();		// Cinderkirk: more creatures in co-op
 };
 
 

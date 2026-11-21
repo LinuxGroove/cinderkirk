@@ -468,6 +468,8 @@ SelectSpawnPoint
 
 Returns the entity to spawn at
 ============*/
+vector(vector at) Coop_Spot;	// cinder/coop.qc
+
 entity() SelectSpawnPoint =
 {
 	local   entity spot, thing;
@@ -618,6 +620,8 @@ void() PutClientInServer =
 	spot = SelectSpawnPoint ();
 
 	self.origin = spot.origin + '0 0 1';
+	if (coop)		// Cinderkirk: beside the start if someone's on it
+		self.origin = Coop_Spot (spot.origin) + '0 0 1';
 	self.angles = spot.angles;
 	self.fixangle = TRUE;		// turn this way immediately
 

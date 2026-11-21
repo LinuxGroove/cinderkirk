@@ -42,6 +42,7 @@ player.qc
 
 #ifndef __QW__
 cinder/bots.qc          // Cinderkirk: bots for Pit fights
+cinder/coop.qc          // Cinderkirk: Co-op Story: more creatures, spread spawns
 #endif
 
 #ifndef __QW__
