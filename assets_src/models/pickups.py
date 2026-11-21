@@ -27,13 +27,15 @@ _shade = C.shade
 
 
 def shade(name):
-    g = C.Nodes(bpy.data.materials[name]) if name in ("salve", "glass") else None
+    g = C.Nodes(bpy.data.materials[name]) if name in ("salve", "glass", "port") else None
     if name == "salve":
         # A red salve that glows a little through the glass.
         n = g.noise(12.0, 3.0, 0.5, seed=21.0)
         return g, g.ramp(n, [(0.3, (0.45, 0.03, 0.02)), (0.7, (0.75, 0.08, 0.04))]), g.ramp(n, [(0.3, (0.25, 0.02, 0.01)), (0.7, (0.5, 0.06, 0.02))])
     if name == "glass":
         return g, (0.32, 0.36, 0.34), None
+    if name == "port":
+        return g, (0.32, 0.36, 0.34), (0.08, 0.2, 0.16)      # a faint light inside, so it shows in the dark
     return _shade(name)
 
 
@@ -278,8 +280,9 @@ def veil():
                  shape=lambda a, z, x, y: (x * (1 + 0.18 * math.sin(a * 5 + z * 7)) , y * (1 + 0.18 * math.sin(a * 5 + z * 7)),
                                            z - (0.06 * (1 + math.sin(a * 7)) if z < -0.25 else 0.0)))
     p.put(C.thicken(sh, 0.012), "hood")
-    for sx in (-1, 1):  # two coals where a face would be
-        p.put(C.prim("uv_sphere", radius=0.022, segments=8, ring_count=5, location=(sx * 0.05, -0.135, 0.17)), "ember")
+    for a, z in ((0.6, 0.2), (2.3, 0.02), (3.6, -0.12), (5.1, 0.1), (4.3, -0.24)):  # embers caught in the cloth
+        r = 0.152 + 0.04 * max(0.0, -z) / 0.3
+        p.put(C.prim("uv_sphere", radius=0.016, segments=8, ring_count=5, location=(math.cos(a) * r, math.sin(a) * r, z)), "ember")
     p.done()
 
 
@@ -293,12 +296,13 @@ def quench_suit():
         a = math.tau * i / 8
         p.put(C.prim("uv_sphere", radius=0.016, segments=8, ring_count=5, location=(0.21 * math.cos(a), 0.21 * math.sin(a), -0.06)), "iron")
     p.put(W.rod(P((0, -0.17, 0.15)), P((0, -0.21, 0.15)), 0.1, segs=24), "brass")              # the port's frame
-    p.put(W.rod(P((0, -0.205, 0.15)), P((0, -0.212, 0.15)), 0.08, segs=24), "glass")
+    p.put(W.rod(P((0, -0.205, 0.15)), P((0, -0.212, 0.15)), 0.08, segs=24), "port")
     for ang in (0, 60, 120):
         a = math.radians(ang)
         d = P((math.cos(a), 0, math.sin(a))) * 0.08
         p.put(W.rod(P((0, -0.215, 0.15)) - d, P((0, -0.215, 0.15)) + d, 0.006, segs=6), "brass")  # its grille
-    p.put(W.tube([(0.12, 0.1, 0.2), (0.22, 0.16, 0.1), (0.24, 0.2, -0.12)], 0.025), "leather")    # the air hose
+    p.put(W.tube([(0.1, 0.12, 0.22), (0.2, 0.2, 0.18), (0.27, 0.22, 0.06), (0.26, 0.16, -0.06), (0.18, 0.1, -0.14),
+                  (0.08, 0.14, -0.2)], 0.025), "leather")    # the air hose, looping down
     p.done()
 
 
