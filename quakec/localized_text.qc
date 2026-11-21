@@ -164,32 +164,32 @@
 
 #ifdef __LIBREQUAKE__
 
-#define LOC_WEAPON_NAME_AXE				"Axe"		// Unused..
-#define LOC_WEAPON_NAME_SHOTGUN			"Shotgun"   // Unused..
-#define LOC_WEAPON_NAME_SUPER_SHOTGUN   "Double-Barreled Shotgun"
-#define LOC_WEAPON_NAME_NAILGUN			"Nailgun"
-#define LOC_WEAPON_NAME_SUPER_NAILGUN   "Super Nailgun"
-#define LOC_WEAPON_NAME_GRENADE_LAUNCH  "Grenade Launcher"
-#define LOC_WEAPON_NAME_ROCKET_LAUNCH   "Rocket Launcher"
-#define LOC_WEAPON_NAME_THUNDERBOLT		"Lightning Gun"
+#define LOC_WEAPON_NAME_AXE				"Pick"		// Unused..
+#define LOC_WEAPON_NAME_SHOTGUN			"Scattergun"   // Unused..
+#define LOC_WEAPON_NAME_SUPER_SHOTGUN   "Steam Cannon"
+#define LOC_WEAPON_NAME_NAILGUN			"Spitter"
+#define LOC_WEAPON_NAME_SUPER_NAILGUN   "Bolt Caster"
+#define LOC_WEAPON_NAME_GRENADE_LAUNCH  "Crucible"
+#define LOC_WEAPON_NAME_ROCKET_LAUNCH   "Shot Mortar"
+#define LOC_WEAPON_NAME_THUNDERBOLT		"Tolling Iron"
 
 #else
 
-#define LOC_WEAPON_NAME_AXE				"Axe"	// Unused..
-#define LOC_WEAPON_NAME_SHOTGUN			"Shotgun"   // Unused..
-#define LOC_WEAPON_NAME_SUPER_SHOTGUN   "Double-barrelled Shotgun"
-#define LOC_WEAPON_NAME_NAILGUN			"nailgun"
-#define LOC_WEAPON_NAME_SUPER_NAILGUN   "Super Nailgun"
-#define LOC_WEAPON_NAME_GRENADE_LAUNCH  "Grenade Launcher"
-#define LOC_WEAPON_NAME_ROCKET_LAUNCH   "Rocket Launcher"
-#define LOC_WEAPON_NAME_THUNDERBOLT		"Thunderbolt"
+#define LOC_WEAPON_NAME_AXE				"Pick"	// Unused..
+#define LOC_WEAPON_NAME_SHOTGUN			"Scattergun"   // Unused..
+#define LOC_WEAPON_NAME_SUPER_SHOTGUN   "Steam Cannon"
+#define LOC_WEAPON_NAME_NAILGUN			"Spitter"
+#define LOC_WEAPON_NAME_SUPER_NAILGUN   "Bolt Caster"
+#define LOC_WEAPON_NAME_GRENADE_LAUNCH  "Crucible"
+#define LOC_WEAPON_NAME_ROCKET_LAUNCH   "Shot Mortar"
+#define LOC_WEAPON_NAME_THUNDERBOLT		"Tolling Iron"
 
 #endif // __LIBREQUAKE__
 
 #define LOC_WEAPON_AMMO_SHELLS			"shells"
-#define LOC_WEAPON_AMMO_NAILS			"nails"
-#define LOC_WEAPON_AMMO_ROCKETS			"rockets"
-#define LOC_WEAPON_AMMO_CELLS			"cells"
+#define LOC_WEAPON_AMMO_NAILS			"slag"
+#define LOC_WEAPON_AMMO_ROCKETS			"mortar shells"
+#define LOC_WEAPON_AMMO_CELLS			"clappers"
 
 /*==============================================================================
 

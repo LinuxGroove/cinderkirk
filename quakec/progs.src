@@ -26,6 +26,7 @@ cinder/pressure.qc      // Cinderkirk: the Pressure gauge, the dash and vents
 
 items.qc
 weapons.qc
+cinder/arsenal.qc       // Cinderkirk: slots, cycling, Overpressure, cracked stone
 world.qc
 client.qc
 

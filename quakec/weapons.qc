@@ -328,7 +328,7 @@ void() W_FireShotgun =
 		self.currentammo = self.ammo_shells = self.ammo_shells - 1;
 	
 	dir = aim (self, 100000);
-	FireBullets (6, dir, '0.04 0.04 0', "shotgun");
+	FireBullets (8, dir, '0.045 0.04 0', "shotgun");	// Cinderkirk: the Scattergun's eight
 };
 
 
@@ -1121,6 +1121,10 @@ W_ChangeWeapon
 cypress (07 feb 2024) -- added wep parm
 ============
 */
+float(float slot) W_SlotItem;		// cinder/arsenal.qc
+float(float slot) W_SlotHasAmmo;
+void(float step) W_CycleSlots;
+
 void(float wep) W_ChangeWeapon =
 {
 	local	float	it, am, fl;
@@ -1128,56 +1132,10 @@ void(float wep) W_ChangeWeapon =
 	fl = it = self.items;
 	am = 0;
 
-	// cypress (07 feb 2024) -- made a switch statement.
-	switch(wep) {
-		case 1:
-			fl = IT_AXE;
-			break;
-		case 2:
-			fl = IT_SHOTGUN;
-
-			if (self.ammo_shells < 1)
-				am = 1;
-			break;
-		case 3:
-			fl = IT_SUPER_SHOTGUN;
-
-			if (self.ammo_shells < 2)
-				am = 1;
-			break;
-		case 4:
-			fl = IT_NAILGUN;
-
-			if (self.ammo_nails < 1)
-				am = 1;
-			break;
-		case 5:
-			fl = IT_SUPER_NAILGUN;
-
-			if (self.ammo_nails < 2)
-				am = 1;
-			break;
-		case 6:
-			fl = IT_GRENADE_LAUNCHER;
-
-			if (self.ammo_rockets < 1)
-				am = 1;
-			break;
-		case 7:
-			fl = IT_ROCKET_LAUNCHER;
-
-			if (self.ammo_rockets < 1)
-				am = 1;
-			break;
-		case 8:
-			fl = IT_LIGHTNING;
-
-			if (self.ammo_cells < 1)
-				am = 1;
-			break;
-		default: 
-			break;
-	}
+	// Cinderkirk: the slots are in arsenal.qc
+	fl = W_SlotItem (wep);
+	if (fl && !W_SlotHasAmmo (wep))
+		am = 1;
 	// cypress end
 
 	if (!(self.items & fl))
@@ -1241,83 +1199,7 @@ Go to the next weapon with ammo
 */
 void() CycleWeaponCommand =
 {
-	local	float	it, am;
-
-	it = self.items;
-	self.impulse = 0;
-
-	while (1)
-	{
-		am = 0;
-
-		if (self.weapon == IT_LIGHTNING)
-		{
-			self.weapon = IT_AXE;
-		}
-
-		else if (self.weapon == IT_AXE)
-		{
-			self.weapon = IT_SHOTGUN;
-
-			if (self.ammo_shells < 1)
-				am = 1;
-		}
-
-		else if (self.weapon == IT_SHOTGUN)
-		{
-			self.weapon = IT_SUPER_SHOTGUN;
-
-			if (self.ammo_shells < 2)
-				am = 1;
-		}
-
-		else if (self.weapon == IT_SUPER_SHOTGUN)
-		{
-			self.weapon = IT_NAILGUN;
-
-			if (self.ammo_nails < 1)
-				am = 1;
-		}
-
-		else if (self.weapon == IT_NAILGUN)
-		{
-			self.weapon = IT_SUPER_NAILGUN;
-
-			if (self.ammo_nails < 2)
-				am = 1;
-		}
-
-		else if (self.weapon == IT_SUPER_NAILGUN)
-		{
-			self.weapon = IT_GRENADE_LAUNCHER;
-
-			if (self.ammo_rockets < 1)
-				am = 1;
-		}
-
-		else if (self.weapon == IT_GRENADE_LAUNCHER)
-		{
-			self.weapon = IT_ROCKET_LAUNCHER;
-
-			if (self.ammo_rockets < 1)
-				am = 1;
-		}
-
-		else if (self.weapon == IT_ROCKET_LAUNCHER)
-		{
-			self.weapon = IT_LIGHTNING;
-
-			if (self.ammo_cells < 1)
-				am = 1;
-		}
-
-		if ( (self.items & self.weapon) && am == 0)
-		{
-			W_SetCurrentAmmo ();
-			return;
-		}
-	}
-
+	W_CycleSlots (1);	// Cinderkirk: in slot order
 };
 
 
@@ -1330,83 +1212,7 @@ Go to the prev weapon with ammo
 */
 void() CycleWeaponReverseCommand =
 {
-	local float it, am;
-
-	it = self.items;
-	self.impulse = 0;
-
-	while (1)
-	{
-		am = 0;
-
-		if (self.weapon == IT_LIGHTNING)
-		{
-			self.weapon = IT_ROCKET_LAUNCHER;
-
-			if (self.ammo_rockets < 1)
-			am = 1;
-		}
-
-		else if (self.weapon == IT_ROCKET_LAUNCHER)
-		{
-			self.weapon = IT_GRENADE_LAUNCHER;
-
-			if (self.ammo_rockets < 1)
-			am = 1;
-		}
-
-		else if (self.weapon == IT_GRENADE_LAUNCHER)
-		{
-			self.weapon = IT_SUPER_NAILGUN;
-
-			if (self.ammo_nails < 2)
-			am = 1;
-		}
-
-		else if (self.weapon == IT_SUPER_NAILGUN)
-		{
-			self.weapon = IT_NAILGUN;
-
-			if (self.ammo_nails < 1)
-			am = 1;
-		}
-
-		else if (self.weapon == IT_NAILGUN)
-		{
-			self.weapon = IT_SUPER_SHOTGUN;
-
-			if (self.ammo_shells < 2)
-			am = 1;
-		}
-
-		else if (self.weapon == IT_SUPER_SHOTGUN)
-		{
-			self.weapon = IT_SHOTGUN;
-
-			if (self.ammo_shells < 1)
-			am = 1;
-		}
-
-		else if (self.weapon == IT_SHOTGUN)
-		{
-			self.weapon = IT_AXE;
-		}
-
-		else if (self.weapon == IT_AXE)
-		{
-			self.weapon = IT_LIGHTNING;
-
-			if (self.ammo_cells < 1)
-			am = 1;
-		}
-
-		if ( (it & self.weapon) && am == 0)
-		{
-			W_SetCurrentAmmo ();
-			return;
-		}
-	}
-
+	W_CycleSlots (-1);
 };
 
 
@@ -1450,12 +1256,6 @@ void() QuadCheat =
 
 #endif // __QW__
 #endif // __LIBREQUAKE__
-
-// Overpressure, every weapon's alt-fire: filled in with the Cinderkirk weapons.
-void() W_Overpressure =
-{
-	Pressure_Spend (self, PRESSURE_MAX + 1);
-};
 
 void() ImpulseCommands =
 {

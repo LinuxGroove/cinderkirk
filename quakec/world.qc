@@ -362,6 +362,7 @@ void() worldspawn =
 	lightstyle(63, "a");
 
 	Pressure_Init ();
+	Arsenal_Precache ();
 };
 
 void() StartFrame =
