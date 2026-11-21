@@ -4,6 +4,8 @@
 #pragma progs_dat "../build/progs.dat"
 #endif
 
+#define __LIBREQUAKE__   // Cinderkirk: LibreQuake's code paths and strings, never id's (see localized_text.qc)
+
 #includelist
 
 defs.qc

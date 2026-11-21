@@ -197,16 +197,11 @@ var struct
 } intermission_levels[] =
 {
 
-#ifdef __LIBREQUAKE__
-
-	{"maps/lq_e0m7.bsp", 2, LOC_EPILOGUE_0, __NULL__},
-
-#endif // __LIBREQUAKE__
-
-	{"maps/lq_e1m7.bsp", 2, LOC_EPILOGUE_1, LOC_EPILOGUE_1_FREEWARE},
-	{"maps/lq_e2m6.bsp", 2, LOC_EPILOGUE_2, __NULL__},
-	{"maps/lq_e3m6.bsp", 2, LOC_EPILOGUE_3, __NULL__},
-	{"maps/lq_e4m7.bsp", 2, LOC_EPILOGUE_4, __NULL__}
+	// Cinderkirk: the last map of each shaft.
+	{"maps/foundry5.bsp", 2, LOC_EPILOGUE_1, __NULL__},
+	{"maps/cisterns5.bsp", 2, LOC_EPILOGUE_2, __NULL__},
+	{"maps/ossuary5.bsp", 2, LOC_EPILOGUE_3, __NULL__},
+	{"maps/undervein5.bsp", 2, LOC_EPILOGUE_4, __NULL__}
 };
 // --cypress
 
