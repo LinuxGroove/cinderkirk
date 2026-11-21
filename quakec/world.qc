@@ -291,13 +291,13 @@ void() worldspawn =
 	precache_model ("progs/s_bubble.spr");	// drowning bubbles
 	precache_model ("progs/s_explod.spr");	// sprite explosion
 
-	precache_model ("progs/v_axe.mdl");
-	precache_model ("progs/v_shot.mdl");
-	precache_model ("progs/v_nail.mdl");
-	precache_model ("progs/v_rock.mdl");
-	precache_model ("progs/v_shot2.mdl");
-	precache_model ("progs/v_nail2.mdl");
-	precache_model ("progs/v_rock2.mdl");
+	precache_model ("progs/v_pick.md3");
+	precache_model ("progs/v_scattergun.md3");
+	precache_model ("progs/v_spitter.md3");
+	precache_model ("progs/v_crucible.md3");
+	precache_model ("progs/v_steam.md3");
+	precache_model ("progs/v_bolt.md3");
+	precache_model ("progs/v_mortar.md3");
 
 	precache_model ("progs/bolt.mdl");		// for lightning gun
 	precache_model ("progs/bolt2.mdl");		// for lightning gun
@@ -313,7 +313,7 @@ void() worldspawn =
 
 	precache_model ("progs/zom_gib.mdl");
 
-	precache_model ("progs/v_light.mdl");
+	precache_model ("progs/v_toll.md3");
 	
 
 //

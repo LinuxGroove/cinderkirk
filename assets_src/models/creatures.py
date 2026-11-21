@@ -1103,6 +1103,7 @@ def hand_grip(J, s, k):
 
 CREATURES = {"ashen": ashen, "censer": censer_bearer, "deacon": deacon}
 
-for name, make in CREATURES.items():
-    if not ONLY or name in ONLY:
-        make()
+if __name__ == "__main__":  # weapons.py imports the rest
+    for name, make in CREATURES.items():
+        if not ONLY or name in ONLY:
+            make()

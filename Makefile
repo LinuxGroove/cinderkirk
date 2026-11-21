@@ -5,6 +5,7 @@
 #   make map MAP=start   rebuild one level
 #   make textures   bake the world textures in Blender (BLENDER=..., see README)
 #   make models     build the creatures in Blender
+#   make weapons    build the weapons the player holds in Blender
 #   make clean      remove build/ and dist/ (keeps fetched sources in build/src)
 #
 # The game runs from dist/: dist/cinderkirk is the engine, dist/cinder/ the game.
@@ -37,7 +38,7 @@ export LD_LIBRARY_PATH := $(abspath $(PREFIX))/lib
 # build/prefix's headers first (the snap's gnome extension adds older Vulkan ones to CFLAGS).
 export CFLAGS := -I$(abspath $(PREFIX))/include $(CFLAGS)
 
-.PHONY: all engine game deps tools librequake maps map run clean textures models check
+.PHONY: all engine game deps tools librequake maps map run clean textures models weapons check
 
 all: engine game
 
@@ -136,8 +137,14 @@ textures:
 models:
 	$(BLENDER) -b -P assets_src/models/creatures.py -- assets/models $(TEXRES)
 
+# Builds the view models (v_*.md3), one Blender run per weapon: one run for
+# all eight runs out of memory.
+WEAPONS := pick scattergun spitter bolt crucible steam mortar toll
+weapons:
+	for w in $(WEAPONS); do $(BLENDER) -b -P assets_src/models/weapons.py -- assets/models $(TEXRES) only=$$w || exit 1; done
+
 check:
-	$(PYTHON) -m py_compile tools/*.py maps_src/*.py
+	$(PYTHON) -m py_compile tools/*.py maps_src/*.py assets_src/models/*.py
 	for m in $(MAPS); do grep -q "LEAK" $(BUILD)/maps/$$m.log && { echo "$$m leaks"; exit 1; } || true; done
 
 clean:

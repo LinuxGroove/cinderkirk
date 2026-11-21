@@ -935,48 +935,48 @@ void() W_SetCurrentAmmo =
 	if (self.weapon == IT_AXE)
 	{
 		self.currentammo = 0;
-		self.weaponmodel = "progs/v_axe.mdl";
+		self.weaponmodel = "progs/v_pick.md3";
 	}
 	else if (self.weapon == IT_SHOTGUN)
 	{
 		self.currentammo = self.ammo_shells;
-		self.weaponmodel = "progs/v_shot.mdl";
+		self.weaponmodel = "progs/v_scattergun.md3";
 		self.items = self.items | IT_SHELLS;
 	}
 	else if (self.weapon == IT_SUPER_SHOTGUN)
 	{
 		self.currentammo = self.ammo_shells;
-		self.weaponmodel = "progs/v_shot2.mdl";
+		self.weaponmodel = "progs/v_steam.md3";
 		self.items = self.items | IT_SHELLS;
 	}
 	else if (self.weapon == IT_NAILGUN)
 	{
 		self.currentammo = self.ammo_nails;
-		self.weaponmodel = "progs/v_nail.mdl";
+		self.weaponmodel = "progs/v_spitter.md3";
 		self.items = self.items | IT_NAILS;
 	}
 	else if (self.weapon == IT_SUPER_NAILGUN)
 	{
 		self.currentammo = self.ammo_nails;
-		self.weaponmodel = "progs/v_nail2.mdl";
+		self.weaponmodel = "progs/v_bolt.md3";
 		self.items = self.items | IT_NAILS;
 	}
 	else if (self.weapon == IT_GRENADE_LAUNCHER)
 	{
 		self.currentammo = self.ammo_rockets;
-		self.weaponmodel = "progs/v_rock.mdl";
+		self.weaponmodel = "progs/v_crucible.md3";
 		self.items = self.items | IT_ROCKETS;
 	}
 	else if (self.weapon == IT_ROCKET_LAUNCHER)
 	{
 		self.currentammo = self.ammo_rockets;
-		self.weaponmodel = "progs/v_rock2.mdl";
+		self.weaponmodel = "progs/v_mortar.md3";
 		self.items = self.items | IT_ROCKETS;
 	}
 	else if (self.weapon == IT_LIGHTNING)
 	{
 		self.currentammo = self.ammo_cells;
-		self.weaponmodel = "progs/v_light.mdl";
+		self.weaponmodel = "progs/v_toll.md3";
 		self.items = self.items | IT_CELLS;
 	}
 	else
