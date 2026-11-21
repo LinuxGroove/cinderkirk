@@ -125,8 +125,10 @@ def build():
 
     for x, y, z in ((-500, 0, 500), (500, 0, 600), (0, 600, 450), (0, -600, 550)):
         L.add("monster_ash_wraith", (x, y, z), angle=270)
-    L.add("monster_censer", (-800, 800, DAIS + 24), angle=270)
-    L.add("monster_censer", (800, -800, DAIS + 24), angle=90)
+    # Two censer-bearers guard brakes, at the daises' outer corners: one on a
+    # rod stuck in it and jammed the brake's button, so the game couldn't end.
+    L.add("monster_censer", (-880, 880, DAIS + 24), angle=315)
+    L.add("monster_censer", (880, -880, DAIS + 24), angle=135)
 
     L.add("item_health", (-120, -R + 80, 0), spawnflags=2)
     L.add("item_armorInv", (120, -R + 80, 0))
