@@ -85,18 +85,19 @@ def build():
     L.add("item_armor1", (720, 300, -64))
     L.add("item_health", (1200, -300, -64))
     # Who's waiting.
-    # The cult, its dead and a pack of slag hounds.
-    L.add("monster_censer", (800, 120, -40), angle=180)
-    L.add("monster_censer", (800, -160, -40), angle=180)
-    L.add("monster_ashen", (860, 260, -40), angle=180)
-    L.add("monster_ashen", (860, -280, -40), angle=180)
-    L.add("monster_slag_hound", (1250, 0, -40), angle=180)
-    L.add("monster_slag_hound", (1300, 200, -40), angle=180)
-    L.add("monster_slag_hound", (1300, -200, -40), angle=180)
-    L.add("monster_deacon", (1390, 0, -40), angle=180)
-    L.add("monster_censer", (1450, -250, -40), angle=180)
-    L.add("monster_ashen", (1420, 120, -40), angle=180)
-    L.add("monster_ashen", (1420, -120, -40), angle=180)
+    # The cult, its dead and a pack of slag hounds, all facing the plinth: they
+    # notice you on the floor, not from the gatehouse.
+    L.add("monster_censer", (800, 120, -40), angle=0)
+    L.add("monster_censer", (800, -160, -40), angle=0)
+    L.add("monster_ashen", (860, 260, -40), angle=0)
+    L.add("monster_ashen", (860, -280, -40), angle=0)
+    L.add("monster_slag_hound", (1250, 0, -40), angle=0)
+    L.add("monster_slag_hound", (1300, 200, -40), angle=0)
+    L.add("monster_slag_hound", (1300, -200, -40), angle=0)
+    L.add("monster_deacon", (1390, 0, -40), angle=0)
+    L.add("monster_censer", (1450, -250, -40), angle=0)
+    L.add("monster_ashen", (1420, 120, -40), angle=0)
+    L.add("monster_ashen", (1420, -120, -40), angle=0)
     # Light: the slag, braziers along the walls, cold light from high up.
     L.add("light", (1024, 0, -100), light=200, _color=SLAG, _surface="*slag1",
           _surface_offset=12)
@@ -105,6 +106,8 @@ def build():
         L.light((x, 300, 64), 260, WARM)
     for x in (700, 1024, 1350):
         L.light((x, 0, 340), 220, COLD, wait=2)
+    for x in (820, 1240):                     # lamps hung over the middle of the floor
+        L.light((x, 0, 128), 300, WARM)
     L.light((1488, 0, 48), 200, (0.85, 0.85, 1.0))
     for y in (-110, 110):
         L.light((1540, y, 40), 220, WARM)
