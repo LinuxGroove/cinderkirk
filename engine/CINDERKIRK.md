@@ -34,6 +34,7 @@ This folder is [vkQuake](https://github.com/Novum/vkQuake) at tag **1.37.0**, wi
 | `Quake/sv_user.c`, `Quake/progs.h` | Bots (the engine's botclients) are steered by the game code's `.movement` vector (forward, side, up), as DarkPlaces' bots are. **Upstream** |
 | `Quake/host.c`, `Quake/server.h` | `bots`: how many bots the game code keeps in a Pit fight |
 | `Quake/menu.c` | Host a game lists Cinderkirk's maps (the Pit fight arenas, then the Story by shaft), the game types are Pit fight and Co-op Story, the skills are the lift's (Apprentice to Founder's), and there's a Bots setting; none of id's map names are left |
+| `Quake/records.c`, `Quake/sbar.c`, `Quake/cl_parse.c` | Each Story map's best time, kills and secrets per skill, kept in `records.txt` in the user folder; the end of a map says whether it beat the best, and `_shaft_marks` (read only) tells the game which shafts have every map finished with all its secrets |
 | `Misc/vq_pak/` | The built-in pak keeps only the crosshairs: vkQuake's console background (which carries id's logo), menus and fixes for id's maps are gone, so Cinderkirk's own are used |
 | `meson_options.txt` | User folders are on by default |
 

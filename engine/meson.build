@@ -282,6 +282,7 @@ srcs = [
     'Quake/hud_svg.c',
     'Quake/wheel.c',
     'Quake/glyph.c',
+    'Quake/records.c',
     'Quake/rumble.c',
     'Quake/snd_codec.c',
     'Quake/snd_dma.c',

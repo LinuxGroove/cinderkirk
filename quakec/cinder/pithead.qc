@@ -39,6 +39,23 @@ void() target_skill =
 	self.use = target_skill_use;
 };
 
+/*QUAKED func_lift_mark (0 .5 .8) ? FOUNDRY CISTERNS OSSUARY UNDERVEIN
+The mark over a shaft's cage: shown once every map down that shaft has been
+finished with all its secrets, at any skill. The engine keeps those finishes
+(records.txt) and says which shafts have earned it in _shaft_marks.
+*/
+void() func_lift_mark =
+{
+	if (deathmatch || !(cvar ("_shaft_marks") & self.spawnflags & 15))
+	{
+		remove (self);
+		return;
+	}
+	self.solid = SOLID_BSP;
+	self.movetype = MOVETYPE_PUSH;
+	setmodel (self, self.model);
+};
+
 /*QUAKED misc_seal_trophy (0 .5 .8) (-16 -16 -24) (16 16 32) FOUNDRY CISTERNS OSSUARY UNDERVEIN
 A Seal on the Pithead's shelf: shown, turning slowly, once its shaft is
 beaten (the same spawnflag as the shaft's item_sigil), and gone until then.

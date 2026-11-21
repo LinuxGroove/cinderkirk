@@ -93,6 +93,16 @@ def build():
         else:
             sx0, sx1 = 896, 1024
         L.brush_entity("trigger_multiple", [Box(sx0, sy0, 0, sx1, sy1, 128, "trigger")], message=sign, wait=4)
+        # The mark over the cage, shown once every map down it is finished with every secret.
+        mx, my = (ox0 + ox1) // 2, (oy0 + oy1) // 2
+        if oy0 >= 512:
+            box = Box(mx - 32, 500, 176, mx + 32, 512, 240, "kirk_glyph1")
+        elif oy1 <= -512:
+            box = Box(mx - 32, -512, 176, mx + 32, -500, 240, "kirk_glyph1")
+        else:
+            box = Box(1012, my - 32, 176, 1024, my + 32, 240, "kirk_glyph1")
+        flag = {"foundry1": 1, "cisterns1": 2, "kilns1": 4, "vein1": 8}[first]
+        L.brush_entity("func_lift_mark", [box], spawnflags=flag)
 
     # The Throat: a pit in the middle of the floor, glowing, under a grate
     # that only lifts once all four shafts are beaten.

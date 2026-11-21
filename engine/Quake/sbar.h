@@ -29,6 +29,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern int sb_lines; // scan lines to draw
 
 void Sbar_Init (void);
+
+// records.c (Cinderkirk): best finishes per map and skill, and the shafts' marks
+void		Records_Init (void);
+void		Records_Finish (void);
+const char *Records_Line (void);
 void Sbar_LoadPics (void);
 
 void Sbar_Draw (cb_context_t *cbx);

@@ -289,6 +289,7 @@ void Sbar_Init (void)
 		extern cvar_t hud_scale;
 		Cvar_RegisterVariable (&hud_scale); // Cinderkirk
 		Wheel_Init ();
+		Records_Init ();
 		Glyph_Init ();
 	}
 
@@ -1670,6 +1671,11 @@ void Sbar_IntermissionOverlay (cb_context_t *cbx)
 	Sbar_IntermissionText (cbx, 160 + total / 2 - ltime, 64, time, 0);
 	Sbar_IntermissionText (cbx, 160 + total / 2 - lsecrets, 104, secrets, 0);
 	Sbar_IntermissionText (cbx, 160 + total / 2 - lmonsters, 144, monsters, 0);
+
+	// Cinderkirk: the best finish at this skill, or that this one beat it.
+	const char *line = Records_Line ();
+	if (line)
+		Draw_String (cbx, 160 - (int)strlen (line) * 4, 176, line);
 }
 
 /*

@@ -2054,6 +2054,7 @@ void CL_ParseServerMessage (void)
 		case svc_intermission:
 			cl.intermission = 1;
 			cl.completed_time = cl.time;
+			Records_Finish (); // Cinderkirk: keep the map's best finish
 			vid.recalc_refdef = true; // go to full screen
 			V_RestoreAngles ();
 			break;
