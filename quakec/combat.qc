@@ -81,6 +81,8 @@ Killed
 ============*/
 void(entity targ, entity attacker, float take) Pressure_Damage;
 
+.float ash_raised;	// Cinderkirk: an Ashen a Deacon raised, already counted as a kill
+
 void(entity targ, entity attacker) Killed =
 {
 	local entity oself;
@@ -101,8 +103,8 @@ void(entity targ, entity attacker) Killed =
 
 	self.enemy = attacker;
 
-	// bump the monster counter
-	if (self.flags & FL_MONSTER)
+	// bump the monster counter (Cinderkirk: once, however often an Ashen is raised)
+	if ((self.flags & FL_MONSTER) && !self.ash_raised)
 	{
 		killed_monsters = killed_monsters + 1;
 		WriteByte (MSG_ALL, SVC_KILLEDMONSTER);

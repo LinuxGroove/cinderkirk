@@ -4,6 +4,7 @@
 #   make run        play it from dist/
 #   make map MAP=start   rebuild one level
 #   make textures   bake the world textures in Blender (BLENDER=..., see README)
+#   make models     build the creatures in Blender
 #   make clean      remove build/ and dist/ (keeps fetched sources in build/src)
 #
 # The game runs from dist/: dist/cinderkirk is the engine, dist/cinder/ the game.
@@ -27,6 +28,7 @@ MAPS     := $(patsubst maps_src/%.py,%,$(wildcard maps_src/*.py))
 BSPS     := $(patsubst %,$(BUILD)/maps/%.bsp,$(MAPS))
 QC       := $(wildcard quakec/*.qc quakec/*/*.qc) quakec/progs.src
 TEXTURES := $(filter-out %_norm.png %_gloss.png %_rough.png,$(wildcard assets/textures/*.png))
+MODELS   := $(wildcard assets/models/*.md3 assets/models/*.png)
 
 export PATH := $(abspath $(PREFIX))/bin:$(PATH)
 export PKG_CONFIG_PATH := $(abspath $(PREFIX))/lib/pkgconfig:$(abspath $(PREFIX))/share/pkgconfig
@@ -96,7 +98,7 @@ $(BUILD)/menu/.done: tools/menu_art.py assets/textures/bronze1.png assets/textur
 
 # pak0.pak holds everything the game loads: LibreQuake's stand-ins first,
 # then Cinderkirk's own files over them.
-$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/sound/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py
+$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/sound/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) $(MODELS) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py
 	rm -rf $(STAGE)
 	mkdir -p $(STAGE)/maps $(STAGE)/textures $(STAGE)/gfx
 	cp -r $(LQ)/gfx.wad $(LQ)/gfx $(LQ)/progs $(LQ)/sound $(LQ)/maps $(STAGE)/
@@ -105,6 +107,7 @@ $(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/sound/.done $(
 		[ ! -f $(BUILD)/maps/$$m.lit ] || cp $(BUILD)/maps/$$m.lit $(STAGE)/maps/; done
 	cp -r $(BUILD)/sound/cinder $(STAGE)/sound/
 	cp $(TEXTURES) $(STAGE)/textures/
+	cp $(MODELS) $(STAGE)/progs/
 	cp $(BUILD)/menu/gfx/* gfx/splash.png $(STAGE)/gfx/
 	cp cinder/default.cfg cinder/quake.rc $(STAGE)/
 	mkdir -p $(DIST)/cinder
@@ -121,8 +124,9 @@ textures:
 	$(PYTHON) assets_src/materials/glyphs.py assets_src/materials/glyph_mask.png
 	$(BLENDER) -b -P assets_src/materials/materials.py -- assets/textures $(TEXRES)
 
+# Builds, rigs, animates and skins the creatures to assets/models at TEXRES.
 models:
-	$(BLENDER) -b -P assets_src/models/models.py -- assets/models
+	$(BLENDER) -b -P assets_src/models/creatures.py -- assets/models $(TEXRES)
 
 check:
 	$(PYTHON) -m py_compile tools/*.py maps_src/*.py

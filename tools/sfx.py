@@ -67,6 +67,62 @@ def clank(seconds, freqs, seed):
     return out
 
 
+def groan(seconds, seed, f0, f1, rasp=0.6):
+    """A dry throat: a buzzing source swept from f0 to f1 Hz, through two
+    vowel-ish resonances, with breath noise and a slow shake."""
+    tt = t(seconds)
+    rng = np.random.default_rng(seed)
+    f = np.geomspace(f0, f1, len(tt)) * (1 + 0.03 * np.sin(2 * np.pi * 5.5 * tt + rng.uniform(0, 6)))
+    ph = np.cumsum(f) / RATE
+    buzz = 2 * (ph % 1.0) - 1
+    breath = noise(seconds, seed + 100)
+    src = buzz * (1 - rasp) + breath * rasp * (0.6 + 0.4 * np.sign(np.sin(2 * np.pi * ph)))
+    x = highpass(lowpass(src, 900), 180) + 0.5 * highpass(lowpass(src, 2400), 1400)
+    return x * (0.8 + 0.2 * np.sin(2 * np.pi * 3.1 * tt))
+
+
+def crackle(seconds, seed, density, decay):
+    """Ash and embers giving way: sparse clicks, thinning out."""
+    rng = np.random.default_rng(seed)
+    n = len(t(seconds))
+    x = np.zeros(n)
+    hits = rng.random(n) < density * np.exp(-np.arange(n) / RATE * decay)
+    x[hits] = rng.standard_normal(hits.sum()) * rng.uniform(0.3, 1.0, hits.sum())
+    return highpass(lowpass(x, 5000), 600)
+
+
+def bell(seconds, f, seed, decay=1.5):
+    """A cast bell: a hum, a prime, a minor third, a fifth and an octave, each
+    ringing down at its own rate, with the strike's click."""
+    tt = t(seconds)
+    rng = np.random.default_rng(seed)
+    out = np.zeros_like(tt)
+    for ratio, amp, d in ((0.5, 0.6, 0.6), (1.0, 1.0, 1.0), (1.19, 0.5, 1.4), (1.5, 0.35, 1.8), (2.0, 0.4, 2.2),
+                          (2.51, 0.2, 3.0), (2.98, 0.15, 3.6)):
+        fr = f * ratio * (1 + rng.uniform(-0.003, 0.003))
+        out += amp * np.sin(2 * np.pi * fr * tt + rng.uniform(0, 6.28)) * np.exp(-tt * decay * d)
+    click = highpass(noise(seconds, seed + 1), 2000) * np.exp(-tt * 200) * 0.4
+    return out + click
+
+
+def chant(seconds, seed, f0, voices=3):
+    """Low voices on one note, a little apart: the cult's drone."""
+    out = 0
+    for v in range(voices):
+        out = out + groan(seconds, seed + v, f0 * (1 + 0.012 * v), f0 * (1 + 0.012 * v) * 0.98, 0.25)
+    return out
+
+
+def lay(*parts):
+    """Mixes (sound, start in seconds) pairs into one, as long as it needs."""
+    n = max(int(at * RATE) + len(x) for x, at in parts)
+    out = np.zeros(n)
+    for x, at in parts:
+        i = int(at * RATE)
+        out[i:i + len(x)] += x
+    return out
+
+
 def normalise(x, peak=0.8):
     return x / (np.abs(x).max() + 1e-9) * peak
 
@@ -99,6 +155,40 @@ def sounds():
     loop = x[:n].copy()
     loop[:fade] = x[:fade] * ramp + x[n:n + fade] * (1 - ramp)
     yield "vent_loop", normalise(loop, 0.5)
+
+    # The Ashen.
+    yield "ashen_idle", normalise(groan(1.4, 20, 85, 70, 0.7) * envelope(len(t(1.4)), 0.3, 3), 0.6)
+    yield "ashen_sight", normalise(groan(1.0, 21, 90, 150, 0.5) * envelope(len(t(1.0)), 0.08, 3, hold=0.4))
+    yield "ashen_pain", normalise(groan(0.35, 22, 140, 95, 0.4) * envelope(len(t(0.35)), 0.01, 6))
+    yield "ashen_death", normalise(lay((groan(0.5, 24, 120, 60, 0.6) * envelope(len(t(0.5)), 0.01, 4) * 0.7, 0),
+                                       (crackle(1.1, 25, 0.004, 2.5), 0.3), (steam(1.4, 23, 300, 2500, 0.02, 3) * 0.4, 0)))
+    tt = t(0.8)
+    thump = np.sin(2 * np.pi * np.cumsum(np.geomspace(120, 40, len(tt))) / RATE) * np.exp(-tt * 9)
+    yield "ashen_burst", normalise(thump + crackle(0.8, 26, 0.02, 4) + 0.5 * steam(0.8, 27, 400, 5000, 0.002, 6))
+    rise = lay((steam(1.6, 28, 2500, 300, 0.6, 1, hold=0.5) * 0.4, 0), (crackle(1.6, 29, 0.003, -0.8), 0),
+               (groan(0.7, 30, 60, 95, 0.6) * envelope(len(t(0.7)), 0.2, 3), 0.9))
+    yield "ashen_rise", normalise(rise)
+    yield "ashen_swipe", normalise(steam(0.35, 31, 700, 3500, 0.12, 8), 0.5)
+    tt = t(0.3)
+    hit = np.sin(2 * np.pi * 75 * tt) * np.exp(-tt * 18) + 0.5 * highpass(noise(0.3, 32), 800) * np.exp(-tt * 40)
+    yield "ashen_hit", normalise(hit)
+
+    # The Censer-bearers and Deacons.
+    n = lambda d: envelope(len(t(d)), 0.15, 2.5, hold=d * 0.4)
+    yield "censer_sight", normalise(chant(1.2, 40, 110) * n(1.2))
+    yield "censer_pain", normalise(groan(0.4, 41, 160, 120, 0.4) * envelope(len(t(0.4)), 0.01, 6))
+    yield "censer_death", normalise(groan(0.9, 42, 150, 70, 0.5) * envelope(len(t(0.9)), 0.01, 3))
+    tt = t(0.5)
+    rattle = crackle(0.5, 43, 0.01, 6) * 0.6
+    yield "censer_swing", normalise(steam(0.5, 44, 500, 2500, 0.15, 5) + rattle + 0.3 * clank(0.5, [1300, 2210], 45))
+    yield "coal_throw", normalise(steam(0.4, 46, 900, 3000, 0.05, 7) + crackle(0.4, 47, 0.008, 5), 0.6)
+    yield "coal_hit", normalise(lay((steam(0.6, 48, 2000, 8000, 0.002, 6), 0), (crackle(0.6, 49, 0.02, 6), 0)), 0.7)
+    yield "deacon_sight", normalise(lay((chant(1.6, 50, 73, 4) * n(1.6), 0), (bell(1.6, 620, 51, 2.0) * 0.5, 0.1)))
+    yield "deacon_pain", normalise(groan(0.5, 52, 95, 80, 0.4) * envelope(len(t(0.5)), 0.01, 5))
+    yield "deacon_death", normalise(lay((groan(1.4, 53, 90, 45, 0.5) * envelope(len(t(1.4)), 0.01, 2.5), 0),
+                                        (bell(1.4, 600, 54, 3.0) * 0.4, 0.5)))
+    yield "deacon_bell", normalise(lay(*[(bell(1.2, 640, 55 + i, 1.6) * (1 - 0.15 * i), 0.22 * i) for i in range(4)]))
+    yield "deacon_throw", normalise(steam(0.6, 60, 300, 2000, 0.2, 4) + crackle(0.6, 61, 0.01, 4) * 0.6)
 
 
 def main():

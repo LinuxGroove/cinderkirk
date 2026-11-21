@@ -63,6 +63,9 @@ monsters/rotfish.qc		    // registered
 monsters/vore.qc			// registered
 monsters/enforcer.qc		// registered
 monsters/shub.qc			// registered
+
+cinder/ashen.qc         // Cinderkirk: the Ashen
+cinder/cult.qc          // Cinderkirk: Censer-bearers and Deacons
 #endif
 
 #endlist
