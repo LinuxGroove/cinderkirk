@@ -603,6 +603,13 @@ def build(c, anims, effects=None):
     os.makedirs(OUT, exist_ok=True)
     save_png(os.path.join(OUT, c.name + ".png"), albedo)
     save_png(os.path.join(OUT, c.name + "_luma.png"), glow)
+    team = getattr(c, "team", None)
+    if team:
+        # The player's colours: red where the shirt colour goes, green the
+        # trousers' (the engine tints each player's copy of the skin by it).
+        for name, g in sources.items():
+            g.src["team"] = tuple(team.get(name, (0.0, 0.0, 0.0)))
+        save_png(os.path.join(OUT, c.name + "_colors.png"), bake(obj, "team", sources))
 
     # Every frame, posed, turned to face +X and scaled to Quake units.
     turn = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]], dtype=float)
@@ -611,7 +618,13 @@ def build(c, anims, effects=None):
     for fname, pose, effect in frames_of(anims):
         m = bone_matrices(c, pose)
         p = np.einsum("vb,bij,vj->vi", w, m[:, :3, :], restp)
-        if effect:
+        if effect and effect[0].startswith("hide:"):
+            # A part this animation doesn't show (the stoker's gun while he
+            # swings the pick) folds to a point at its bone, out of sight.
+            for bone in effect[0][5:].split(","):
+                hid = w[:, c.index[bone]] > 0.5
+                p[hid] = p[hid].mean(axis=0)
+        elif effect:
             p = effects[effect[0]](p, rest, effect[1])
         p = (p @ turn.T) * UNITS
         p[:, 2] += c.hull_bottom

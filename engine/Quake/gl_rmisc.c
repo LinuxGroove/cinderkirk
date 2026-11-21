@@ -4813,6 +4813,95 @@ void R_FreeDescriptorSet (VkDescriptorSet desc_set, vulkan_desc_set_layout_t *la
 R_TranslatePlayerSkin -- johnfitz -- rewritten.  also, only handles new colors, not new skins
 ===============
 */
+/*
+Cinderkirk: the stoker's skin is a PNG, which can't be recoloured through the
+palette, so it comes with a mask, <skin>_colors.png: red where the shirt (top)
+colour goes, green the trousers (bottom). Each player's copy is tinted from it.
+*/
+static struct
+{
+	gltexture_t *source;	   // the skin the base and mask were loaded for
+	byte		*base, *mask;  // RGBA
+	int			 width, height;
+} player_tint;
+static byte *player_tinted[MAX_SCOREBOARD];
+static int	 player_tinted_size[MAX_SCOREBOARD];
+
+static qboolean R_LoadPlayerTint (gltexture_t *skin)
+{
+	char		   stem[MAX_QPATH], name[MAX_QPATH];
+	int			   w, h, mw, mh;
+	enum srcformat fmt, mfmt;
+
+	if (player_tint.source == skin)
+		return player_tint.base != NULL;
+	if (player_tint.base)
+		Mem_Free (player_tint.base);
+	if (player_tint.mask)
+		Mem_Free (player_tint.mask);
+	memset (&player_tint, 0, sizeof (player_tint));
+	player_tint.source = skin;
+	COM_StripExtension (skin->source_file, stem, sizeof (stem));
+	q_snprintf (name, sizeof (name), "%s_colors", stem);
+	byte *mask = Image_LoadImage (name, &mw, &mh, &mfmt, 0);
+	if (!mask)
+		return false;
+	byte *base = Image_LoadImage (stem, &w, &h, &fmt, 0);
+	if (!base || fmt != SRC_RGBA || mfmt != SRC_RGBA || w != mw || h != mh)
+	{
+		Con_Warning ("%s doesn't match its skin\n", name);
+		Mem_Free (mask);
+		if (base)
+			Mem_Free (base);
+		return false;
+	}
+	player_tint.base = base;
+	player_tint.mask = mask;
+	player_tint.width = w;
+	player_tint.height = h;
+	return true;
+}
+
+static byte *R_TintColour (int colour)
+{
+	// The middle of the colour's range, a little to the bright side.
+	return (byte *)&d_8to24table[colour * 16 + (colour < 8 ? 10 : 5)];
+}
+
+static void R_TintPlayerSkin (int playernum, int top, int bottom)
+{
+	const int n = player_tint.width * player_tint.height;
+	if (player_tinted[playernum] && player_tinted_size[playernum] != n)
+	{
+		Mem_Free (player_tinted[playernum]);
+		player_tinted[playernum] = NULL;
+	}
+	if (!player_tinted[playernum])
+	{
+		player_tinted[playernum] = Mem_Alloc (n * 4);
+		player_tinted_size[playernum] = n;
+	}
+	byte	   *out = player_tinted[playernum];
+	const byte *tc = R_TintColour (top), *bc = R_TintColour (bottom);
+	for (int i = 0; i < n; i++)
+	{
+		const byte *b = player_tint.base + i * 4, *m = player_tint.mask + i * 4;
+		const float mt = m[0] / 255.0f, mb = m[1] / 255.0f;
+		const float lum = (0.3f * b[0] + 0.59f * b[1] + 0.11f * b[2]) / 255.0f * 2.4f;
+		for (int c = 0; c < 3; c++)
+		{
+			const float v = b[c] * (1.0f - mt - mb) + lum * tc[c] * mt + lum * bc[c] * mb;
+			out[i * 4 + c] = (byte)CLAMP (0.0f, v, 255.0f);
+		}
+		out[i * 4 + 3] = 255;
+	}
+	char name[64];
+	q_snprintf (name, sizeof (name), "player_%i", playernum);
+	playertextures[playernum] = TexMgr_LoadImage (
+		cl.entities[1 + playernum].model, name, player_tint.width, player_tint.height, SRC_RGBA, out, "", (src_offset_t)out,
+		TEXPREF_PAD | TEXPREF_OVERWRITE | TEXPREF_MIPMAP);
+}
+
 void R_TranslatePlayerSkin (int playernum)
 {
 	int top, bottom;
@@ -4821,8 +4910,12 @@ void R_TranslatePlayerSkin (int playernum)
 	bottom = cl.scores[playernum].colors & 15;
 
 	if (!gl_nocolors.value)
-		if (playertextures[playernum])
+	{
+		if (player_tinted[playernum] && player_tint.base)
+			R_TintPlayerSkin (playernum, top, bottom);
+		else if (playertextures[playernum])
 			TexMgr_ReloadImage (playertextures[playernum], top, bottom);
+	}
 }
 
 /*
@@ -4858,13 +4951,19 @@ void R_TranslateNewPlayerSkin (int playernum)
 	pixels = (byte *)paliashdr->texels[skinnum];
 	if (!pixels)
 	{
+		playertextures[playernum] = NULL;
+		gltexture_t *skin = paliashdr->gltextures[skinnum][0];
+		if (skin && R_LoadPlayerTint (skin))
+		{
+			R_TintPlayerSkin (playernum, (cl.scores[playernum].colors & 0xf0) >> 4, cl.scores[playernum].colors & 15);
+			return;
+		}
 		static qboolean warned = false;
 		if (!warned)
 		{
 			warned = true;
 			Con_Warning ("can't recolor non-indexed player skin\n");
 		}
-		playertextures[playernum] = NULL;
 		return;
 	}
 
@@ -4890,6 +4989,14 @@ void R_NewGame (void)
 	// clear playertexture pointers (the textures themselves were freed by texmgr_newgame)
 	for (i = 0; i < MAX_SCOREBOARD; i++)
 		playertextures[i] = NULL;
+	// Cinderkirk: the tinted copies went with the textures; load the mask afresh.
+	player_tint.source = NULL;
+	for (i = 0; i < MAX_SCOREBOARD; i++)
+	{
+		if (player_tinted[i])
+			Mem_Free (player_tinted[i]);
+		player_tinted[i] = NULL;
+	}
 }
 
 /*
