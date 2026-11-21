@@ -188,6 +188,22 @@ def sounds():
     yield "deacon_death", normalise(lay((groan(1.4, 53, 90, 45, 0.5) * envelope(len(t(1.4)), 0.01, 2.5), 0),
                                         (bell(1.4, 600, 54, 3.0) * 0.4, 0.5)))
     yield "deacon_bell", normalise(lay(*[(bell(1.2, 640, 55 + i, 1.6) * (1 - 0.15 * i), 0.22 * i) for i in range(4)]))
+    # Slag hounds: growls through a hot throat, snapping jaws of stone.
+    yield "hound_idle", normalise(groan(0.9, 70, 70, 62, 0.75) * envelope(len(t(0.9)), 0.1, 4), 0.5)
+    snarl = groan(0.8, 71, 120, 210, 0.65) * (0.7 + 0.3 * np.sign(np.sin(2 * np.pi * 23 * t(0.8))))
+    yield "hound_sight", normalise(lay((snarl * envelope(len(t(0.8)), 0.04, 3, hold=0.3), 0),
+                                       (steam(0.7, 72, 1500, 6000, 0.02, 5) * 0.35, 0.1)))
+    tt = t(0.22)
+    snap = clank(0.22, [520, 1170, 2290], 73) * 0.7 + highpass(noise(0.22, 74), 1500) * np.exp(-tt * 60)
+    yield "hound_bite", normalise(snap)
+    yield "hound_leap", normalise(lay((groan(0.45, 75, 160, 260, 0.6) * envelope(len(t(0.45)), 0.02, 6), 0),
+                                      (steam(0.5, 76, 600, 4000, 0.05, 6) * 0.5, 0)))
+    yield "hound_pain", normalise(groan(0.3, 77, 420, 260, 0.35) * envelope(len(t(0.3)), 0.005, 9))
+    yield "hound_death", normalise(lay((groan(0.7, 78, 300, 90, 0.5) * envelope(len(t(0.7)), 0.01, 4), 0),
+                                       (crackle(1.2, 79, 0.006, 2.0), 0.4), (steam(1.2, 80, 2500, 300, 0.1, 2) * 0.4, 0.3)))
+    tt = t(0.7)
+    burst = np.sin(2 * np.pi * np.cumsum(np.geomspace(140, 45, len(tt))) / RATE) * np.exp(-tt * 10)
+    yield "hound_burst", normalise(burst + crackle(0.7, 81, 0.03, 5) + 0.6 * steam(0.7, 82, 800, 7000, 0.002, 6))
     yield "deacon_throw", normalise(steam(0.6, 60, 300, 2000, 0.2, 4) + crackle(0.6, 61, 0.01, 4) * 0.6)
 
 

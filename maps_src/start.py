@@ -79,13 +79,14 @@ def build():
     L.add("item_armor1", (720, 300, -64))
     L.add("item_health", (1200, -300, -64))
     # Who's waiting.
-    # The cult and its dead; dogs stand in for slag hounds.
+    # The cult, its dead and a pack of slag hounds.
     L.add("monster_censer", (800, 120, -40), angle=180)
     L.add("monster_censer", (800, -160, -40), angle=180)
     L.add("monster_ashen", (860, 260, -40), angle=180)
     L.add("monster_ashen", (860, -280, -40), angle=180)
-    L.add("monster_dog", (1250, 0, -40), angle=180)
-    L.add("monster_dog", (1300, 200, -40), angle=180)
+    L.add("monster_slag_hound", (1250, 0, -40), angle=180)
+    L.add("monster_slag_hound", (1300, 200, -40), angle=180)
+    L.add("monster_slag_hound", (1300, -200, -40), angle=180)
     L.add("monster_deacon", (1390, 0, -40), angle=180)
     L.add("monster_censer", (1450, -250, -40), angle=180)
     L.add("monster_ashen", (1420, 120, -40), angle=180)
@@ -161,7 +162,8 @@ def build():
     L.add("item_health", (1240, -520, 128))
     L.add("monster_censer", (1100, -620, 152), angle=180)
     L.add("monster_censer", (1300, -520, 152), angle=180)
-    L.add("monster_dog", (900, -640, 152), angle=180)
+    L.add("monster_slag_hound", (900, -640, 152), angle=180)
+    L.add("monster_slag_hound", (960, -580, 152), angle=180)
     L.add("monster_deacon", (1250, -700, 152), angle=180)
     L.add("light", (1424, -656, 200), light=260, _color=SLAG)
     for x in (760, 1080):

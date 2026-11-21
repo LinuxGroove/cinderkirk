@@ -46,12 +46,6 @@ def shade(name):
         g = C.Nodes(bpy.data.materials[name])
         n = g.noise(40.0, 3.0, 0.5, seed=11.0)
         return g, g.ramp(n, [(0.3, (0.55, 0.5, 0.38)), (0.7, (0.7, 0.64, 0.5))]), None
-    if name == "slag":
-        g = C.Nodes(bpy.data.materials[name])
-        n = g.noise(60.0, 5.0, 0.6, seed=13.0)
-        col = g.ramp(n, [(0.35, (0.5, 0.12, 0.02)), (0.65, (0.9, 0.45, 0.1))])
-        glow = g.ramp(n, [(0.3, (0.7, 0.18, 0.02)), (0.7, (1.0, 0.7, 0.3))])
-        return g, col, glow
     if name == "pilot":
         return C.Nodes(bpy.data.materials[name]), (0.6, 0.3, 0.1), (1.0, 0.5, 0.15)
     return _shade(name)

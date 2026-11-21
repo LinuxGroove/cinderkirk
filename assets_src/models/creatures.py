@@ -324,6 +324,22 @@ def shade(name):
         col = g.ramp(n, [(0.35, (0.25, 0.06, 0.01)), (0.65, (0.6, 0.22, 0.04))])
         glow = g.ramp(n, [(0.3, (0.55, 0.12, 0.01)), (0.7, (1.0, 0.62, 0.22))])
         return g, col, glow
+    if name == "crust":
+        # Slag gone hard: black glassy rock in plates, the cracks between them
+        # still molten and glowing.
+        n = g.noise(9.0, 6.0, 0.62, seed=60.0)
+        col = g.ramp(n, [(0.3, (0.02, 0.016, 0.014)), (0.6, (0.07, 0.055, 0.045)), (0.8, (0.16, 0.12, 0.09))])
+        crack = g.voronoi(5.0, seed=61.0)
+        c = g.ramp(crack, [(0.0, (1, 1, 1)), (0.025, (0, 0, 0))])
+        col = g.mixc(c, col, (0.30, 0.07, 0.015))
+        heat = g.ramp(g.noise(2.5, 2.0, 0.5, seed=62.0), [(0.45, (0.0, 0.0, 0.0)), (0.65, (1, 1, 1))])
+        glow = g.mixc(g.mixc(heat, (0, 0, 0), c, blend="MULTIPLY"), (0, 0, 0), (1.0, 0.36, 0.05))
+        return g, col, glow
+    if name == "slag":
+        n = g.noise(30.0, 5.0, 0.6, seed=13.0)
+        col = g.ramp(n, [(0.35, (0.5, 0.12, 0.02)), (0.65, (0.9, 0.45, 0.1))])
+        glow = g.ramp(n, [(0.3, (0.7, 0.18, 0.02)), (0.7, (1.0, 0.7, 0.3))])
+        return g, col, glow
     if name == "ember":
         return g, (0.5, 0.2, 0.05), (1.0, 0.55, 0.15)
     if name == "dark":
@@ -1130,7 +1146,190 @@ def hand_grip(J, s, k):
     return out
 
 
-CREATURES = {"ashen": ashen, "censer": censer_bearer, "deacon": deacon}
+# ------------------------------------------------------------------ slag hounds
+
+def slag_hound():
+    """A slag hound: a lean dog of cooled slag, its ribs open and molten, that
+    hunts in packs. About 0.8 m at the shoulder, facing -Y."""
+    k = 1.2
+    J = scaled({
+        "hips": (0, 0.36, 0.62), "spine": (0, 0.02, 0.66), "chest": (0, -0.30, 0.66), "neck": (0, -0.48, 0.80),
+        "head": (0, -0.58, 0.84), "snout": (0, -0.84, 0.76),
+        "sho_l": (0.12, -0.32, 0.54), "elb_l": (0.13, -0.26, 0.34), "wri_l": (0.13, -0.32, 0.10), "toe_l": (0.13, -0.42, 0.025),
+        "hip_l": (0.12, 0.38, 0.56), "knee_l": (0.13, 0.24, 0.36), "hock_l": (0.13, 0.44, 0.16), "paw_l": (0.13, 0.36, 0.025),
+        "tail1": (0, 0.52, 0.64), "tail2": (0, 0.74, 0.56), "tail3": (0, 0.92, 0.40),
+    }, k)
+    for n in list(J):
+        if n.endswith("_l"):
+            x, y, z = J[n]
+            J[n[:-2] + "_r"] = (-x, y, z)
+    jaw_at = (0, -0.60 * k, 0.78 * k)
+    bones = [
+        ("hips", None, J["hips"], J["spine"]),
+        ("chest", "hips", J["spine"], J["chest"]),
+        ("neck", "chest", J["chest"], J["neck"]),
+        ("head", "neck", J["neck"], J["snout"]),
+        ("jaw", "head", jaw_at, (0, -0.83 * k, 0.70 * k)),
+        ("tail1", "hips", J["tail1"], J["tail2"]),
+        ("tail2", "tail1", J["tail2"], J["tail3"]),
+    ]
+    for s in "lr":
+        bones += [
+            ("upper_" + s, "chest", J["sho_" + s], J["elb_" + s]),
+            ("fore_" + s, "upper_" + s, J["elb_" + s], J["wri_" + s]),
+            ("fpaw_" + s, "fore_" + s, J["wri_" + s], J["toe_" + s]),
+            ("thigh_" + s, "hips", J["hip_" + s], J["knee_" + s]),
+            ("shin_" + s, "thigh_" + s, J["knee_" + s], J["hock_" + s]),
+            ("hpaw_" + s, "shin_" + s, J["hock_" + s], J["paw_" + s]),
+        ]
+    c = Creature("hound", bones, hull_bottom=-24.0)
+    edges = [("hips", "spine"), ("spine", "chest"), ("chest", "neck"), ("neck", "head"), ("head", "snout"),
+             ("hips", "tail1"), ("tail1", "tail2"), ("tail2", "tail3")]
+    for s in "lr":
+        edges += [("chest", "sho_" + s), ("sho_" + s, "elb_" + s), ("elb_" + s, "wri_" + s), ("wri_" + s, "toe_" + s),
+                  ("hips", "hip_" + s), ("hip_" + s, "knee_" + s), ("knee_" + s, "hock_" + s), ("hock_" + s, "paw_" + s)]
+    r = lambda v: tuple(a * k for a in v) if isinstance(v, tuple) else v * k
+    radius = {"hips": r((0.10, 0.11)), "spine": r((0.085, 0.10)), "chest": r((0.12, 0.17)), "neck": r(0.075),
+              "head": r((0.075, 0.08)), "snout": r((0.04, 0.035)), "tail1": r(0.04), "tail2": r(0.028), "tail3": r(0.012)}
+    for s in "lr":
+        radius.update({"sho_" + s: r(0.075), "elb_" + s: r(0.045), "wri_" + s: r(0.03), "toe_" + s: r((0.035, 0.02)),
+                       "hip_" + s: r(0.085), "knee_" + s: r(0.055), "hock_" + s: r(0.03), "paw_" + s: r((0.035, 0.02))})
+    rib_y0, rib_y1 = -0.40 * k, 0.0
+
+    def gaunt(p, n):
+        # A tucked belly behind the chest, and grooves where the ribs show.
+        if p.z < 0.62 * k and -0.15 * k < p.y < 0.30 * k:
+            p = p + Vector((0, 0, 0.06 * k * math.sin((p.y + 0.15 * k) / (0.45 * k) * math.pi)))
+        if rib_y0 < p.y < rib_y1 and abs(p.x) > 0.04 * k:
+            g = max(0.0, math.sin((p.y - rib_y0) * math.tau / (0.075 * k)))
+            p = p - n * 0.014 * k * g
+        return p
+
+    body = skin_body("body", J, edges, radius, "hips", seed=3, lumps=0.012 * k, shape=gaunt)
+    c.add(body, "crust", among=[b[0] for b in bones if b[0] != "jaw"], power=5.0)
+    # The ribs: molten bars curving down each flank, sunk into the crust and glowing through it.
+    for i in range(6):
+        y = rib_y0 + (i + 0.5) * 0.075 * k
+        f = 1.0 - 0.07 * i
+        rx, rz, cz = 0.118 * k * f, 0.15 * k * f, 0.665 * k
+        for sx in (1, -1):
+            pts = [Vector((sx * rx * math.sin(a), y + 0.012 * k * a, cz + rz * math.cos(a)))
+                   for a in np.linspace(0.35, 2.3, 8)]
+            for a, b in zip(pts, pts[1:]):
+                c.add(between("cylinder", a, b, radius=0.010 * k, vertices=6), "slag", "chest" if y < -0.12 * k else "hips")
+    # Plates of crust along the back, like a ridge of cooled spatter.
+    for i in range(9):
+        y = -0.40 * k + i * 0.09 * k
+        z = 0.80 * k - 0.04 * k * abs(i - 3) / 3 if i < 6 else 0.74 * k
+        h = 0.07 * k * (1.0 - abs(i - 3) / 7)
+        c.add(between("cone", (0, y + 0.02 * k, z - 0.04 * k), (0, y - 0.03 * k, z + h), radius1=0.03 * k, radius2=0.004,
+                      vertices=6), "crust", "chest" if y < -0.05 * k else "hips")
+    # The head: a long skull, a heavy brow and a jaw full of slag teeth.
+    hx, hy, hz = J["head"]
+    skull = prim("uv_sphere", radius=0.09 * k, segments=18, ring_count=10, location=(0, hy - 0.04 * k, hz + 0.01 * k))
+    skull.scale = (0.85, 1.35, 0.8)
+    c.add(skull, "crust", "head")
+    for sx in (1, -1):
+        brow = prim("uv_sphere", radius=0.035 * k, segments=10, ring_count=6, location=(sx * 0.045 * k, hy - 0.10 * k, hz + 0.05 * k))
+        brow.scale = (1.0, 1.4, 0.6)
+        c.add(brow, "crust", "head")
+        eye = prim("uv_sphere", radius=0.016 * k, segments=10, ring_count=6, location=(sx * 0.05 * k, hy - 0.125 * k, hz + 0.025 * k))
+        c.add(eye, "ember", "head")
+        ear = between("cone", (sx * 0.05 * k, hy + 0.02 * k, hz + 0.06 * k), (sx * 0.08 * k, hy + 0.10 * k, hz + 0.13 * k),
+                      radius1=0.03 * k, radius2=0.003, vertices=6)
+        c.add(ear, "crust", "head")
+    jx, jy, jz = jaw_at
+    jaw = prim("uv_sphere", radius=0.06 * k, segments=14, ring_count=8, location=(0, jy - 0.11 * k, jz - 0.01 * k))
+    jaw.scale = (0.7, 1.9, 0.45)
+    c.add(jaw, "crust", "jaw")
+    mouth = prim("uv_sphere", radius=0.05 * k, segments=12, ring_count=6, location=(0, jy - 0.12 * k, jz + 0.015 * k))
+    mouth.scale = (0.6, 1.9, 0.3)
+    c.add(mouth, "slag", "jaw")
+    for i in range(5):
+        y = jy - 0.04 * k - i * 0.035 * k
+        for sx in (1, -1):
+            x = sx * 0.03 * k * (1 - i * 0.12)
+            c.add(between("cone", (x, y, jz + 0.01 * k), (x, y, jz + 0.045 * k), radius1=0.008 * k, radius2=0.001, vertices=5),
+                  "bone", "jaw")
+            c.add(between("cone", (x, y - 0.01 * k, hz - 0.035 * k), (x, y - 0.01 * k, hz - 0.07 * k), radius1=0.008 * k,
+                          radius2=0.001, vertices=5), "bone", "head")
+    # Claws.
+    for s, toe in (("l", "toe_l"), ("r", "toe_r"), ("l", "paw_l"), ("r", "paw_r")):
+        bone = ("fpaw_" if toe.startswith("toe") else "hpaw_") + s
+        tx, ty, tz = J[toe]
+        for dx in (-0.02, 0.0, 0.02):
+            c.add(between("cone", (tx + dx * k, ty - 0.01 * k, tz + 0.01 * k), (tx + dx * 1.3 * k, ty - 0.06 * k, 0.0),
+                          radius1=0.007 * k, radius2=0.001, vertices=5), "bone", bone)
+
+    # Animations, ten frames a second.
+    base = {"neck": (8, 0, 0), "head": (-6, 0, 0), "tail1": (-10, 0, 0), "tail2": (-15, 0, 0)}
+    stand = [(0.0, base),
+             (0.5, pose_of(base, chest=(-2, 0, 0), neck=(6, 0, 6), head=(-4, 0, 8), tail1=(-12, 0, 10), tail2=(-15, 0, 14),
+                           move=(0, 0, 0.008))),
+             (1.0, base)]
+    # The gallop: gathered with the legs under it, then stretched out flying.
+    gather = pose_of(base, hips=(-8, 0, 0), chest=(14, 0, 0), neck=(-6, 0, 0), head=(4, 0, 0),
+                     upper_l=(30, 0, 0), fore_l=(-20, 0, 0), upper_r=(22, 0, 0), fore_r=(-30, 0, 0),
+                     thigh_l=(-45, 0, 0), shin_l=(30, 0, 0), thigh_r=(-38, 0, 0), shin_r=(35, 0, 0),
+                     tail1=(10, 0, 0), tail2=(5, 0, 0), move=(0, 0, -0.04 * k))
+    stretch = pose_of(base, hips=(4, 0, 0), chest=(-8, 0, 0), neck=(6, 0, 0), head=(-4, 0, 0),
+                      upper_l=(-40, 0, 0), fore_l=(8, 0, 0), fpaw_l=(10, 0, 0), upper_r=(-32, 0, 0), fore_r=(12, 0, 0),
+                      thigh_l=(40, 0, 0), shin_l=(-10, 0, 0), hpaw_l=(-30, 0, 0), thigh_r=(35, 0, 0), shin_r=(0, 0, 0),
+                      tail1=(-30, 0, 0), tail2=(-20, 0, 0), move=(0, 0, 0.05 * k))
+    reach_ = pose_of(base, hips=(-2, 0, 0), chest=(4, 0, 0), upper_l=(-20, 0, 0), fore_l=(30, 0, 0), upper_r=(-10, 0, 0),
+                     fore_r=(40, 0, 0), thigh_l=(10, 0, 0), shin_l=(20, 0, 0), thigh_r=(0, 0, 0), shin_r=(20, 0, 0),
+                     move=(0, 0, 0.0))
+    land = pose_of(base, hips=(-4, 0, 0), chest=(6, 0, 0), upper_l=(10, 0, 0), fore_l=(-5, 0, 0), upper_r=(20, 0, 0),
+                   fore_r=(-10, 0, 0), thigh_l=(-10, 0, 0), shin_l=(5, 0, 0), thigh_r=(-20, 0, 0), shin_r=(15, 0, 0),
+                   move=(0, 0, -0.02 * k))
+    run = [(0.0, gather), (0.33, stretch), (0.6, reach_), (0.8, land), (1.0, gather)]
+    trot_a = pose_of(base, upper_l=(-20, 0, 0), fore_l=(15, 0, 0), upper_r=(16, 0, 0), thigh_l=(16, 0, 0), thigh_r=(-20, 0, 0),
+                     shin_r=(20, 0, 0), move=(0, 0, 0.01 * k))
+    trot_b = pose_of(base, move=(0, 0, -0.01 * k), shin_l=(15, 0, 0), fore_r=(20, 0, 0))
+    walk = [(0.0, trot_a), (0.25, trot_b), (0.5, mirror(trot_a)), (0.75, mirror(trot_b)), (1.0, trot_a)]
+    # The bite: drop the head, jaws wide, snap.
+    low = pose_of(base, chest=(6, 0, 0), neck=(20, 0, 0), head=(4, 0, 0), jaw=(10, 0, 0), upper_l=(-10, 0, 0),
+                  upper_r=(-14, 0, 0), thigh_l=(-12, 0, 0), thigh_r=(-12, 0, 0), shin_l=(12, 0, 0), shin_r=(12, 0, 0),
+                  move=(0, 0, -0.04 * k))
+    gape = pose_of(low, neck=(-4, 0, 0), head=(-14, 0, 0), jaw=(38, 0, 0), move=(0, -0.10 * k, -0.02 * k))
+    snap = pose_of(low, neck=(10, 0, 4), head=(6, 0, 10), jaw=(0, 0, 0), move=(0, -0.14 * k, -0.03 * k))
+    bite = [(0.0, base), (0.25, low), (0.45, gape), (0.6, snap), (0.75, pose_of(snap, head=(2, 0, -14), neck=(10, 0, -6))),
+            (1.0, base)]
+    # The lunge: a crouch, a long flat leap with the jaws open, and the landing.
+    crouch = pose_of(base, hips=(-6, 0, 0), chest=(8, 0, 0), neck=(-4, 0, 0), head=(-6, 0, 0),
+                     upper_l=(30, 0, 0), fore_l=(-40, 0, 0), upper_r=(30, 0, 0), fore_r=(-40, 0, 0),
+                     thigh_l=(-50, 0, 0), shin_l=(50, 0, 0), thigh_r=(-50, 0, 0), shin_r=(50, 0, 0),
+                     tail1=(20, 0, 0), move=(0, 0.05 * k, -0.14 * k))
+    fly = pose_of(base, hips=(4, 0, 0), chest=(-6, 0, 0), neck=(-2, 0, 0), head=(-10, 0, 0), jaw=(40, 0, 0),
+                  upper_l=(-50, 0, 0), fore_l=(10, 0, 0), upper_r=(-46, 0, 0), fore_r=(14, 0, 0),
+                  thigh_l=(50, 0, 0), shin_l=(-15, 0, 0), hpaw_l=(-30, 0, 0), thigh_r=(50, 0, 0), shin_r=(-15, 0, 0),
+                  hpaw_r=(-30, 0, 0), tail1=(-30, 0, 0), tail2=(-10, 0, 0), move=(0, 0, 0.04 * k))
+    leap = [(0.0, base), (0.2, crouch), (0.35, fly), (0.8, pose_of(fly, jaw=(10, 0, 0))), (1.0, land)]
+    flinch = pose_of(base, hips=(0, 6, 0), chest=(0, 6, 10), neck=(-6, 0, -16), head=(-10, 0, -18), jaw=(25, 0, 0),
+                     move=(0, 0.06 * k, 0))
+    pain = [(0.0, base), (0.3, flinch), (1.0, base)]
+    # Death: the legs go, it rolls onto its side and the heat goes out of it.
+    buckle = pose_of(base, chest=(10, 0, 0), neck=(20, 0, 0), upper_l=(20, 0, 0), fore_l=(-60, 0, 0), upper_r=(30, 0, 0),
+                     fore_r=(-70, 0, 0), thigh_l=(-30, 0, 0), shin_l=(40, 0, 0), thigh_r=(-20, 0, 0), shin_r=(30, 0, 0),
+                     move=(0, 0, -0.16 * k))
+    side = pose_of(base, hips=(0, 82, 0), chest=(0, 4, 6), neck=(-10, 0, 10), head=(-20, 0, 0), jaw=(20, 0, 0),
+                   upper_l=(-30, 0, 0), fore_l=(-10, 0, 0), upper_r=(-10, 0, 0), fore_r=(-30, 0, 0),
+                   thigh_l=(-20, 0, 0), shin_l=(10, 0, 0), thigh_r=(10, 0, 0), shin_r=(25, 0, 0),
+                   tail1=(10, 0, 30), tail2=(0, 0, 20), move=(-0.30 * k, 0, -0.42 * k))
+    death = [(0.0, base), (0.3, buckle), (0.7, side), (1.0, pose_of(side, jaw=(30, 0, 0), neck=(-14, 0, 14)))]
+    anims = [
+        ("stand", 10, stand, True, None),
+        ("walk", 8, walk, True, None),
+        ("run", 6, run, True, None),
+        ("bite", 8, bite, False, None),
+        ("leap", 9, leap, False, None),
+        ("pain", 5, pain, False, None),
+        ("death", 10, death, False, None),
+    ]
+    build(c, anims)
+
+
+CREATURES = {"ashen": ashen, "censer": censer_bearer, "deacon": deacon, "hound": slag_hound}
 
 if __name__ == "__main__":  # weapons.py imports the rest
     for name, make in CREATURES.items():

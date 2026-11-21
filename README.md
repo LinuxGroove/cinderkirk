@@ -6,7 +6,7 @@ It's idea 25 in [game-ideas](https://github.com/LinuxGroove/game-ideas/blob/main
 
 ![The Casting Floor](docs/screenshots/casting-floor.jpg)
 
-More in [docs/screenshots](docs/screenshots/): the splash, the main menu, the gatehouse, the Casting Floor from above, the pattern shop, the pouring gallery, the quench pit, a Deacon with two Ashen, the status bar, the weapon wheel, and all eight weapons in hand (`weapons.jpg`).
+More in [docs/screenshots](docs/screenshots/): the splash, the main menu, the gatehouse, the Casting Floor from above, the pattern shop, the pouring gallery, the quench pit, a Deacon with two Ashen, the status bar, the weapon wheel, all eight weapons in hand (`weapons.jpg`), and a pack of slag hounds (`slag-hounds.jpg`).
 
 ## Where it's at
 
@@ -17,10 +17,10 @@ More in [docs/screenshots](docs/screenshots/): the splash, the main menu, the ga
 - The menus, cursor, side plaque and console background are Cinderkirk's own, drawn at 4× so they stay sharp at 4K.
 - **The status bar and the weapon wheel** are vector art: `tools/hud_svg.py` writes them as SVG (text turned to paths from the game's fonts) and the engine rasterises them with nanosvg at the screen's own resolution, so they're as sharp at 4K as at 720p. The Pressure dial sits in the middle of the bar, with the eight weapons in a row above it. Hold LB (or Q) for the wheel: the right stick, the gyro or the mouse points, letting go equips, a tap goes back to the last weapon, and time slows to a third while it's open in single player.
 - **Normal and gloss maps** on the world: ericw-tools' light also writes the direction light comes from at each lightmap sample, so stone and brick show their relief against the level's real lights and gloss catches them as you move (`docs/screenshots/normal-maps.jpg`).
-- The Ashen, Censer-bearers and Deacons are Cinderkirk's own; slag hounds, the weapon models, items and most sounds are still **stand-ins from LibreQuake** (BSD-3) until Cinderkirk's own are made, and the game code is LibreQuake's QuakeC (GPL-2.0). The menus already use Cinderkirk's words: Story, Pit Fights, Apprentice to Bellfounder.
+- The Ashen, Censer-bearers, Deacons, slag hounds and the weapons are Cinderkirk's own; items, the other monsters and some sounds are still **stand-ins from LibreQuake** (BSD-3) until Cinderkirk's own are made, and the game code is LibreQuake's QuakeC (GPL-2.0). The menus already use Cinderkirk's words: Story, Pit Fights, Apprentice to Bellfounder.
 - Snap packaging for amd64 and arm64 (core24, strict), so it installs on Ubuntu and Ubuntu Core.
 
-Next, from the idea's plan: the weapons and slag hounds as models from Blender, button glyphs that follow the last device used, and the four shafts of the Foundry.
+Next, from the idea's plan: button glyphs that follow the last device used, and the four shafts of the Foundry.
 
 ## Playing it
 
