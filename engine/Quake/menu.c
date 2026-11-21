@@ -194,6 +194,7 @@ extern cvar_t r_lerpturn;
 extern cvar_t vid_filter;
 extern cvar_t scr_guifilter;
 extern cvar_t vid_palettize;
+extern cvar_t r_bloom; // Cinderkirk
 extern cvar_t vid_anisotropic;
 extern cvar_t vid_fsaa;
 extern cvar_t vid_fsaamode;
@@ -2075,6 +2076,7 @@ enum
 	GRAPHICS_OPT_GAMMA,
 	GRAPHICS_OPT_CONTRAST,
 	GRAPHICS_OPT_FOV,
+	GRAPHICS_OPT_BLOOM, // Cinderkirk
 	GRAPHICS_OPT_8BIT_COLOR,
 	GRAPHICS_OPT_FILTER,
 	GRAPHICS_OPT_MENU_FILTER,
@@ -2200,6 +2202,10 @@ static void M_GraphicsOptions_AdjustSliders (int dir, qboolean mouse)
 	case GRAPHICS_OPT_FOV:
 		f = M_GetSliderPos (80, 130, scr_fov.value, false, mouse, clamped_mouse, dir, 5, 999);
 		Cvar_SetValue ("fov", f);
+		break;
+	case GRAPHICS_OPT_BLOOM:
+		f = M_GetSliderPos (0, 1, r_bloom.value, false, mouse, clamped_mouse, dir, 0.1, 999);
+		Cvar_SetValue ("r_bloom", f);
 		break;
 	case GRAPHICS_OPT_8BIT_COLOR:
 		Cvar_SetValueQuick (&vid_palettize, (float)(((int)vid_palettize.value + 2 + dir) % 2));
@@ -2359,6 +2365,11 @@ static void M_GraphicsOptions_Draw (cb_context_t *cbx)
 	M_Print (cbx, MENU_LABEL_X, top + CHARACTER_SIZE * GRAPHICS_OPT_FOV, "Field of View");
 	r = (scr_fov.value - 80) / (130 - 80);
 	M_DrawSlider (cbx, MENU_SLIDER_X, top + CHARACTER_SIZE * GRAPHICS_OPT_FOV, r, va ("%.0f", scr_fov.value));
+
+	M_PreviewRow (cbx, GRAPHICS_OPT_BLOOM, top + CHARACTER_SIZE * GRAPHICS_OPT_BLOOM);
+	M_Print (cbx, MENU_LABEL_X, top + CHARACTER_SIZE * GRAPHICS_OPT_BLOOM, "Glow");
+	r = CLAMP (0.0f, r_bloom.value, 1.0f);
+	M_DrawSlider (cbx, MENU_SLIDER_X, top + CHARACTER_SIZE * GRAPHICS_OPT_BLOOM, r, r_bloom.value > 0 ? va ("%.1f", r_bloom.value) : "off");
 
 	M_PreviewRow (cbx, GRAPHICS_OPT_8BIT_COLOR, top + CHARACTER_SIZE * GRAPHICS_OPT_8BIT_COLOR);
 	M_Print (cbx, MENU_LABEL_X, top + CHARACTER_SIZE * GRAPHICS_OPT_8BIT_COLOR, "8-bit Color");
@@ -5347,6 +5358,7 @@ void M_Init (void)
 	Cmd_AddCommand ("menu_options", M_Menu_Options_f);
 	Cmd_AddCommand ("menu_keys", M_Menu_Keys_f);
 	Cmd_AddCommand ("menu_video", M_Menu_Video_f);
+	Cmd_AddCommand ("menu_graphics", M_Menu_GraphicsOptions_f); // Cinderkirk
 	Cmd_AddCommand ("help", M_Menu_Help_f);
 	Cmd_AddCommand ("menu_quit", M_Menu_Quit_f);
 	Cmd_AddCommand ("menu_credits", M_Menu_Credits_f); // needed by the 2021 re-release
