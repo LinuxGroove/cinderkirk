@@ -47,7 +47,7 @@ Controls: a controller just works (left stick moves, right stick or gyro looks, 
 | `quakec/` | The game code, built with fteqcc into `build/progs.dat` |
 | `maps_src/` | Levels in code: each `<map>.py` writes a `.map` (TrenchBroom opens it) with `tools/mapkit.py` |
 | `assets_src/materials/` | Blender scripts that bake the world textures (`make textures`) |
-| `assets_src/models/` | `creatures.py` builds, rigs, animates and skins the creatures in Blender and writes them as MD3 (`make models`; `PREVIEW=dir` adds a sheet of their frames); `weapons.py` builds the weapons the player holds, with the stoker's glove, the same way (`make weapons`, one Blender run each; `VIEWSHOT=dir` shows them from the eye); `models.py` is the idea's mockup |
+| `assets_src/models/` | `creatures.py` builds, rigs, animates and skins the creatures in Blender and writes them as MD3 (`make models`; `PREVIEW=dir` adds a sheet of their frames); `weapons.py` builds the weapons the player holds, with the stoker's glove, the same way (`make -j8 weapons`, one Blender run each, side by side; `VIEWSHOT=dir` shows them from the eye); `models.py` is the idea's mockup |
 | `assets/models/` | The creatures and the view models (`v_*`) as the game loads them: `<name>.md3`, its skin and `_luma` glow, and `.frames` (the frame order their QuakeC lists) |
 | `assets_src/fonts/` | Cinzel and Barlow Condensed, for the menus and the HUD |
 | `assets/textures/` | The baked textures: `<name>.png`, `_luma`, and `_norm` and `_gloss`, which the renderer shades with the light's direction from each map's `.lux` (`r_normalmaps`, `r_glossmaps`) |

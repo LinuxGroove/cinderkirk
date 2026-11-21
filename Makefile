@@ -137,11 +137,14 @@ textures:
 models:
 	$(BLENDER) -b -P assets_src/models/creatures.py -- assets/models $(TEXRES)
 
-# Builds the view models (v_*.md3), one Blender run per weapon: one run for
-# all eight runs out of memory.
+# Builds the view models (v_*.md3), one Blender run per weapon (one run for
+# all eight runs out of memory). Building and skinning a model is Python on one
+# core, so run them side by side: make -j8 weapons.
 WEAPONS := pick scattergun spitter bolt crucible steam mortar toll
-weapons:
-	for w in $(WEAPONS); do $(BLENDER) -b -P assets_src/models/weapons.py -- assets/models $(TEXRES) only=$$w || exit 1; done
+.PHONY: $(addprefix weapon-,$(WEAPONS))
+weapons: $(addprefix weapon-,$(WEAPONS))
+$(addprefix weapon-,$(WEAPONS)): weapon-%:
+	$(BLENDER) -b -P assets_src/models/weapons.py -- assets/models $(TEXRES) only=$*
 
 check:
 	$(PYTHON) -m py_compile tools/*.py maps_src/*.py assets_src/models/*.py
