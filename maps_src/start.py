@@ -88,6 +88,7 @@ def build():
         L.solid(x + 16, -384, 300, x + 48, 384, 332, "oak_beam1")
     # The plinth at the far end, with slag on it.
     L.solid(1440, -48, -64, 1536, 48, -32, "bronze1")
+    L.solid(1436, -52, -36, 1540, 52, -32, "brass_trim1")   # its brass rim
     L.add("item_spikes", (1488, 0, -32))
     L.add("item_spikes", (1360, 256, -64))
     L.add("item_armor1", (720, 300, -64))
@@ -133,6 +134,8 @@ def build():
             for px in range(x0 + 16, x1 - 32, 56):      # patterns on the shelves: bells and wheels
                 L.solid(px, y - 8, 24, px + 32, y + 24, 56, "oak1" if (px // 56) % 2 else "bronze1")
     L.solid(1088, 768, 80, 1536, 864, 96, "oak1")          # the mezzanine
+    L.solid(1328, 432, -64, 1472, 512, -52, "oak1")         # a moulding box, half rammed
+    L.solid(1336, 440, -52, 1464, 504, -50, "sand_mould1")
     L.steps(1472, 560, 1536, 768, -64, 96, axis="y", tex="oak1")
     for x in (1152, 1312, 1456):
         L.solid(x, 760, -64, x + 16, 776, 80, "oak1")        # its posts
@@ -228,6 +231,8 @@ def build():
         L.light((1660, y, 80), 240, WARM)
         L.light((2200, y, -100), 220, WARM)
     L.light((1780, 0, -120), 220, WARM)
+    for y in (-312, 296):                                   # copper pipes feeding the tank
+        L.solid(1728, y, 160, 2240, y + 16, 176, "copper1")
     # A vent in the far corner up to a balcony with ammo.
     L.solid(2176, 240, -192, 2240, 304, -188, "vent_grate1")
     L.brush_entity("trigger_vent", [_box(2180, 244, -188, 2236, 300, -156, "trigger")], speed=640)
