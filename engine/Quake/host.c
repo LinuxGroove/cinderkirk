@@ -1504,6 +1504,19 @@ void Host_Shutdown (void)
 	}
 	isdown = true;
 
+	// Cinderkirk: let the last frame finish on its worker before anything is
+	// torn down; quitting mid-present crashed in GL_EndRenderingTask.
+	if (cls.state != ca_dedicated)
+	{
+		GL_SynchronizeEndRenderingTask ();
+		if (vulkan_globals.device)
+		{
+			SDL_LockMutex (vulkan_globals.queue_mutex);
+			vkDeviceWaitIdle (vulkan_globals.device);
+			SDL_UnlockMutex (vulkan_globals.queue_mutex);
+		}
+	}
+
 	// keep Con_Printf from trying to update the screen
 	scr_disabled_for_loading = true;
 

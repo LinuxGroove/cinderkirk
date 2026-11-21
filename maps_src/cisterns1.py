@@ -22,7 +22,7 @@ CANDLE = (1.0, 0.8, 0.55)
 
 
 def build():
-    L = Level(wad="cinder.wad", sounds=5, message="The Quench House", worldtype=0,
+    L = Level(wad="cinder.wad", light_wait=0.8, sounds=5, message="The Quench House", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The cage's landing, north of the house.

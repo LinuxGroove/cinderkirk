@@ -2,7 +2,9 @@
 """Synthesize Cinderkirk's own sounds from fixed seeds, so the build makes the
 same files every time.
 
-    tools/sfx.py OUT_DIR        writes OUT_DIR/cinder/*.wav
+    tools/sfx.py OUT_DIR        writes OUT_DIR/cinder/*.wav, and the sounds the
+                                game asks for by their old paths (OUT_DIR/doors/,
+                                player/ and the rest, from tools/sfx_world.py)
 
 16-bit mono at 22050 Hz, as the engine mixes. A sound whose name ends in
 _loop gets a cue point at its start, which tells the engine to loop it.
@@ -318,7 +320,12 @@ def main():
     os.makedirs(out, exist_ok=True)
     for name, x in sounds():
         write(os.path.join(out, name + ".wav"), x, loop=name.endswith("_loop"))
-    print(f"sounds in {out}")
+    import sfx_world
+    for name, x in sfx_world.sounds():
+        path = os.path.join(sys.argv[1], name + ".wav")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        write(path, x, loop=name in sfx_world.LOOPS)
+    print(f"sounds in {sys.argv[1]}")
 
 
 if __name__ == "__main__":

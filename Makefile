@@ -99,7 +99,7 @@ map:
 
 game: $(DIST)/cinder/pak0.pak
 
-$(BUILD)/sound/.done: tools/sfx.py
+$(BUILD)/sound/.done: tools/sfx.py tools/sfx_world.py
 	$(PYTHON) tools/sfx.py $(BUILD)/sound
 	touch $@
 
@@ -125,7 +125,7 @@ $(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BU
 	for m in $(MAPS); do cp $(BUILD)/maps/$$m.bsp $(STAGE)/maps/; \
 		[ ! -f $(BUILD)/maps/$$m.lit ] || cp $(BUILD)/maps/$$m.lit $(STAGE)/maps/; \
 		[ ! -f $(BUILD)/maps/$$m.lux ] || cp $(BUILD)/maps/$$m.lux $(STAGE)/maps/; done
-	cp -r $(BUILD)/sound/cinder $(STAGE)/sound/
+	cp -r $(BUILD)/sound/* $(STAGE)/sound/
 	mkdir -p $(STAGE)/music && for f in $(MUSIC); do cp $$f $(STAGE)/music/; done
 	cp $(TEXTURES) $(MATERIALS) $(STAGE)/textures/
 	cp $(MODELS) $(STAGE)/progs/
