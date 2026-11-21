@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    name: Build everything, play the first level, take screenshots
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            cmake ninja-build meson pkg-config python3-pil python3-numpy python3-fonttools glslang-tools bc \
+            libembree-dev libtbb-dev zlib1g-dev \
+            libasound2-dev libpulse-dev libpipewire-0.3-dev libx11-dev libxext-dev libxrandr-dev \
+            libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev libxkbcommon-dev \
+            libdrm-dev libgbm-dev libegl-dev libdbus-1-dev libudev-dev libwayland-dev \
+            wayland-protocols libdecor-0-dev libvorbis-dev libopusfile-dev libflac-dev libmpg123-dev \
+            xvfb imagemagick mesa-vulkan-drivers
+      # SDL 3, the Vulkan loader, spirv-opt, ericw-tools and fteqcc only
+      # change when tools/versions.sh does.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            build/prefix
+            build/bin
+          key: deps-${{ runner.os }}-${{ hashFiles('tools/versions.sh', 'tools/deps.sh', 'tools/tools.sh') }}
+      - name: Build
+        run: make -j1 JOBS=$(nproc)
+      - name: Check the levels
+        run: make check
+      - name: Screenshots
+        env:
+          VK_ICD_FILENAMES: /usr/share/vulkan/icd.d/lvp_icd.json
+        run: |
+          mkdir -p shots
+          tools/shoot.sh shots/splash "3"
+          tools/shoot.sh shots/menu "12"
+          SPAWN="notarget; god; setpos 660 -250 -40 8 25 0" tools/shoot.sh shots/casting-floor "25" +map start
+          grep -q "shoot.sh: in the level" shots/casting-floor.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: shots/

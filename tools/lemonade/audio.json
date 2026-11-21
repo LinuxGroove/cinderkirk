@@ -1,0 +1,65 @@
+{
+  "server": "http://192.168.1.226:13305",
+  "notes": "Generated with Lemonade by tools/lemonade/generate.py. Ogg Vorbis 44.1 kHz stereo; trim silence, peak about -3 dBFS; loops crossfade their ends. The engine plays music/trackNN.ogg, NN being a map's worldspawn sounds (2 the Pithead, 3 the end of a map, 4 to 7 the shafts, 8 the Throat, 9 the big fights, 10 Pit fights).",
+  "music": {
+    "model": "ACE-Step-Music",
+    "tracks": [
+      {
+        "file": "assets_src/music/track02.ogg",
+        "seconds": 150,
+        "loop": true,
+        "prompt": "dark ambient drone, deep low cello drone, distant cracked church bell tolling slowly, wind in a mine shaft, faint metallic creaks, cold and still, abandoned industrial chapel, sparse, no drums, 60 bpm, instrumental, loopable"
+      },
+      {
+        "file": "assets_src/music/track03.ogg",
+        "seconds": 60,
+        "loop": true,
+        "prompt": "quiet dark ambient interlude, warm low organ drone, soft bowed metal, slow single bell, embers cooling, a breath after a fight, no drums, 60 bpm, instrumental, loopable"
+      },
+      {
+        "file": "assets_src/music/track04.ogg",
+        "seconds": 150,
+        "loop": true,
+        "prompt": "dark industrial ambient, foundry at night, slow heavy hammer on anvil far away, furnace roar, low brass drone, metallic clangs with long reverb, grinding chains, ominous, 70 bpm, instrumental, loopable"
+      },
+      {
+        "file": "assets_src/music/track05.ogg",
+        "seconds": 150,
+        "loop": true,
+        "prompt": "dark ambient, flooded underground cistern, water dripping in huge stone vaults, deep sub bass drone, distant muffled pump thuds, eerie bowed glass, cold green gloom, sparse, no drums, 60 bpm, instrumental, loopable"
+      },
+      {
+        "file": "assets_src/music/track06.ogg",
+        "seconds": 150,
+        "loop": true,
+        "prompt": "dark ambient, ossuary crypt and bone kilns, low wordless male choir drone, hollow wooden bone percussion, crackling fire, slow hand bells, ash and dread, sacred and wrong, 65 bpm, instrumental, loopable"
+      },
+      {
+        "file": "assets_src/music/track07.ogg",
+        "seconds": 150,
+        "loop": true,
+        "prompt": "dark industrial ambient, deep mine tunnels, rumbling earth, slow steam engine pistons, metal pings of pickaxes far away, low detuned synth drone, creaking timber, claustrophobic, 70 bpm, instrumental, loopable"
+      },
+      {
+        "file": "assets_src/music/track08.ogg",
+        "seconds": 150,
+        "loop": true,
+        "prompt": "doom dark ambient, descending into an endless pit, huge slow cracked bell tolls, sub bass swells, distorted low strings, heat haze, dread building, no drums, 55 bpm, instrumental, loopable"
+      },
+      {
+        "file": "assets_src/music/track09.ogg",
+        "seconds": 120,
+        "loop": true,
+        "prompt": "heavy industrial doom metal, crushing slow distorted baritone guitars, pounding taiko and anvil percussion, church bells, low brass, boss fight in a burning foundry, 90 bpm, instrumental, loopable"
+      },
+      {
+        "file": "assets_src/music/track10.ogg",
+        "seconds": 120,
+        "loop": true,
+        "prompt": "driving dark industrial, fast mechanical drum machine, anvil hits, distorted bass synth, steam hisses, metal clangs, arena fight in a foundry, aggressive, 130 bpm, instrumental, loopable"
+      }
+    ]
+  },
+  "voices": {"model": "kokoro-v1", "voices": {}},
+  "sfx": {"model": "ThinkSound-SFX", "sounds": []}
+}

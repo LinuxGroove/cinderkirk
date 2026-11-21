@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Cinderkirk
+Comment=A bell foundry over a burning pit. Fight your way down.
+Exec=cinderkirk
+Icon=${SNAP}/meta/gui/cinderkirk.png
+Categories=Game;ActionGame;
+Keywords=shooter;fps;retro;boomer shooter;foundry;
+StartupWMClass=cinderkirk

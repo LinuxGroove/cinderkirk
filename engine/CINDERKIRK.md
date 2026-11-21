@@ -1,0 +1,44 @@
+# Cinderkirk's engine
+
+This folder is [vkQuake](https://github.com/Novum/vkQuake) at tag **1.37.0**, with Cinderkirk's changes on top. Windows-only files, the AppImage packaging and GitHub workflows were left out. Changes that would help vkQuake itself (controller and big-screen work) should go upstream as well.
+
+## Changes from 1.37.0
+
+| Where | What |
+|---|---|
+| `Quake/quakedef.h` | The game folder is `cinder` (`GAMENAME`), the config `cinderkirk.cfg`, screenshots `cinderkirk-*`, and `GAME_TITLE` "Cinderkirk" |
+| `Quake/common.c`, `Quake/console.c` | SDL's preference path and the error box use Cinderkirk's name |
+| `Quake/sys_sdl_unix.c` | The user folder is `~/.cinderkirk` (the snap passes `-userdir` instead) |
+| `Quake/gl_vidsdl.c`, `Quake/steam.c` | The window title and Vulkan application name are Cinderkirk |
+| `Quake/gl_screen.c` | Centerprints draw `{+command}` as button glyphs (`glyph.c`). The LinuxGroove Games splash (`gfx/splash.png`, scaled to cover the screen) for 1.5 s at start-up, fading out; `-nosplash` skips it |
+| `Quake/host.c` | The game opens on the main menu unless the command line starts a map, a save, a demo or a connection |
+| `Quake/menu.c` | How to Play has Cinderkirk's three pages (`NUM_HELP_PAGES`), drawn by `tools/menu_art.py` |
+| `Quake/sbar.c` | HUD style 3, the Foundry bar, is the default and calls `sbar_foundry.c`; the classic and modern bars keep a strip for Pressure (the game code's stat 32) |
+| `Quake/sbar_foundry.c` (new) | The Foundry status bar: full width, armour, health, the Pressure dial, ammo, keys, secrets (frags in Pit fights), the weapon row above it and kills, secrets and time on `+showscores`; laid out in the mockup's 1280x720 units and scaled to the screen (`hud_scale`) |
+| `Quake/hud_svg.c` (new), `Quake/nanosvg/` | SVG pictures from `gfx/hud/`, rasterised with [nanosvg](https://github.com/memononen/nanosvg) (zlib licence, commit 239e102, with `t` in `nsvg__parseTransform` zeroed so GCC 15 builds it) at the size they're drawn and kept for the last three sizes. **Upstream:** a general way to ship a sharp HUD |
+| `Quake/wheel.c` (new) | The weapon wheel: hold `+wheel` (LB, Q) and point with the right stick, the gyro or the mouse; letting go sends `impulse <slot>`, a tap goes back to the last weapon, and single player runs at `wheel_slowmo` (a third) while it's open. `wheel_select N` points it from a key. **Upstream:** with the slots as a cvar |
+| `Quake/gl_draw.c` | `Draw_PicFromRGBA`, `Draw_FreePic` and `Draw_PicRotated` (the dial's needle, the wheel's wedges). **Upstream** |
+| `Quake/in_sdl.c` | While the wheel is open the look stick, the gyro and the mouse point at it instead of turning the view; `IN_GamepadGlyphs` names the pad in use (Xbox, PlayStation, Switch, Steam Deck) |
+| `Quake/glyph.c` (new) | Button glyphs: text with `{+command}` shows the glyph of the key bound to it on the device used last (`{@look}` and `{@move}` for the sticks or the mouse), from `gfx/hud/g/<set>/<key>.svg`; `glyph_set` forces a set. Centerprints and the weapon wheel's hint use it. **Upstream** |
+| `Quake/rumble.c` (new), `Quake/in_sdl.c` | Named rumble patterns: the game sends `rumble <pattern>` (or `rumble <low> <high> <ms>`) to the player it happens to, for each weapon's shot, hits taken, the dash, Overpressure, vents, pickups, keys, secrets, landing and death. The pad no longer rumbles with every loud sound; `joy_rumble_sound 1` brings that back between patterns. **Upstream:** the command and the table |
+| `Quake/r_part.c` | `r_particles` defaults to 1, round particles: the square ones (2) look like blocks up close at high resolutions |
+| `Quake/menu.c` | No Mods item on the main menu (the only game folder is the game) |
+| `Quake/host.c` | The frame time is scaled by the wheel's slow motion |
+| `Quake/menu.c`, `Quake/gl_screen.c` | HUD Style offers Foundry, and `scr_style` starts at 3 |
+| `Quake/gl_model.c`, `Quake/gl_model.h` | Each external world texture's `_norm` (rgb) and `_gloss` (alpha) load beside it as one picture, and `maps/<map>.lux` (ericw-tools' `light -lux`: the direction light comes from at each lightmap sample) loads beside the `.lit`. **Upstream** |
+| `Quake/r_brush.c`, `Quake/r_world.c`, `Shaders/world.vert`, `Shaders/world.frag`, `Shaders/world_common.inc` | Normal and gloss maps on the world: the bumps are shaded against the lightmap's direction (a flat normal changes nothing), and gloss adds a highlight towards the light that moves with the view. `r_normalmaps` (0 to 2) and `r_glossmaps` (0 to 3) set how strong; textures or maps without them draw as before. **Upstream** |
+| `Quake/gl_rmisc.c` | The world pipeline layout has two more sets (light directions, normal and gloss) and 27 floats of push constants (the view position and the two strengths); the basic, GUI, alias and MD5 layouts grew to 27 too, since `R_BindPipeline` zeroes the push constants whenever the size changes and the world's would otherwise be lost |
+| `Makefile` (repository) | `light` runs with `-lux`, and the pak carries the `.lux` and the `_norm` and `_gloss` pictures |
+| `Quake/view.c` | Under water the view is tinted the Cisterns' black-green, not brown |
+| `Quake/cl_main.c` | `cl_spawncmd`: console commands to run each time the player enters a level (`tools/shoot.sh` uses it for screenshots) |
+| `Quake/sv_user.c`, `Quake/progs.h` | Bots (the engine's botclients) are steered by the game code's `.movement` vector (forward, side, up), as DarkPlaces' bots are. **Upstream** |
+| `Quake/host.c`, `Quake/server.h` | `bots`: how many bots the game code keeps in a Pit fight |
+| `Quake/menu.c` | Host a game lists Cinderkirk's maps (the Pit fight arenas, then the Story by shaft), the game types are Pit fight and Co-op Story, the skills are the lift's (Apprentice to Founder's), and there's a Bots setting; none of id's map names are left |
+| `Quake/records.c`, `Quake/sbar.c`, `Quake/cl_parse.c` | Each Story map's best time, kills and secrets per skill, kept in `records.txt` in the user folder; the end of a map says whether it beat the best, and `_shaft_marks` (read only) tells the game which shafts have every map finished with all its secrets |
+| `Shaders/bloom.comp`, `Shaders/screen_effects.inc`, `Quake/r_passes.c`, `Quake/gl_vidsdl.c`, `Quake/gl_rmisc.c` | Bloom: the scene's bright parts at a quarter of its size, blurred across and down in two compute passes, added back in the screen effects pass. `r_bloom` (strength, 0 for none, default 0.6) and `r_bloom_threshold` (0.7). Options, Graphics has a Glow slider for it, and `menu_graphics` opens that page. **Upstream** |
+| `Misc/vq_pak/` | The built-in pak keeps only the crosshairs: vkQuake's console background (which carries id's logo), menus and fixes for id's maps are gone, so Cinderkirk's own are used |
+| `meson_options.txt` | User folders are on by default |
+
+## Building
+
+`make engine` from the top of the repository builds SDL 3, the Vulkan headers and loader and `spirv-opt` into `build/prefix` (`tools/deps.sh`), then this with Meson into `build/engine`, and copies it to `dist/cinderkirk`.

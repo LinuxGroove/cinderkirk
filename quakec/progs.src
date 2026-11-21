@@ -1,0 +1,86 @@
+#ifdef __QW__
+#pragma progs_dat "../build/qwprogs.dat"
+#else
+#pragma progs_dat "../build/progs.dat"
+#endif
+
+#define __LIBREQUAKE__   // Cinderkirk: LibreQuake's code paths and strings, never id's (see localized_text.qc)
+
+#includelist
+
+defs.qc
+localized_text.qc       // LQ: Localized strings, also applies to Quake
+deathmatch_settings.qc
+subs.qc
+cinder/rumble.qc        // Cinderkirk: rumble patterns on the pad
+
+#ifdef __QW__
+server.qc
+#endif
+
+#ifndef __QW__
+fight.qc
+ai.qc
+lq1/cutscene_camera.qc  // LQ: svc_cutscene firing camera
+#endif
+
+combat.qc
+cinder/pressure.qc      // Cinderkirk: the Pressure gauge, the dash and vents
+
+items.qc
+weapons.qc
+cinder/arsenal.qc       // Cinderkirk: slots, cycling, Overpressure, cracked stone
+cinder/pithead.qc       // Cinderkirk: the hub's skill lever
+world.qc
+client.qc
+
+#ifdef __QW__
+spectate.qc
+#endif
+
+player.qc
+
+#ifndef __QW__
+cinder/bots.qc          // Cinderkirk: bots for Pit fights
+cinder/coop.qc          // Cinderkirk: Co-op Story: more creatures, spread spawns
+#endif
+
+#ifndef __QW__
+monsters.qc
+#endif
+
+doors.qc
+buttons.qc
+triggers.qc
+plats.qc
+misc.qc
+
+#ifndef __QW__
+monsters/ogre.qc
+monsters/fiend.qc
+monsters/shambler.qc
+monsters/knight.qc
+monsters/grunt.qc
+monsters/scrag.qc
+monsters/rottweiler.qc
+monsters/zombie.qc
+monsters/chthon.qc
+
+monsters/spawn.qc			// registered
+monsters/hellknight.qc	    // registered
+monsters/rotfish.qc		    // registered
+monsters/vore.qc			// registered
+monsters/enforcer.qc		// registered
+monsters/shub.qc			// registered
+
+cinder/ashen.qc         // Cinderkirk: the Ashen
+cinder/cult.qc          // Cinderkirk: Censer-bearers and Deacons
+cinder/hound.qc         // Cinderkirk: slag hounds
+cinder/foundry.qc       // Cinderkirk: Gaugers, Crucible Brutes and clinkers
+cinder/cisterns.qc      // Cinderkirk: cistern leeches
+cinder/kilns.qc         // Cinderkirk: ash wraiths and bell-ringers
+cinder/vein.qc          // Cinderkirk: the Founder
+cinder/throat.qc        // Cinderkirk: the Throat and the Great Bell
+#endif
+
+#endlist
