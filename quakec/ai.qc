@@ -503,6 +503,7 @@ float()	WizardCheckAttack;
 float()	DogCheckAttack;
 float()	HoundCheckAttack;
 float()	BruteCheckAttack;
+float()	WraithCheckAttack;
 
 float() CheckAnyAttack =
 {
@@ -522,6 +523,8 @@ float() CheckAnyAttack =
 		return HoundCheckAttack ();
 	if (self.classname == "monster_crucible_brute")
 		return BruteCheckAttack ();
+	if (self.classname == "monster_ash_wraith")
+		return WraithCheckAttack ();
 	if (self.classname == "monster_wizard")
 		return WizardCheckAttack ();
 	return CheckAttack ();

@@ -31,8 +31,8 @@ CAGES = (
      "The Cisterns: flooded vaults, quench tanks, and what lives in the water"),
     ("The Undervein", (1024, -320, 1056, -192), (1056, -320, 1184, -192), None,
      "The Undervein: the cage isn't running yet"),
-    ("The Ossuary Kilns", (640, -544, 768, -512), (640, -672, 768, -544), None,
-     "The Ossuary Kilns: the cage isn't running yet"),
+    ("The Ossuary Kilns", (640, -544, 768, -512), (640, -672, 768, -544), "kilns1",
+     "The Ossuary Kilns: the kirk's crypts, the bone kilns, and the ash that walks"),
 )
 
 

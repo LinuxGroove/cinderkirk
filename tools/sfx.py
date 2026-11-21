@@ -255,6 +255,17 @@ def sounds():
     yield "leech_pain", normalise(lowpass(noise(0.3, 144), 1200) * envelope(len(t(0.3)), 0.01, 9))
     yield "leech_death", normalise(lay((lowpass(noise(0.8, 145), 500) * envelope(len(t(0.8)), 0.01, 4), 0),
                                        (groan(0.6, 146, 90, 40, 0.3) * envelope(len(t(0.6)), 0.05, 4) * 0.4, 0.1)))
+    # Ash wraiths: a breath of ash, a dry rising shriek when they swoop.
+    tt = t(1.2)
+    yield "wraith_idle", normalise(steam(1.2, 150, 200, 1400, 0.4, 2, 0.3) * (0.7 + 0.3 * np.sin(2 * np.pi * 0.8 * tt)), 0.4)
+    yield "wraith_sight", normalise(lay((steam(0.9, 151, 400, 3000, 0.2, 3), 0), (groan(0.8, 152, 160, 240, 0.8) * 0.5, 0.05)))
+    tt = t(0.7)
+    shriek = np.sin(2 * np.pi * np.cumsum(np.geomspace(300, 900, len(tt))) / RATE) * envelope(len(tt), 0.1, 3)
+    yield "wraith_swoop", normalise(shriek * 0.4 + steam(0.7, 153, 1500, 7000, 0.15, 3))
+    yield "wraith_claw", normalise(steam(0.25, 154, 2500, 9000, 0.005, 14) + 0.3 * crackle(0.25, 155, 0.02, 12))
+    yield "wraith_pain", normalise(lay((groan(0.4, 156, 260, 180, 0.9), 0), (steam(0.3, 157, 800, 4000, 0.01, 8) * 0.5, 0)))
+    yield "wraith_death", normalise(lay((groan(1.0, 158, 220, 60, 0.9) * envelope(len(t(1.0)), 0.02, 2), 0),
+                                        (steam(1.4, 159, 200, 2500, 0.3, 2, 0.4) * 0.7, 0.2)))
     yield "deacon_throw", normalise(steam(0.6, 60, 300, 2000, 0.2, 4) + crackle(0.6, 61, 0.01, 4) * 0.6)
 
 

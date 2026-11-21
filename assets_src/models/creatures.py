@@ -1717,8 +1717,96 @@ def leech():
     build(c, anims)
 
 
+# ------------------------------------------------------------------ ash wraiths
+
+def ash_wraith():
+    """An ash wraith: a hooded thing of ash from the waist up, long clawed
+    hands, and below the waist only a trail of ash that streams out behind.
+    Built facing -Y at 1.9 m from the trail's tip to the crown, floating."""
+    J = scaled(HUMAN, 1.05)
+    w = J["pelvis"]
+    tips = [(0, 0.12, 0.62), (0, 0.32, 0.34), (0, 0.6, 0.12)]
+    extra = [("trail1", "pelvis", w, tips[0]), ("trail2", "trail1", tips[0], tips[1]), ("trail3", "trail2", tips[1], tips[2])]
+    for s, sx in (("l", 1), ("r", -1)):
+        f = Vector(J["fin_" + s])
+        for i, dx in enumerate((-0.03, 0.0, 0.03)):
+            a = f + Vector((sx * dx, -0.01, 0.0))
+            extra.append(("claw%d_%s" % (i, s), "hand_" + s, tuple(a), tuple(a + Vector((sx * dx * 0.6, -0.04, -0.13)))))
+    c = Creature("wraith", humanoid(J, extra), hull_bottom=-24.0)
+    k = 1.05
+    for s in "lr":
+        arm = {n: J[n] for n in ("chest", "sho_" + s, "elb_" + s, "wri_" + s)}
+        a = skin_body("arm_" + s, arm, [("chest", "sho_" + s), ("sho_" + s, "elb_" + s), ("elb_" + s, "wri_" + s)],
+                      {"chest": 0.06 * k, "sho_" + s: 0.07 * k, "elb_" + s: 0.06 * k, "wri_" + s: 0.085 * k},
+                      "chest", seed=11, lumps=0.012, subdiv=2)
+        c.add(a, "ash", among=["chest", "upper_" + s, "fore_" + s], power=4.0)
+        wr, fi = Vector(J["wri_" + s]), Vector(J["fin_" + s])
+        hand = skin_body("hand_" + s, {"w": tuple(wr - (fi - wr) * 0.3), "f": tuple(fi)}, [("w", "f")],
+                         {"w": 0.026, "f": (0.032, 0.018)}, "w", subdiv=1)
+        c.add(hand, "bone", "hand_" + s)
+        for i in range(3):
+            b = c.bones[c.index["claw%d_%s" % (i, s)]]
+            c.add(between("cone", b[2], b[3], radius1=0.011, radius2=0.001, vertices=5), "bone", "claw%d_%s" % (i, s))
+    top = J["neck"][2] - 0.02
+    torso = lathe("torso", [(0.06, top), (0.2, J["sho_l"][2] - 0.03), (0.21, J["chest"][2]), (0.17, J["spine"][2]),
+                            (0.15, w[2] + 0.02)], segs=32,
+                  shape=lambda a, z, x, y: (x, y * 0.75 + J["chest"][1], z))
+    c.add(torso, "ash", among=["pelvis", "spine", "chest", "neck"], power=3.0)
+
+    def stream(a, z, x, y):
+        t = max(0.0, min(1.0, 1.0 - z / w[2]))
+        rag = 1.0 + 0.35 * t * (math.sin(7 * a) * 0.6 + noise.noise(Vector((a * 3.0, z * 6.0, 1.0))))
+        return x * rag, y * rag + 0.62 * t * t, z
+    trail = lathe("trail", [(0.16, w[2] + 0.04), (0.18, w[2] - 0.12), (0.15, w[2] * 0.6), (0.09, w[2] * 0.33),
+                            (0.03, 0.1), (0.0, 0.04)], segs=40, shape=stream)
+    thicken(trail, 0.01)
+    c.add(trail, "ash", among=["pelvis", "trail1", "trail2", "trail3"], power=2.0)
+    hood(c, J, k)
+    hx, hy, hz = J["head"]
+    for x in (-0.04, 0.04):
+        eye = prim("uv_sphere", radius=0.022, segments=10, ring_count=6, location=(hx + x, hy - 0.135, hz + 0.08))
+        eye.scale = (1.2, 0.5, 0.6)
+        c.add(eye, "ember", "head")
+
+    def claws(curl):
+        return {"claw%d_%s" % (i, s): (curl, 0, 0) for i in range(3) for s in "lr"}
+    base = pose_of(claws(10), spine=(8, 0, 0), chest=(6, 0, 0), neck=(-4, 0, 0), upper_l=(-18, 0, 12), fore_l=(-40, 0, 0),
+                   upper_r=(-18, 0, -12), fore_r=(-40, 0, 0), trail1=(14, 0, 0), trail2=(10, 0, 0), trail3=(8, 0, 0))
+
+    def drifting(t):
+        a = math.tau * t
+        return pose_of(base, move=(0, 0, 0.05 * math.sin(a)), trail1=(14 + 6 * math.sin(a), 0, 10 * math.sin(a)),
+                       trail2=(10, 0, 14 * math.sin(a - 1.0)), trail3=(8, 0, 18 * math.sin(a - 2.0)),
+                       upper_l=(-18 + 6 * math.sin(a), 0, 12), upper_r=(-18 - 6 * math.sin(a), 0, -12))
+    drift = [(k8 / 8, drifting(k8 / 8)) for k8 in range(9)]
+    dive = pose_of(claws(-25), pelvis=(38, 0, 0), spine=(10, 0, 0), chest=(6, 0, 0), neck=(-30, 0, 0), head=(-14, 0, 0),
+                   upper_l=(-95, 0, 18), fore_l=(-10, 0, 0), upper_r=(-95, 0, -18), fore_r=(-10, 0, 0),
+                   trail1=(-28, 0, 0), trail2=(-12, 0, 0), trail3=(-8, 0, 0))
+    swoop = [(0.0, base), (0.4, dive), (0.7, pose_of(dive, trail2=(-4, 0, 10), trail3=(0, 0, 16))),
+             (1.0, pose_of(dive, trail2=(-4, 0, -10), trail3=(0, 0, -16)))]
+    rake_up = pose_of(dive, upper_r=(-150, 0, -30), fore_r=(-30, 0, 0), upper_l=(-60, 0, 10), spine=(-4, 0, -10))
+    rake = pose_of(dive, upper_r=(-40, 0, 25), fore_r=(-10, 0, 0), upper_l=(-140, 0, 20), fore_l=(-30, 0, 0),
+                   spine=(18, 0, 14), **claws(40))
+    claw = [(0.0, dive), (0.3, rake_up), (0.55, rake), (1.0, base)]
+    reel = pose_of(base, spine=(-16, 0, 8), chest=(-10, 0, 0), head=(14, 0, -10), upper_l=(-60, 0, 40), upper_r=(-50, 0, -40),
+                   trail1=(40, 0, 0), move=(0, 0.08, 0.06))
+    pain = [(0.0, base), (0.35, reel), (1.0, base)]
+    sag = pose_of(base, spine=(30, 0, 0), chest=(20, 0, 0), neck=(20, 0, 0), upper_l=(10, 0, 20), upper_r=(10, 0, -20),
+                  fore_l=(-10, 0, 0), fore_r=(-10, 0, 0), move=(0, 0, -0.3))
+    death = [(0.0, base), (0.3, sag), (1.0, sag)]
+    anims = [
+        ("drift", 8, drift, True, None),
+        ("swoop", 8, swoop, False, None),
+        ("claw", 6, claw, False, None),
+        ("pain", 4, pain, False, None),
+        ("death", 10, death, False, "crumble"),
+    ]
+    build(c, anims, {"crumble": crumble})
+
+
 CREATURES = {"ashen": ashen, "censer": censer_bearer, "deacon": deacon, "hound": slag_hound,
-             "gauger": gauger, "brute": crucible_brute, "clinker": clinker, "leech": leech}
+             "gauger": gauger, "brute": crucible_brute, "clinker": clinker, "leech": leech,
+             "wraith": ash_wraith}
 
 if __name__ == "__main__":  # weapons.py imports the rest
     for name, make in CREATURES.items():
