@@ -262,7 +262,7 @@ def build():
         L.light((2380, y, -40), 220, CANDLE)
     L.light((2592, 0, -96), 200, SLAG)
     L.brush_entity("trigger_changelevel", [_box(2592, -64, -192, 2656, 64, -64, "trigger")],
-                   map="start")
+                   map="foundry2")
     L.add("info_intermission", (1024, -300, 160), mangle=(20, 30, 0))
     return L
 
