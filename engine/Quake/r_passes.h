@@ -67,11 +67,14 @@ typedef struct end_rendering_parms_s
 	bool		 polyblend	   : 1;
 	bool		 menu		   : 1;
 	bool		 ray_debug	   : 1;
+	bool		 bloom		   : 1; // Cinderkirk
 	uint32_t	 vid_height	   : 20;
 	uint32_t	 render_width;
 	uint32_t	 render_height;
 	float		 time;
 	float		 menu_alpha;
+	float		 bloom_strength;
+	float		 bloom_threshold;
 	VkClearValue color_clear_value;
 	uint8_t		 v_blend[4];
 	float		 origin[3];

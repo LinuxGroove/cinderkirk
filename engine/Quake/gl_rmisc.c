@@ -1483,7 +1483,7 @@ void R_CreateDescriptorSetLayouts ()
 	}
 
 	{
-		ZEROED_STRUCT_ARRAY (VkDescriptorSetLayoutBinding, screen_effects_layout_bindings, 5);
+		ZEROED_STRUCT_ARRAY (VkDescriptorSetLayoutBinding, screen_effects_layout_bindings, 6);
 		screen_effects_layout_bindings[0].binding = 0;
 		screen_effects_layout_bindings[0].descriptorCount = 1;
 		screen_effects_layout_bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -1504,12 +1504,16 @@ void R_CreateDescriptorSetLayouts ()
 		screen_effects_layout_bindings[4].descriptorCount = 1;
 		screen_effects_layout_bindings[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		screen_effects_layout_bindings[4].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+		screen_effects_layout_bindings[5].binding = 5; // Cinderkirk: the bloom
+		screen_effects_layout_bindings[5].descriptorCount = 1;
+		screen_effects_layout_bindings[5].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		screen_effects_layout_bindings[5].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 
 		descriptor_set_layout_create_info.bindingCount = countof (screen_effects_layout_bindings);
 		descriptor_set_layout_create_info.pBindings = screen_effects_layout_bindings;
 
 		memset (&vulkan_globals.screen_effects_set_layout, 0, sizeof (vulkan_globals.screen_effects_set_layout));
-		vulkan_globals.screen_effects_set_layout.num_combined_image_samplers = 2;
+		vulkan_globals.screen_effects_set_layout.num_combined_image_samplers = 3;
 		vulkan_globals.screen_effects_set_layout.num_storage_images = 1;
 
 		err = vkCreateDescriptorSetLayout (vulkan_globals.device, &descriptor_set_layout_create_info, NULL, &vulkan_globals.screen_effects_set_layout.handle);
@@ -2066,7 +2070,7 @@ void R_CreatePipelineLayouts ()
 
 		ZEROED_STRUCT (VkPushConstantRange, push_constant_range);
 		push_constant_range.offset = 0;
-		push_constant_range.size = 3 * sizeof (uint32_t) + 9 * sizeof (float);
+		push_constant_range.size = 3 * sizeof (uint32_t) + 10 * sizeof (float);
 		push_constant_range.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 
 		ZEROED_STRUCT (VkPipelineLayoutCreateInfo, pipeline_layout_create_info);
@@ -2107,6 +2111,32 @@ void R_CreatePipelineLayouts ()
 			Sys_Error ("vkCreatePipelineLayout failed with code %i", (int)err);
 		GL_SetObjectName ((uint64_t)vulkan_globals.cs_tex_warp_pipeline.layout.handle, VK_OBJECT_TYPE_PIPELINE_LAYOUT, "cs_tex_warp_pipeline_layout");
 		vulkan_globals.cs_tex_warp_pipeline.layout.push_constant_range = push_constant_range;
+	}
+
+	{
+		// Cinderkirk: bloom, a texture in and a storage image out, as the warp
+		VkDescriptorSetLayout bloom_descriptor_set_layouts[2] = {
+			vulkan_globals.single_texture_set_layout.handle,
+			vulkan_globals.single_texture_cs_write_set_layout.handle,
+		};
+
+		ZEROED_STRUCT (VkPushConstantRange, push_constant_range);
+		push_constant_range.offset = 0;
+		push_constant_range.size = 3 * sizeof (uint32_t) + 3 * sizeof (float);
+		push_constant_range.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
+		ZEROED_STRUCT (VkPipelineLayoutCreateInfo, pipeline_layout_create_info);
+		pipeline_layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipeline_layout_create_info.setLayoutCount = 2;
+		pipeline_layout_create_info.pSetLayouts = bloom_descriptor_set_layouts;
+		pipeline_layout_create_info.pushConstantRangeCount = 1;
+		pipeline_layout_create_info.pPushConstantRanges = &push_constant_range;
+
+		err = vkCreatePipelineLayout (vulkan_globals.device, &pipeline_layout_create_info, NULL, &vulkan_globals.bloom_pipeline.layout.handle);
+		if (err != VK_SUCCESS)
+			Sys_Error ("vkCreatePipelineLayout failed with code %i", (int)err);
+		GL_SetObjectName ((uint64_t)vulkan_globals.bloom_pipeline.layout.handle, VK_OBJECT_TYPE_PIPELINE_LAYOUT, "bloom_pipeline_layout");
+		vulkan_globals.bloom_pipeline.layout.push_constant_range = push_constant_range;
 	}
 
 	{
@@ -2612,6 +2642,7 @@ DECLARE_SHADER_MODULE (mboit_resolve_frag);
 DECLARE_SHADER_MODULE (mboit_resolve_msaa_frag);
 DECLARE_SHADER_MODULE (screen_effects_8bit_comp);
 DECLARE_SHADER_MODULE (screen_effects_10bit_comp);
+DECLARE_SHADER_MODULE (bloom_comp);
 DECLARE_SHADER_MODULE (cs_tex_warp_comp);
 DECLARE_SHADER_MODULE (indirect_comp);
 DECLARE_SHADER_MODULE (indirect_clear_comp);
@@ -4135,6 +4166,7 @@ static void R_CreateScreenEffectsPipelines ()
 
 	R_CreateComputePipeline (
 		&vulkan_globals.screen_effects_pipeline, ten_bit ? screen_effects_10bit_comp_module : screen_effects_8bit_comp_module, 0, NULL, "screen_effects");
+	R_CreateComputePipeline (&vulkan_globals.bloom_pipeline, bloom_comp_module, 0, NULL, "bloom");
 }
 
 /*
@@ -4262,6 +4294,7 @@ static void R_CreateShaderModules ()
 	CREATE_SHADER_MODULE_COND (mboit_resolve_msaa_frag, vulkan_globals.sample_count != VK_SAMPLE_COUNT_1_BIT);
 	CREATE_SHADER_MODULE (screen_effects_8bit_comp);
 	CREATE_SHADER_MODULE (screen_effects_10bit_comp);
+	CREATE_SHADER_MODULE (bloom_comp);
 	CREATE_SHADER_MODULE (cs_tex_warp_comp);
 	CREATE_SHADER_MODULE (indirect_comp);
 	CREATE_SHADER_MODULE (indirect_clear_comp);
@@ -4351,6 +4384,7 @@ static void R_DestroyShaderModules ()
 	DESTROY_SHADER_MODULE (mboit_resolve_msaa_frag);
 	DESTROY_SHADER_MODULE (screen_effects_8bit_comp);
 	DESTROY_SHADER_MODULE (screen_effects_10bit_comp);
+	DESTROY_SHADER_MODULE (bloom_comp);
 	DESTROY_SHADER_MODULE (cs_tex_warp_comp);
 	DESTROY_SHADER_MODULE (indirect_comp);
 	DESTROY_SHADER_MODULE (indirect_clear_comp);
@@ -4546,6 +4580,8 @@ void R_DestroyPipelines (void)
 	}
 	vkDestroyPipeline (vulkan_globals.device, vulkan_globals.screen_effects_pipeline.handle, NULL);
 	vulkan_globals.screen_effects_pipeline.handle = VK_NULL_HANDLE;
+	vkDestroyPipeline (vulkan_globals.device, vulkan_globals.bloom_pipeline.handle, NULL);
+	vulkan_globals.bloom_pipeline.handle = VK_NULL_HANDLE;
 
 	vkDestroyPipeline (vulkan_globals.device, vulkan_globals.cs_tex_warp_pipeline.handle, NULL);
 	vulkan_globals.cs_tex_warp_pipeline.handle = VK_NULL_HANDLE;

@@ -1,0 +1,59 @@
+#version 460
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_shading_language_420pack : enable
+
+// Cinderkirk: bloom. Pass 0 takes the bright part of the scene at a quarter
+// of its size; passes 1 and 2 blur that across and then down. The screen
+// effects pass adds the result back over the scene.
+
+layout (push_constant) uniform PushConsts
+{
+	vec2  input_texel;	// 1 / the input's size
+	uvec2 output_size;
+	uint  pass;
+	float threshold;
+}
+push_constants;
+
+layout (set = 0, binding = 0) uniform sampler2D input_tex;
+layout (set = 1, binding = 0, rgba16f) uniform writeonly image2D output_image;
+
+// A 9-tap gaussian folded into 5 bilinear fetches, spread over twice the texels.
+const float OFFSETS[3] = {0.0f, 1.3846153846f * 2.0f, 3.2307692308f * 2.0f};
+const float WEIGHTS[3] = {0.2270270270f, 0.3162162162f, 0.0702702703f};
+
+layout (local_size_x = 8, local_size_y = 8) in;
+void main ()
+{
+	const uvec2 pos = gl_GlobalInvocationID.xy;
+	if (pos.x >= push_constants.output_size.x || pos.y >= push_constants.output_size.y)
+		return;
+	const vec2 uv = (vec2 (pos) + 0.5f) / vec2 (push_constants.output_size);
+	vec3	   color;
+
+	if (push_constants.pass == 0)
+	{
+		// Four bilinear fetches average the 4x4 texels under this one.
+		const vec2 t = push_constants.input_texel;
+		color = 0.25f * (texture (input_tex, uv + vec2 (-t.x, -t.y)).rgb + texture (input_tex, uv + vec2 (t.x, -t.y)).rgb +
+						 texture (input_tex, uv + vec2 (-t.x, t.y)).rgb + texture (input_tex, uv + vec2 (t.x, t.y)).rgb);
+		// Only what's brighter than the threshold glows, with a soft knee.
+		const float bright = max (color.r, max (color.g, color.b));
+		const float knee = 0.5f * push_constants.threshold;
+		float		soft = clamp (bright - push_constants.threshold + knee, 0.0f, 2.0f * knee);
+		soft = soft * soft / (4.0f * knee + 1e-4f);
+		const float amount = max (soft, bright - push_constants.threshold) / max (bright, 1e-4f);
+		color *= amount;
+	}
+	else
+	{
+		const vec2 dir = (push_constants.pass == 1) ? vec2 (push_constants.input_texel.x, 0.0f) : vec2 (0.0f, push_constants.input_texel.y);
+		color = texture (input_tex, uv).rgb * WEIGHTS[0];
+		for (int i = 1; i < 3; ++i)
+		{
+			color += texture (input_tex, uv + dir * OFFSETS[i]).rgb * WEIGHTS[i];
+			color += texture (input_tex, uv - dir * OFFSETS[i]).rgb * WEIGHTS[i];
+		}
+	}
+	imageStore (output_image, ivec2 (pos), vec4 (color, 1.0f));
+}

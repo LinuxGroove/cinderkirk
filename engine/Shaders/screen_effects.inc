@@ -15,6 +15,7 @@ layout (set = 0, binding = 4) uniform PaletteOctree
 	OctreeNode nodes[NUM_PALETTE_OCTREE_NODES];
 }
 palette_octree;
+layout (set = 0, binding = 5) uniform sampler2D bloom_tex;	// Cinderkirk: bloom.comp's result
 
 layout (push_constant) uniform PushConsts
 {
@@ -28,6 +29,7 @@ layout (push_constant) uniform PushConsts
 	float poly_blend_b;
 	float poly_blend_a;
 	float menu_alpha;
+	float bloom;
 }
 push_constants;
 
@@ -39,6 +41,7 @@ float blue_noise (ivec2 u)
 #define SCREEN_EFFECT_FLAG_WATER_WARP 0x4
 #define SCREEN_EFFECT_FLAG_PALETTIZE  0x8
 #define SCREEN_EFFECT_FLAG_MENU		  0x10
+#define SCREEN_EFFECT_FLAG_BLOOM	  0x20
 
 layout (local_size_x = 8, local_size_y = 8) in;
 void main ()
@@ -65,6 +68,9 @@ void main ()
 	}
 	else
 		color = texelFetch (input_tex, ivec2 (min (push_constants.clamp_size.x, pos_x), min (push_constants.clamp_size.y, pos_y)), 0);
+
+	[[branch]] if ((push_constants.flags & SCREEN_EFFECT_FLAG_BLOOM) != 0)
+		color.rgb += push_constants.bloom * texture (bloom_tex, (vec2 (pos_x, pos_y) + 0.5f) * push_constants.screen_size_rcp).rgb;
 
 	[[branch]] if ((push_constants.flags & SCREEN_EFFECT_FLAG_PALETTIZE) != 0)
 	{

@@ -115,6 +115,8 @@ static cvar_t vid_maxframelatency = {"vid_maxframelatency", "2", CVAR_ARCHIVE};	
 static cvar_t vid_desktopfullscreen = {"vid_desktopfullscreen", "1", CVAR_ARCHIVE}; // QuakeSpasm
 static cvar_t vid_borderless = {"vid_borderless", "0", CVAR_ARCHIVE};				// QuakeSpasm
 cvar_t		  vid_palettize = {"vid_palettize", "0", CVAR_ARCHIVE};
+cvar_t		  r_bloom = {"r_bloom", "0.6", CVAR_ARCHIVE};			   // Cinderkirk: how strongly bright things glow, 0 for none
+cvar_t		  r_bloom_threshold = {"r_bloom_threshold", "0.7", CVAR_ARCHIVE}; // how bright a thing must be to glow
 cvar_t		  vid_filter = {"vid_filter", "1", CVAR_ARCHIVE};
 cvar_t		  vid_anisotropic = {"vid_anisotropic", "1", CVAR_ARCHIVE};
 cvar_t		  vid_fsaa = {"vid_fsaa", "4", CVAR_ARCHIVE};
@@ -154,6 +156,8 @@ static vulkan_memory_t	depth_buffer_memory;
 static VkImageView		depth_buffer_view;
 static vulkan_memory_t	color_buffers_memory[NUM_COLOR_BUFFERS];
 static VkImageView		color_buffers_view[NUM_COLOR_BUFFERS];
+static vulkan_memory_t	bloom_memory[2];	 // Cinderkirk: bloom
+static VkImageView		bloom_views[2];
 static vulkan_memory_t	oit_accum_buffer_memory;
 static vulkan_memory_t	oit_reveal_buffer_memory;
 static VkImageView		oit_accum_buffer_view;
@@ -2012,6 +2016,158 @@ static void GL_CreateColorBuffer (void)
 		GL_CreateOITBuffers ();
 }
 
+/*
+===============
+GL_CreateBloomImages
+
+Cinderkirk: two images a quarter of the render size, which bloom.comp
+fills with the scene's bright parts and blurs between.
+===============
+*/
+static void GL_CreateBloomImages (void)
+{
+	VkResult err;
+
+	vulkan_globals.bloom_width = q_max (1, (vid.render_width + 3) / 4);
+	vulkan_globals.bloom_height = q_max (1, (vid.render_height + 3) / 4);
+
+	for (int i = 0; i < 2; ++i)
+	{
+		ZEROED_STRUCT (VkImageCreateInfo, image_create_info);
+		image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		image_create_info.imageType = VK_IMAGE_TYPE_2D;
+		image_create_info.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+		image_create_info.extent.width = vulkan_globals.bloom_width;
+		image_create_info.extent.height = vulkan_globals.bloom_height;
+		image_create_info.extent.depth = 1;
+		image_create_info.mipLevels = 1;
+		image_create_info.arrayLayers = 1;
+		image_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
+		image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+		image_create_info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+
+		assert (vulkan_globals.bloom_images[i] == VK_NULL_HANDLE);
+		err = vkCreateImage (vulkan_globals.device, &image_create_info, NULL, &vulkan_globals.bloom_images[i]);
+		if (err != VK_SUCCESS)
+			Sys_Error ("vkCreateImage failed with code %i", (int)err);
+		GL_SetObjectName ((uint64_t)vulkan_globals.bloom_images[i], VK_OBJECT_TYPE_IMAGE, va ("Bloom %d", i));
+
+		VkMemoryRequirements memory_requirements;
+		vkGetImageMemoryRequirements (vulkan_globals.device, vulkan_globals.bloom_images[i], &memory_requirements);
+
+		ZEROED_STRUCT (VkMemoryAllocateInfo, memory_allocate_info);
+		memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		memory_allocate_info.allocationSize = memory_requirements.size;
+		memory_allocate_info.memoryTypeIndex = GL_MemoryTypeFromProperties (memory_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 0);
+
+		assert (bloom_memory[i].handle == VK_NULL_HANDLE);
+		R_AllocateVulkanMemory (&bloom_memory[i], &memory_allocate_info, VULKAN_MEMORY_TYPE_DEVICE, &num_vulkan_misc_allocations);
+		GL_SetObjectName ((uint64_t)bloom_memory[i].handle, VK_OBJECT_TYPE_DEVICE_MEMORY, va ("Bloom %d", i));
+
+		err = vkBindImageMemory (vulkan_globals.device, vulkan_globals.bloom_images[i], bloom_memory[i].handle, 0);
+		if (err != VK_SUCCESS)
+			Sys_Error ("vkBindImageMemory failed with code %i", (int)err);
+
+		ZEROED_STRUCT (VkImageViewCreateInfo, image_view_create_info);
+		image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		image_view_create_info.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+		image_view_create_info.image = vulkan_globals.bloom_images[i];
+		image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		image_view_create_info.subresourceRange.levelCount = 1;
+		image_view_create_info.subresourceRange.layerCount = 1;
+		image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+
+		assert (bloom_views[i] == VK_NULL_HANDLE);
+		err = vkCreateImageView (vulkan_globals.device, &image_view_create_info, NULL, &bloom_views[i]);
+		if (err != VK_SUCCESS)
+			Sys_Error ("vkCreateImageView failed with code %i", (int)err);
+		GL_SetObjectName ((uint64_t)bloom_views[i], VK_OBJECT_TYPE_IMAGE_VIEW, va ("Bloom View %d", i));
+	}
+}
+
+/*
+===============
+GL_UpdateBloomDescriptorSets
+===============
+*/
+static void GL_UpdateBloomDescriptorSets (void)
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		if (vulkan_globals.bloom_read_sets[i] != VK_NULL_HANDLE)
+			R_FreeDescriptorSet (vulkan_globals.bloom_read_sets[i], &vulkan_globals.single_texture_set_layout);
+		vulkan_globals.bloom_read_sets[i] = R_AllocateDescriptorSet (&vulkan_globals.single_texture_set_layout);
+
+		ZEROED_STRUCT (VkDescriptorImageInfo, image_info);
+		image_info.imageView = (i == 0) ? color_buffers_view[1] : bloom_views[i - 1];
+		image_info.imageLayout = (i == 0) ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_GENERAL;
+		image_info.sampler = vulkan_globals.linear_sampler;
+
+		ZEROED_STRUCT (VkWriteDescriptorSet, write);
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstBinding = 0;
+		write.descriptorCount = 1;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		write.dstSet = vulkan_globals.bloom_read_sets[i];
+		write.pImageInfo = &image_info;
+		vkUpdateDescriptorSets (vulkan_globals.device, 1, &write, 0, NULL);
+	}
+	for (int i = 0; i < 2; ++i)
+	{
+		if (vulkan_globals.bloom_write_sets[i] != VK_NULL_HANDLE)
+			R_FreeDescriptorSet (vulkan_globals.bloom_write_sets[i], &vulkan_globals.single_texture_cs_write_set_layout);
+		vulkan_globals.bloom_write_sets[i] = R_AllocateDescriptorSet (&vulkan_globals.single_texture_cs_write_set_layout);
+
+		ZEROED_STRUCT (VkDescriptorImageInfo, image_info);
+		image_info.imageView = bloom_views[i];
+		image_info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+		ZEROED_STRUCT (VkWriteDescriptorSet, write);
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstBinding = 0;
+		write.descriptorCount = 1;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		write.dstSet = vulkan_globals.bloom_write_sets[i];
+		write.pImageInfo = &image_info;
+		vkUpdateDescriptorSets (vulkan_globals.device, 1, &write, 0, NULL);
+	}
+}
+
+/*
+===============
+GL_DestroyBloom
+===============
+*/
+static void GL_DestroyBloom (void)
+{
+	for (int i = 0; i < 3; ++i)
+		if (vulkan_globals.bloom_read_sets[i] != VK_NULL_HANDLE)
+		{
+			R_FreeDescriptorSet (vulkan_globals.bloom_read_sets[i], &vulkan_globals.single_texture_set_layout);
+			vulkan_globals.bloom_read_sets[i] = VK_NULL_HANDLE;
+		}
+	for (int i = 0; i < 2; ++i)
+	{
+		if (vulkan_globals.bloom_write_sets[i] != VK_NULL_HANDLE)
+		{
+			R_FreeDescriptorSet (vulkan_globals.bloom_write_sets[i], &vulkan_globals.single_texture_cs_write_set_layout);
+			vulkan_globals.bloom_write_sets[i] = VK_NULL_HANDLE;
+		}
+		if (bloom_views[i] != VK_NULL_HANDLE)
+		{
+			vkDestroyImageView (vulkan_globals.device, bloom_views[i], NULL);
+			bloom_views[i] = VK_NULL_HANDLE;
+		}
+		if (vulkan_globals.bloom_images[i] != VK_NULL_HANDLE)
+		{
+			vkDestroyImage (vulkan_globals.device, vulkan_globals.bloom_images[i], NULL);
+			vulkan_globals.bloom_images[i] = VK_NULL_HANDLE;
+		}
+		if (bloom_memory[i].handle != VK_NULL_HANDLE)
+			R_FreeVulkanMemory (&bloom_memory[i], &num_vulkan_misc_allocations);
+	}
+}
+
 static void GL_CreateOITImage (VkImage *image, vulkan_memory_t *memory, VkImageView *view, VkFormat format, const char *name)
 {
 	VkResult err;
@@ -2427,7 +2583,14 @@ void GL_UpdateDescriptorSets (void)
 	blue_noise_image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	blue_noise_image_info.sampler = vulkan_globals.linear_sampler;
 
-	ZEROED_STRUCT_ARRAY (VkWriteDescriptorSet, screen_effects_writes, 5);
+	GL_UpdateBloomDescriptorSets ();
+
+	ZEROED_STRUCT (VkDescriptorImageInfo, bloom_image_info);
+	bloom_image_info.imageView = bloom_views[0];
+	bloom_image_info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+	bloom_image_info.sampler = vulkan_globals.linear_sampler;
+
+	ZEROED_STRUCT_ARRAY (VkWriteDescriptorSet, screen_effects_writes, 6);
 	screen_effects_writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	screen_effects_writes[0].dstBinding = 0;
 	screen_effects_writes[0].dstArrayElement = 0;
@@ -2467,6 +2630,14 @@ void GL_UpdateDescriptorSets (void)
 	screen_effects_writes[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	screen_effects_writes[4].dstSet = vulkan_globals.screen_effects_desc_set;
 	screen_effects_writes[4].pBufferInfo = &palette_octree_info;
+
+	screen_effects_writes[5].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	screen_effects_writes[5].dstBinding = 5;
+	screen_effects_writes[5].dstArrayElement = 0;
+	screen_effects_writes[5].descriptorCount = 1;
+	screen_effects_writes[5].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	screen_effects_writes[5].dstSet = vulkan_globals.screen_effects_desc_set;
+	screen_effects_writes[5].pImageInfo = &bloom_image_info;
 
 	vkUpdateDescriptorSets (vulkan_globals.device, countof (screen_effects_writes), screen_effects_writes, 0, NULL);
 
@@ -2842,6 +3013,7 @@ static void GL_CreateRenderResources (void)
 
 	VID_GetRenderSize (&vid.render_width, &vid.render_height);
 	GL_CreateColorBuffer ();
+	GL_CreateBloomImages ();
 	if (vid.render_width != vid.width || vid.render_height != vid.height)
 		GL_CreateUIColorBuffer ();
 	GL_CreateDepthBuffer ();
@@ -2923,6 +3095,8 @@ static void GL_DestroyRenderResources (void)
 	}
 
 	GL_DestroyOITBuffers ();
+
+	GL_DestroyBloom ();
 
 	for (int i = 0; i < NUM_COLOR_BUFFERS; ++i)
 	{
@@ -3605,6 +3779,9 @@ task_handle_t GL_EndRendering (qboolean use_tasks, qboolean swapchain)
 		.use_mboit = R_UseMBOIT (),
 		.render_warp = render_warp,
 		.vid_palettize = vid_palettize.value != 0,
+		.bloom = r_bloom.value > 0 && !vid_palettize.value,
+		.bloom_strength = r_bloom.value,
+		.bloom_threshold = CLAMP (0.05f, r_bloom_threshold.value, 1.0f),
 		.polyblend = gl_polyblend.value != 0,
 		.menu = key_dest == key_menu,
 		.menu_alpha = 1.0f - M_MenuPreviewFraction (),
@@ -3976,6 +4153,8 @@ void VID_Init (void)
 	Cvar_RegisterVariable (&vid_desktopfullscreen); // QuakeSpasm
 	Cvar_RegisterVariable (&vid_borderless);		// QuakeSpasm
 	Cvar_RegisterVariable (&vid_palettize);
+	Cvar_RegisterVariable (&r_bloom);
+	Cvar_RegisterVariable (&r_bloom_threshold);
 #if defined(_DEBUG)
 	Cvar_RegisterVariable (&r_raydebug);
 #endif

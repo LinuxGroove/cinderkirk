@@ -427,6 +427,11 @@ typedef struct
 	vulkan_pipeline_t		 mboit_resolve_pipeline;
 	vulkan_pipeline_t		 screen_effects_pipeline;
 	vulkan_pipeline_t		 cs_tex_warp_pipeline;
+	vulkan_pipeline_t		 bloom_pipeline;			  // Cinderkirk
+	VkImage					 bloom_images[2];		  // Cinderkirk: a quarter of the render size
+	VkDescriptorSet			 bloom_read_sets[3];	  // the scene, then each bloom image, to sample
+	VkDescriptorSet			 bloom_write_sets[2];	  // each bloom image, to write
+	uint32_t				 bloom_width, bloom_height;
 	vulkan_pipeline_t		 showtris_pipeline[MAIN_RENDER_PASS_VARIANT_COUNT];
 	vulkan_pipeline_t		 showtris_indirect_pipeline[MAIN_RENDER_PASS_VARIANT_COUNT];
 	vulkan_pipeline_t		 showtris_depth_test_pipeline[MAIN_RENDER_PASS_VARIANT_COUNT];

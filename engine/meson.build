@@ -42,6 +42,7 @@ shaders = [
     'Shaders/draw_pic_xbr_alphatest.frag',
     'Shaders/draw_pic_xbr.vert',
     'Shaders/cs_tex_warp.comp',
+    'Shaders/bloom.comp',
     'Shaders/indirect.comp',
     'Shaders/indirect_clear.comp',
     'Shaders/postprocess.frag',

@@ -521,6 +521,7 @@ typedef struct screen_effect_constants_s
 	float	 poly_blend_b;
 	float	 poly_blend_a;
 	float	 menu_alpha;
+	float	 bloom;
 } screen_effect_constants_t;
 
 typedef struct ray_debug_constants_s
@@ -545,6 +546,85 @@ typedef struct ray_debug_constants_s
 #define SCREEN_EFFECT_FLAG_WATER_WARP 0x4
 #define SCREEN_EFFECT_FLAG_PALETTIZE  0x8
 #define SCREEN_EFFECT_FLAG_MENU		  0x10
+#define SCREEN_EFFECT_FLAG_BLOOM	  0x20
+
+typedef struct bloom_constants_s
+{
+	float	 input_texel_x;
+	float	 input_texel_y;
+	uint32_t output_width;
+	uint32_t output_height;
+	uint32_t pass;
+	float	 threshold;
+} bloom_constants_t;
+
+/*
+===============
+R_Bloom
+
+Cinderkirk: the scene's bright parts at a quarter size, blurred across and
+down, for the screen effects to add back. The scene must already be readable.
+===============
+*/
+static void R_Bloom (cb_context_t *cbx, end_rendering_parms_t *parms)
+{
+	R_BeginDebugUtilsLabel (cbx, "Bloom");
+
+	VkImageMemoryBarrier barriers[2];
+	for (int i = 0; i < 2; ++i)
+	{
+		barriers[i] = (VkImageMemoryBarrier){
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.srcAccessMask = 0,
+			.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+			.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.image = vulkan_globals.bloom_images[i],
+			.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1}};
+	}
+	vkCmdPipelineBarrier (cbx->cb, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, NULL, 0, NULL, 2, barriers);
+
+	R_BindPipeline (cbx, VK_PIPELINE_BIND_POINT_COMPUTE, vulkan_globals.bloom_pipeline);
+	const uint32_t w = vulkan_globals.bloom_width;
+	const uint32_t h = vulkan_globals.bloom_height;
+	// The scene into image 0, image 0 across into 1, image 1 down into 0.
+	const int reads[3] = {0, 1, 2};
+	const int writes[3] = {0, 1, 0};
+	for (uint32_t pass = 0; pass < 3; ++pass)
+	{
+		if (pass > 0)
+		{
+			const VkMemoryBarrier memory_barrier = {
+				.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER,
+				.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+				.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+			};
+			vkCmdPipelineBarrier (cbx->cb, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &memory_barrier, 0, NULL, 0, NULL);
+		}
+		const VkDescriptorSet sets[2] = {vulkan_globals.bloom_read_sets[reads[pass]], vulkan_globals.bloom_write_sets[writes[pass]]};
+		vkCmdBindDescriptorSets (cbx->cb, VK_PIPELINE_BIND_POINT_COMPUTE, vulkan_globals.bloom_pipeline.layout.handle, 0, 2, sets, 0, NULL);
+		const bloom_constants_t constants = {
+			pass == 0 ? 1.0f / (float)parms->render_width : 1.0f / (float)w,
+			pass == 0 ? 1.0f / (float)parms->render_height : 1.0f / (float)h,
+			w,
+			h,
+			pass,
+			parms->bloom_threshold,
+		};
+		R_PushConstants (cbx, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof (constants), &constants);
+		vkCmdDispatch (cbx->cb, (w + 7) / 8, (h + 7) / 8, 1);
+	}
+
+	const VkMemoryBarrier memory_barrier = {
+		.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER,
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+	};
+	vkCmdPipelineBarrier (cbx->cb, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &memory_barrier, 0, NULL, 0, NULL);
+	R_EndDebugUtilsLabel (cbx);
+}
 
 /*
 ===============
@@ -593,6 +673,9 @@ static void R_ScreenEffects (cb_context_t *cbx, qboolean enabled, end_rendering_
 
 		GL_SetCanvas (cbx, CANVAS_NONE); // Invalidate canvas so push constants get set later
 
+		if (parms->bloom)
+			R_Bloom (cbx, parms);
+
 		vulkan_pipeline_t *pipeline = NULL;
 #if defined(_DEBUG)
 		if (parms->ray_debug)
@@ -618,6 +701,8 @@ static void R_ScreenEffects (cb_context_t *cbx, qboolean enabled, end_rendering_
 				screen_effect_flags |= SCREEN_EFFECT_FLAG_PALETTIZE;
 			if (parms->menu)
 				screen_effect_flags |= SCREEN_EFFECT_FLAG_MENU;
+			if (parms->bloom)
+				screen_effect_flags |= SCREEN_EFFECT_FLAG_BLOOM;
 
 			const screen_effect_constants_t push_constants = {
 				parms->render_width - 1,
@@ -632,6 +717,7 @@ static void R_ScreenEffects (cb_context_t *cbx, qboolean enabled, end_rendering_
 				(float)parms->v_blend[2] / 255.0f,
 				(float)parms->v_blend[3] / 255.0f,
 				parms->menu_alpha,
+				parms->bloom_strength,
 			};
 			R_PushConstants (cbx, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof (push_constants), &push_constants);
 		}
@@ -766,7 +852,7 @@ uint32_t R_RecordFrame (
 	const main_render_pass_variant_t variant = parms->use_mboit ? MAIN_RENDER_PASS_MBOIT : parms->use_oit ? MAIN_RENDER_PASS_OIT : MAIN_RENDER_PASS_STANDARD;
 	const frame_desc_t				*frame = &current_layout.variants[variant];
 	VkCommandBuffer					 command_buffer = vulkan_globals.primary_cb_contexts[PCBX_RENDER_PASSES].cb;
-	const bool	 screen_effects = parms->render_warp || parms->vid_palettize || (parms->polyblend && parms->v_blend[3]) || parms->menu || parms->ray_debug;
+	const bool	 screen_effects = parms->render_warp || parms->vid_palettize || (parms->polyblend && parms->v_blend[3]) || parms->menu || parms->ray_debug || parms->bloom;
 	const bool	 msaa = current_layout.samples != VK_SAMPLE_COUNT_1_BIT;
 	VkClearValue clear_values[MAX_PASS_ATTACHMENTS] = {0};
 	clear_values[0] = parms->color_clear_value;
