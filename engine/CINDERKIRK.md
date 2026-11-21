@@ -12,6 +12,7 @@ This folder is [vkQuake](https://github.com/Novum/vkQuake) at tag **1.37.0**, wi
 | `Quake/gl_vidsdl.c`, `Quake/steam.c` | The window title and Vulkan application name are Cinderkirk |
 | `Quake/gl_screen.c` | Centerprints draw `{+command}` as button glyphs (`glyph.c`). The LinuxGroove Games splash (`gfx/splash.png`, scaled to cover the screen) for 1.5 s at start-up, fading out; `-nosplash` skips it |
 | `Quake/cmd.c` | `+commands` on the command line are read from argv: the `cmdline` copy they came from stops at 256 characters (a long `-basedir` and `-userdir` cut `+map start` to `+map st`) and took a `+` inside a path as a command. **Upstream** |
+| `Quake/gl_model.c` | MD3 and MD5 skins load each distinct file once: a frame group whose skin name matches an earlier group's shares its texture. Before, every skin and glow map was uploaded four times (318 textures and 4.6 GB on the Pithead, and Foundry 2 ran a 12 GB card out of memory; now 149 and 1.5 GB). **Upstream** |
 | `Quake/host.c` | The game opens on the main menu unless the command line starts a map, a save, a demo or a connection |
 | `Quake/menu.c` | How to Play has Cinderkirk's three pages (`NUM_HELP_PAGES`), drawn by `tools/menu_art.py` |
 | `Quake/sbar.c` | HUD style 3, the Foundry bar, is the default and calls `sbar_foundry.c`; the classic and modern bars keep a strip for Pressure (the game code's stat 32) |

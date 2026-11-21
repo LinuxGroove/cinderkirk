@@ -5277,7 +5277,7 @@ static void Mod_LoadMDXSkinTask (int i, load_skin_MDX_task_args_t *args)
 
 	const char *basic_texname = skins[skin_index].framegroups[f].c_str;
 
-	if (!basic_texname)
+	if (!basic_texname[0]) // no such group, or one that shares an earlier group's texture
 		return;
 
 #define TRY_LOAD_FULLBRIGHTS(tex_name)                                                         \
@@ -5415,8 +5415,34 @@ static size_t Mod_LoadMDXSkinsByIndex (
 			break;
 	}
 
+	// Cinderkirk: a frame group whose name is an earlier group's (MD3 skin
+	// names rarely vary by group) shares that texture instead of uploading
+	// the same image again: four copies of every skin filled a 12 GB card.
+	TEMP_ALLOC_ZEROED (int, same_as, numskins * MAX_FRAMEGROUPS);
+	for (int skin_index = 0; skin_index < effective_num_skins; skin_index++)
+	{
+		for (int f = 1; f < skin_table[skin_index].numframegroups; f++)
+		{
+			same_as[skin_index * MAX_FRAMEGROUPS + f] = -1;
+			for (int g = 0; g < f; g++)
+			{
+				if (skin_table[skin_index].framegroups[g].c_str[0] &&
+					!strcmp (skin_table[skin_index].framegroups[f].c_str, skin_table[skin_index].framegroups[g].c_str))
+				{
+					same_as[skin_index * MAX_FRAMEGROUPS + f] = g;
+					break;
+				}
+			}
+		}
+	}
+	TEMP_ALLOC_ZEROED (skin_def_t, unique_table, numskins);
+	memcpy (unique_table, skin_table, sizeof (skin_def_t) * numskins);
+	for (int i = 0; i < effective_num_skins * MAX_FRAMEGROUPS; i++)
+		if (i % MAX_FRAMEGROUPS && same_as[i] >= 0)
+			unique_table[i / MAX_FRAMEGROUPS].framegroups[i % MAX_FRAMEGROUPS].c_str[0] = 0;
+
 	// load textures: (concurrently)
-	load_skin_MDX_task_args_t args = {.mod = mod, .surf = surf, .skins = skin_table};
+	load_skin_MDX_task_args_t args = {.mod = mod, .surf = surf, .skins = unique_table};
 
 	if (!Tasks_IsWorker () && effective_num_skins > 1)
 	{
@@ -5431,6 +5457,18 @@ static size_t Mod_LoadMDXSkinsByIndex (
 			Mod_LoadMDXSkinTask (i, &args);
 		}
 	}
+
+	for (int i = 0; i < effective_num_skins * MAX_FRAMEGROUPS; i++)
+	{
+		const int skin_index = i / MAX_FRAMEGROUPS, f = i % MAX_FRAMEGROUPS;
+		if (f && same_as[i] >= 0)
+		{
+			surf->gltextures[skin_index][f] = surf->gltextures[skin_index][same_as[i]];
+			surf->fbtextures[skin_index][f] = surf->fbtextures[skin_index][same_as[i]];
+		}
+	}
+	TEMP_FREE (unique_table);
+	TEMP_FREE (same_as);
 
 	// normalize skin definitions:
 	// fills out animation array based on existing data (from Ironwail Mod_LoadMD3_PopulateAnimation)
