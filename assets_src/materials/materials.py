@@ -661,6 +661,170 @@ def m_brass(g):
     g.finish(col, g.mixf(dark, 0.22, 0.6), g.add(g.mul(bead, 0.6), g.mul(groove, 0.3)), bump=0.7, metal=1.0)
 
 
+# ------------------------------------------------------------------ the Cisterns
+
+def vstreak(g, seed, across=14.0, lo=0.55, hi=0.75):
+    """Vertical runs down a wall: noise on the tiling torus, many features
+    across and few down, so it streaks and still tiles."""
+    sep = g.node("ShaderNodeSeparateXYZ")
+    g.feed(sep.inputs[0], g.uv)
+    a = g.mul(sep.outputs["X"], TAU)
+    b = g.mul(sep.outputs["Y"], TAU)
+    ra, rb = across / 4.0, 0.35
+    comb = g.node("ShaderNodeCombineXYZ")
+    g.feed(comb.inputs["X"], g.add(g.mul(g.math("COSINE", a), ra), seed * 17.0))
+    g.feed(comb.inputs["Y"], g.mul(g.math("SINE", a), ra))
+    g.feed(comb.inputs["Z"], g.mul(g.math("COSINE", b), rb))
+    nd = g.node("ShaderNodeTexNoise", noise_dimensions="4D")
+    g.feed(nd.inputs["Vector"], comb.outputs[0])
+    g.feed(nd.inputs["W"], g.mul(g.math("SINE", b), rb))
+    nd.inputs["Scale"].default_value = 1.0
+    nd.inputs["Detail"].default_value = 5.0
+    nd.inputs["Roughness"].default_value = 0.6
+    return g.remap(nd.outputs["Fac"], lo, hi)
+
+
+def m_wet_stone(g):
+    """The Cisterns' ashlar: pale stone gone grey-green in the damp, mortar
+    crusted with lime, and wet runs that catch the light."""
+    col, rough, height, mortar = m_stone(g, seed=300.0)
+    col = g.mixc(1.0, col, (0.78, 0.86, 0.84), blend="MULTIPLY")
+    lime = g.mul(mortar, g.remap(g.noise(3.0, 5.0, 0.6, seed=301), 0.4, 0.6))
+    col = g.mixc(lime, col, (0.44, 0.43, 0.38))
+    wet = vstreak(g, 302.0)
+    col = g.mixc(g.mul(wet, 0.5), col, (0.04, 0.05, 0.045))
+    g.finish(col, g.mixf(wet, rough, 0.18), g.add(height, g.mul(lime, 0.15)), bump=1.0)
+
+
+def m_brick_wet(g):
+    """Brick vaults under the water line: black-green slime low and in the
+    joints, white lime bloom where the damp dries out."""
+    col, rough, height, mortar = brick_base(g, seed=310.0)
+    slime = g.remap(g.noise(1.4, 6.0, 0.62, seed=311), 0.45, 0.62)
+    col = g.mixc(slime, col, (0.025, 0.04, 0.025))
+    bloom = g.mul(g.remap(g.noise(2.2, 7.0, 0.6, seed=312), 0.55, 0.7), g.sub(1.0, slime))
+    col = g.mixc(g.mul(bloom, 0.8), col, (0.40, 0.39, 0.35))
+    col = g.mixc(g.mul(mortar, slime), col, (0.012, 0.02, 0.012))
+    wet = g.clamp(g.add(slime, g.mul(vstreak(g, 313.0, 18.0), 0.5)))
+    g.finish(col, g.mixf(wet, rough, 0.2), g.add(height, g.mul(bloom, 0.12)), bump=1.0)
+
+
+def m_lime(g):
+    """Flowstone: lime that has run down the walls for two hundred years in
+    cream curtains, wet and shining, stained rust where iron drips into it."""
+    folds = vstreak(g, 320.0, 22.0, 0.3, 0.8)
+    big = vstreak(g, 321.0, 5.0, 0.35, 0.75)
+    col = g.mixc(folds, (0.27, 0.25, 0.20), (0.45, 0.42, 0.36))
+    col = g.mixc(g.mul(big, 0.4), col, (0.30, 0.22, 0.14))
+    rust = g.mul(vstreak(g, 322.0, 9.0, 0.62, 0.8), 0.8)
+    col = g.mixc(rust, col, (0.30, 0.14, 0.06))
+    nubs = g.remap(g.voronoi(26.0, "F1", seed=323), 0.0, 0.3, 1.0, 0.0)
+    height = g.add(g.add(g.mul(folds, 0.6), g.mul(big, 0.8)), g.mul(nubs, 0.15))
+    g.finish(col, g.mixf(folds, 0.35, 0.15), height, bump=1.0)
+
+
+def m_verdigris(g):
+    """Copper that has stood in the wet: a crust of pale green over brown, the
+    metal showing only where it's been rubbed."""
+    sep = g.node("ShaderNodeSeparateXYZ")
+    g.feed(sep.inputs[0], g.uv)
+    seam = g.remap(g.math("ABSOLUTE", g.sub(g.math("FRACT", g.mul(sep.outputs["X"], 2.0)), 0.5)), 0.485, 0.495)
+    crust = g.noise(3.0, 8.0, 0.65, seed=330)
+    col = g.mixc(crust, (0.12, 0.30, 0.24), (0.30, 0.52, 0.42))
+    brown = g.remap(g.noise(1.2, 5.0, 0.6, seed=331), 0.5, 0.62)
+    col = g.mixc(brown, col, (0.22, 0.11, 0.05))
+    rub = g.remap(g.noise(0.8, 3.0, 0.5, seed=332), 0.7, 0.75)
+    col = g.mixc(rub, col, (0.60, 0.32, 0.16))
+    col = g.mixc(seam, col, (0.04, 0.06, 0.05))
+    height = g.sub(g.mul(crust, 0.4), g.mul(seam, 0.5))
+    g.finish(col, g.mixf(rub, 0.85, 0.3), height, bump=0.8, metal=rub)
+
+
+def m_tank(g):
+    """Riveted iron plate for the quench tanks: four plates to the tile, rows
+    of rivets at the laps, red lead paint flaking off rust."""
+    sep = g.node("ShaderNodeSeparateXYZ")
+    g.feed(sep.inputs[0], g.uv)
+    u, v = sep.outputs["X"], sep.outputs["Y"]
+    lap_u = g.remap(g.math("ABSOLUTE", g.sub(g.math("FRACT", g.mul(u, 2.0)), 0.5)), 0.47, 0.49)
+    lap_v = g.remap(g.math("ABSOLUTE", g.sub(g.math("FRACT", g.mul(v, 2.0)), 0.5)), 0.47, 0.49)
+    lap = g.clamp(g.add(lap_u, lap_v))
+    # Rivets: dots on a fine grid, kept only near the laps.
+    du = g.math("ABSOLUTE", g.sub(g.math("FRACT", g.mul(u, 32.0)), 0.5))
+    dv = g.math("ABSOLUTE", g.sub(g.math("FRACT", g.mul(v, 32.0)), 0.5))
+    dot = g.remap(g.add(g.mul(du, du), g.mul(dv, dv)), 0.03, 0.06, 1.0, 0.0)
+    near_u = g.remap(g.math("ABSOLUTE", g.sub(g.math("FRACT", g.mul(u, 2.0)), 0.5)), 0.40, 0.44)
+    near_v = g.remap(g.math("ABSOLUTE", g.sub(g.math("FRACT", g.mul(v, 2.0)), 0.5)), 0.40, 0.44)
+    rivet = g.mul(dot, g.clamp(g.add(g.mul(near_u, g.sub(1.0, lap_u)), g.mul(near_v, g.sub(1.0, lap_v)))))
+    rustn = g.noise(2.5, 8.0, 0.62, seed=340)
+    paint = g.remap(g.noise(1.6, 6.0, 0.6, seed=341), 0.42, 0.5)
+    col = g.mixc(rustn, (0.10, 0.05, 0.03), (0.30, 0.13, 0.05))
+    col = g.mixc(paint, col, g.mixc(rustn, (0.30, 0.07, 0.04), (0.42, 0.11, 0.06)))
+    col = g.mixc(g.mul(vstreak(g, 342.0, 10.0, 0.6, 0.8), 0.6), col, (0.24, 0.10, 0.04))
+    col = g.mixc(lap, col, (0.05, 0.03, 0.02))
+    height = g.add(g.add(g.mul(paint, 0.12), g.mul(rivet, 0.9)), g.mul(lap, -0.4))
+    g.finish(col, g.mixf(paint, 0.85, 0.55), height, bump=1.0, metal=g.mul(g.sub(1.0, paint), 0.3))
+
+
+def m_white_tile(g):
+    """The quench house's glazed white tiles: crazed, chipped to the red body,
+    grey in the joints and yellowed by steam."""
+    col, fac = g.bricks(8, 16, 0.006, (0.48, 0.47, 0.43), (0.43, 0.42, 0.39), (0.10, 0.10, 0.09), offset=0.0, bias=0.0, smooth=0.05)
+    craze = g.remap(g.voronoi(34.0, "DISTANCE_TO_EDGE", seed=350), 0.0, 0.012, 1.0, 0.0)
+    chip = g.remap(g.noise(7.0, 5.0, 0.6, seed=351), 0.68, 0.71)
+    col = g.mixc(g.mul(craze, 0.35), col, (0.22, 0.20, 0.17))
+    col = g.mixc(chip, col, (0.30, 0.14, 0.09))
+    stain = g.remap(g.noise(0.9, 5.0, 0.6, seed=352), 0.4, 0.75)
+    col = g.mixc(1.0, col, g.mixc(stain, (1.0, 1.0, 1.0), (0.62, 0.55, 0.40)), blend="MULTIPLY")
+    col = g.mixc(g.mul(vstreak(g, 353.0, 16.0, 0.6, 0.8), 0.5), col, (0.20, 0.16, 0.10))
+    height = g.sub(g.sub(1.0, g.mul(fac, 0.8)), g.add(g.mul(chip, 0.3), g.mul(craze, 0.04)))
+    g.finish(col, g.mixf(g.clamp(g.add(fac, chip)), 0.08, 0.8), height, bump=0.8)
+
+
+def m_drain(g):
+    """A drain grate set in the floor: square iron bars over black water."""
+    sep = g.node("ShaderNodeSeparateXYZ")
+    g.feed(sep.inputs[0], g.uv)
+    u8 = g.math("FRACT", g.mul(sep.outputs["X"], 8.0))
+    v8 = g.math("FRACT", g.mul(sep.outputs["Y"], 8.0))
+    bar = g.clamp(g.add(g.remap(g.math("ABSOLUTE", g.sub(u8, 0.5)), 0.30, 0.35),
+                        g.remap(g.math("ABSOLUTE", g.sub(v8, 0.5)), 0.30, 0.35)))
+    rustn = g.noise(3.0, 7.0, 0.62, seed=360)
+    iron = g.mixc(g.remap(rustn, 0.45, 0.65), (0.07, 0.075, 0.075), (0.22, 0.12, 0.06))
+    deep = g.mixc(g.noise(2.0, 3.0, 0.5, seed=361), (0.004, 0.006, 0.006), (0.015, 0.02, 0.018))
+    col = g.mixc(bar, deep, iron)
+    g.finish(col, g.mixf(bar, 0.1, 0.7), g.add(g.mul(bar, 0.9), g.mul(rustn, 0.1)), bump=1.0, metal=g.mul(bar, 0.4))
+
+
+def m_sodden(g):
+    """Sluice-gate planks that have never dried: black oak, swollen, with green
+    at the edges and iron straps bleeding rust."""
+    sep = g.node("ShaderNodeSeparateXYZ")
+    g.feed(sep.inputs[0], g.uv)
+    plank = g.remap(g.math("ABSOLUTE", g.sub(g.math("FRACT", g.mul(sep.outputs["Y"], 6.0)), 0.5)), 0.46, 0.49)
+    n = g.noise(3.0, 6.0, 0.6, seed=370)
+    grain = g.remap(g.math("SINE", g.add(g.mul(sep.outputs["X"], TAU * 3.0), g.mul(n, 12.0))), -1.0, 1.0)
+    col = g.mixc(grain, (0.03, 0.025, 0.018), (0.08, 0.06, 0.04))
+    green = g.mul(g.remap(g.noise(2.0, 5.0, 0.6, seed=371), 0.5, 0.65), g.add(plank, 0.4))
+    col = g.mixc(g.clamp(green), col, (0.03, 0.06, 0.035))
+    strap = g.remap(g.math("ABSOLUTE", g.sub(g.math("FRACT", sep.outputs["X"]), 0.25)), 0.06, 0.05)
+    col = g.mixc(strap, col, g.mixc(n, (0.10, 0.05, 0.03), (0.25, 0.11, 0.05)))
+    col = g.mixc(g.mul(g.mul(vstreak(g, 372.0, 20.0, 0.6, 0.8), g.remap(g.math("ABSOLUTE", g.sub(g.math("FRACT", sep.outputs["X"]), 0.25)), 0.15, 0.05)), 0.7), col, (0.20, 0.08, 0.03))
+    col = g.mixc(plank, col, (0.01, 0.01, 0.008))
+    height = g.add(g.sub(g.mul(grain, 0.2), g.mul(plank, 0.8)), g.mul(strap, 0.6))
+    g.finish(col, g.mixf(strap, 0.3, 0.6), height, bump=0.8, metal=g.mul(strap, 0.4))
+
+
+def m_cistern_water(g):
+    """Cistern water: still, deep green-black, a scum of lime on the top in
+    places. Drawn unlit like every liquid, so kept dark."""
+    ripple = g.noise(2.0, 6.0, 0.55, distort=0.3, seed=380)
+    col = g.mixc(ripple, (0.004, 0.010, 0.008), (0.012, 0.026, 0.020))
+    scum = g.remap(g.noise(1.4, 6.0, 0.6, seed=381), 0.62, 0.72)
+    col = g.mixc(g.mul(scum, 0.6), col, (0.05, 0.055, 0.045))
+    g.finish(col, g.mixf(scum, 0.06, 0.6), g.mul(ripple, 0.5), bump=0.3)
+
+
 MATERIALS = {
     "kirk_brick1": m_brick,
     "kirk_vbrick1": m_vein_brick,
@@ -693,6 +857,15 @@ MATERIALS = {
     "plaster1": m_plaster,
     "lamp_amber1": m_lamp,
     "brass_trim1": m_brass,
+    "cist_stone1": m_wet_stone,
+    "cist_brick1": m_brick_wet,
+    "cist_lime1": m_lime,
+    "verdigris1": m_verdigris,
+    "tank_iron1": m_tank,
+    "cist_tile1": m_white_tile,
+    "cist_drain1": m_drain,
+    "sluice_wood1": m_sodden,
+    "*cistern1": m_cistern_water,
 }
 
 
