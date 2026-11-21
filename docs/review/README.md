@@ -1,0 +1,47 @@
+# Screenshots from a full play-through
+
+Played on p16g3 (RTX PRO 3000 laptop GPU) at 1920x1080. The story ran on main c5fa888, skill 1, in campaign order. The finale was replayed on 5d7a6e6, after the Throat and brake fixes. The Pit fights had 3 bots at skill 2. All shots are scaled to 1280 wide. The line at the top left of some shots is the engine's `timerefresh` frame-rate readout.
+
+- [01-splash.jpg](01-splash.jpg): First launch: the LinuxGroove Games splash, about 2 s.
+- [02-main-menu.jpg](02-main-menu.jpg): The main menu at 5 s: Story, Pit Fights, Options, How to Play, Quit.
+- [03-how-to-play.jpg](03-how-to-play.jpg): How to Play, page 1. The last paragraph runs over the "1 of 3" pager.
+- [04-controls.jpg](04-controls.jpg): Controls: Quake's weapon names (Axe, Shotgun, Nailgun) and "???" for unbound actions.
+- [05-graphics-options.jpg](05-graphics-options.jpg): Graphics options; the small console font is hard to read at 1080p.
+- [06-pit-fights-setup.jpg](06-pit-fights-setup.jpg): Pit Fights setup. The shirt and pants colours don't show on the player model.
+- [07-pithead.jpg](07-pithead.jpg): The Pithead, the hub.
+- [08-pithead-shaft-sign.jpg](08-pithead-shaft-sign.jpg): The Pithead: a shaft entrance names where it goes.
+- [09-foundry-gate.jpg](09-foundry-gate.jpg): foundry1, The Foundry Gate, at spawn.
+- [10-tip-dash-keyboard.jpg](10-tip-dash-keyboard.jpg): The gatehouse tutorial with keyboard glyphs (SHIFT for Dash).
+- [11-tip-overpressure-xbox.jpg](11-tip-overpressure-xbox.jpg): The same tutorial with glyph_set xbox (LT for Overpressure).
+- [12-weapon-wheel.jpg](12-weapon-wheel.jpg): The weapon wheel with all eight weapons; time slows while it's open.
+- [13-foundry-gate-death.jpg](13-foundry-gate-death.jpg): foundry1 at 10 s: the scripted player is already dead (a slag hound in view). The first map holds 30 creatures.
+- [14-complete-screen.jpg](14-complete-screen.jpg): The records screen at the end of a map.
+- [15-bell-pit.jpg](15-bell-pit.jpg): foundry4, The Bell Pit.
+- [16-slag-hounds.jpg](16-slag-hounds.jpg): foundry_s, The Ash Pit: run down by slag hounds.
+- [17-quench-house.jpg](17-quench-house.jpg): cisterns1, The Quench House.
+- [18-gauger.jpg](18-gauger.jpg): cisterns1: a Gauger and its pressure-dial head.
+- [19-long-vault.jpg](19-long-vault.jpg): cisterns2, The Long Vault.
+- [20-flowstone-ashen.jpg](20-flowstone-ashen.jpg): cisterns4, The Flowstone Stair: the flowstone now reads as rock; an Ashen.
+- [21-great-cistern.jpg](21-great-cistern.jpg): cisterns5, The Great Cistern.
+- [22-underwater-murk.jpg](22-underwater-murk.jpg): cisterns5 under water: green murk, little to see.
+- [23-ashen-close.jpg](23-ashen-close.jpg): kilns1, The Charnel Stair: an Ashen up close.
+- [24-ash-galleries.jpg](24-ash-galleries.jpg): kilns3, The Ash Galleries.
+- [25-reliquary.jpg](25-reliquary.jpg): kilns_s, The Reliquary: skull walls, an Ash wraith at the shrine.
+- [26-calcining-floor.jpg](26-calcining-floor.jpg): kilns5, The Calcining Floor: a glowing cracked wall.
+- [27-adit.jpg](27-adit.jpg): vein1, The Adit: mine rails into the Undervein.
+- [28-nearest-filtering.jpg](28-nearest-filtering.jpg): vein2: an Ashen, scattergun puffs as black discs, and a point-blank wall in big square texels (vid_filter 1).
+- [29-hot-workings.jpg](29-hot-workings.jpg): vein4, The Hot Workings.
+- [30-the-founder.jpg](30-the-founder.jpg): vein5: the Founder.
+- [31-founder-fight.jpg](31-founder-fight.jpg): vein5: fighting the Founder.
+- [32-undervein-the-end.jpg](32-undervein-the-end.jpg): The end of a shaft: "The Founder is broken."
+- [33-the-well.jpg](33-the-well.jpg): throat1, The Throat: the stair round the well, no rail.
+- [34-throat-crash-before-fix.jpg](34-throat-crash-before-fix.jpg): throat2 before cc4ad94: shooting the Throat stopped the game with Host_Error (fixed).
+- [35-throat-rises.jpg](35-throat-rises.jpg): throat2 (5d7a6e6): the Throat rises under the Great Bell.
+- [36-nothing-you-carry.jpg](36-nothing-you-carry.jpg): Shooting it: "Nothing you carry can hurt it."
+- [37-brake.jpg](37-brake.jpg): A brake knocked off: "A brake is off, and the bell drops."
+- [38-bell-down-complete.jpg](38-bell-down-complete.jpg): All four brakes off: the bell is down on the Throat, records screen.
+- [39-the-end.jpg](39-the-end.jpg): THE END and the epilogue.
+- [40-pit-scoreboard.jpg](40-pit-scoreboard.jpg): Pit fight, The Cooling Yard: dead, with the scoreboard.
+- [41-slag-run.jpg](41-slag-run.jpg): Pit fight, The Slag Run: half the deaths were falls into slag.
+- [42-shot-mortar.jpg](42-shot-mortar.jpg): Pit fight, The Charnel Kiln: the Shot Mortar.
+- [43-coop-guest.jpg](43-coop-guest.jpg): Co-op, the guest's view of foundry1.
