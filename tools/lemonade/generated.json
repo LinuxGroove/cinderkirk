@@ -1,0 +1,894 @@
+{
+	"files": {
+		"assets_src/music/track02.ogg": {
+			"kind": "music",
+			"model": "ACE-Step-Music",
+			"seed": 98162,
+			"takes": 3,
+			"ask": 180.0,
+			"quality": 5,
+			"made": "2026-11-21",
+			"all_takes": [
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 0,
+					"loop": {
+						"start_s": 17.89,
+						"end_s": 158.168,
+						"crossfade_s": 1.5,
+						"match": 0.03,
+						"beat_match": 0.17,
+						"seam_cost": 0.149
+					},
+					"spread_db": 7.1,
+					"seconds": 140.28,
+					"gain_db": -3.2,
+					"lufs": -18.4,
+					"seed": 98160,
+					"score": 1.654,
+					"parts": {
+						"length": 0.13,
+						"seam": 0.15,
+						"spread": 0.77,
+						"loudness": 0.6
+					}
+				},
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 0,
+					"loop": {
+						"start_s": 22.5,
+						"end_s": 170.89,
+						"crossfade_s": 1.5,
+						"match": 0.0,
+						"beat_match": 0.1,
+						"seam_cost": 0.341
+					},
+					"spread_db": 7.1,
+					"seconds": 148.39,
+					"gain_db": -3.1,
+					"lufs": -14.0,
+					"seed": 98161,
+					"score": 1.637,
+					"parts": {
+						"length": 0.02,
+						"seam": 0.34,
+						"spread": 0.77,
+						"loudness": 0.5
+					}
+				},
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 11,
+					"loop": {
+						"start_s": 21.5,
+						"end_s": 171.645,
+						"crossfade_s": 1.5,
+						"match": 0.0,
+						"beat_match": 0.16,
+						"seam_cost": 0.203
+					},
+					"spread_db": 2.3,
+					"seconds": 150.14,
+					"gain_db": -3.5,
+					"lufs": -19.1,
+					"seed": 98162,
+					"score": 1.2,
+					"parts": {
+						"clipped": 0.22,
+						"length": 0.0,
+						"seam": 0.2,
+						"spread": 0.0,
+						"loudness": 0.78
+					}
+				}
+			],
+			"prompt": "dark ambient drone, deep low cello drone, distant cracked church bell tolling slowly, wind in a mine shaft, faint metallic creaks, cold and still, abandoned industrial chapel, sparse, no drums, 60 bpm, instrumental, loopable",
+			"backend": "ace-server f65b160 (2026-10-28) --vae-chunk 256",
+			"loop": {
+				"start_s": 21.5,
+				"end_s": 171.645,
+				"crossfade_s": 1.5,
+				"match": 0.0,
+				"beat_match": 0.16,
+				"seam_cost": 0.203
+			},
+			"lufs": -19.1,
+			"seconds": 150.14,
+			"peak_db": -2.9,
+			"rms_db": -19.9
+		},
+		"assets_src/music/track03.ogg": {
+			"kind": "music",
+			"model": "ACE-Step-Music",
+			"seed": 79458,
+			"takes": 3,
+			"ask": 72.0,
+			"quality": 5,
+			"made": "2026-11-21",
+			"all_takes": [
+				{
+					"raw_s": 72.0,
+					"clipped_runs": 0,
+					"loop": {
+						"start_s": 3.85,
+						"end_s": 60.361,
+						"crossfade_s": 1.5,
+						"match": 0.07,
+						"beat_match": 0.1,
+						"seam_cost": 0.262
+					},
+					"spread_db": 3.9,
+					"seconds": 56.51,
+					"gain_db": -3.0,
+					"lufs": -20.1,
+					"seed": 79456,
+					"score": 1.403,
+					"parts": {
+						"length": 0.12,
+						"seam": 0.26,
+						"spread": 0.0,
+						"loudness": 1.03
+					}
+				},
+				{
+					"raw_s": 72.0,
+					"clipped_runs": 0,
+					"loop": {
+						"start_s": 2.95,
+						"end_s": 61.374,
+						"crossfade_s": 1.5,
+						"match": 0.05,
+						"beat_match": 0.12,
+						"seam_cost": 0.502
+					},
+					"spread_db": 4.9,
+					"seconds": 58.42,
+					"gain_db": -3.0,
+					"lufs": -18.5,
+					"seed": 79457,
+					"score": 1.405,
+					"parts": {
+						"length": 0.05,
+						"seam": 0.5,
+						"spread": 0.23,
+						"loudness": 0.62
+					}
+				},
+				{
+					"raw_s": 72.0,
+					"clipped_runs": 0,
+					"loop": {
+						"start_s": 9.0,
+						"end_s": 61.202,
+						"crossfade_s": 1.5,
+						"match": 0.08,
+						"beat_match": 0.06,
+						"seam_cost": 0.305
+					},
+					"spread_db": 2.4,
+					"seconds": 52.2,
+					"gain_db": -3.1,
+					"lufs": -15.1,
+					"seed": 79458,
+					"score": 0.79,
+					"parts": {
+						"length": 0.26,
+						"seam": 0.3,
+						"spread": 0.0,
+						"loudness": 0.23
+					}
+				}
+			],
+			"prompt": "quiet dark ambient interlude, warm low organ drone, soft bowed metal, slow single bell, embers cooling, a breath after a fight, no drums, 60 bpm, instrumental, loopable",
+			"backend": "ace-server f65b160 (2026-10-28) --vae-chunk 256",
+			"loop": {
+				"start_s": 9.0,
+				"end_s": 61.202,
+				"crossfade_s": 1.5,
+				"match": 0.08,
+				"beat_match": 0.06,
+				"seam_cost": 0.305
+			},
+			"lufs": -15.1,
+			"seconds": 52.2,
+			"peak_db": -2.7,
+			"rms_db": -17.2
+		},
+		"assets_src/music/track04.ogg": {
+			"kind": "music",
+			"model": "ACE-Step-Music",
+			"seed": 61585,
+			"takes": 3,
+			"ask": 180.0,
+			"quality": 5,
+			"made": "2026-11-21",
+			"all_takes": [
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 1,
+					"loop": {
+						"start_s": 18.49,
+						"end_s": 153.074,
+						"crossfade_s": 1.5,
+						"match": 0.03,
+						"beat_match": 0.14,
+						"seam_cost": 0.337
+					},
+					"spread_db": 3.6,
+					"seconds": 134.58,
+					"gain_db": -3.0,
+					"lufs": -18.5,
+					"seed": 61584,
+					"score": 1.188,
+					"parts": {
+						"clipped": 0.02,
+						"length": 0.21,
+						"seam": 0.34,
+						"spread": 0.0,
+						"loudness": 0.62
+					}
+				},
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 0,
+					"loop": {
+						"start_s": 8.16,
+						"end_s": 154.55,
+						"crossfade_s": 1.5,
+						"match": 0.11,
+						"beat_match": 0.11,
+						"seam_cost": 0.404
+					},
+					"spread_db": 2.3,
+					"seconds": 146.39,
+					"gain_db": -3.4,
+					"lufs": -17.6,
+					"seed": 61585,
+					"score": 0.852,
+					"parts": {
+						"length": 0.05,
+						"seam": 0.4,
+						"spread": 0.0,
+						"loudness": 0.4
+					}
+				},
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 1,
+					"loop": {
+						"start_s": 4.4,
+						"end_s": 154.25,
+						"crossfade_s": 1.5,
+						"match": 0.0,
+						"beat_match": 0.21,
+						"seam_cost": 0.435
+					},
+					"spread_db": 3.3,
+					"seconds": 149.85,
+					"gain_db": -3.3,
+					"lufs": -18.2,
+					"seed": 61586,
+					"score": 1.007,
+					"parts": {
+						"clipped": 0.02,
+						"length": 0.0,
+						"seam": 0.43,
+						"spread": 0.0,
+						"loudness": 0.55
+					}
+				}
+			],
+			"prompt": "dark industrial ambient, foundry at night, slow heavy hammer on anvil far away, furnace roar, low brass drone, metallic clangs with long reverb, grinding chains, ominous, 70 bpm, instrumental, loopable",
+			"backend": "ace-server f65b160 (2026-10-28) --vae-chunk 256",
+			"loop": {
+				"start_s": 8.16,
+				"end_s": 154.55,
+				"crossfade_s": 1.5,
+				"match": 0.11,
+				"beat_match": 0.11,
+				"seam_cost": 0.404
+			},
+			"lufs": -17.6,
+			"seconds": 146.39,
+			"peak_db": -2.9,
+			"rms_db": -18.8
+		},
+		"assets_src/music/track05.ogg": {
+			"kind": "music",
+			"model": "ACE-Step-Music",
+			"seed": 65921,
+			"takes": 3,
+			"ask": 180.0,
+			"quality": 5,
+			"made": "2026-11-21",
+			"all_takes": [
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 0,
+					"loop": {
+						"start_s": 16.85,
+						"end_s": 172.583,
+						"crossfade_s": 1.5,
+						"match": 0.0,
+						"beat_match": 0.12,
+						"seam_cost": 0.437
+					},
+					"spread_db": 5.8,
+					"seconds": 155.73,
+					"gain_db": -3.2,
+					"lufs": -16.1,
+					"seed": 65920,
+					"score": 0.988,
+					"parts": {
+						"length": 0.08,
+						"seam": 0.44,
+						"spread": 0.45,
+						"loudness": 0.03
+					}
+				},
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 3,
+					"loop": {
+						"start_s": 11.09,
+						"end_s": 159.604,
+						"crossfade_s": 1.5,
+						"match": 0.02,
+						"beat_match": 0.14,
+						"seam_cost": 0.171
+					},
+					"spread_db": 4.2,
+					"seconds": 148.51,
+					"gain_db": -3.6,
+					"lufs": -16.2,
+					"seed": 65921,
+					"score": 0.351,
+					"parts": {
+						"clipped": 0.06,
+						"length": 0.02,
+						"seam": 0.17,
+						"spread": 0.05,
+						"loudness": 0.05
+					}
+				},
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 5,
+					"loop": {
+						"start_s": 22.27,
+						"end_s": 172.861,
+						"crossfade_s": 1.5,
+						"match": 0.05,
+						"beat_match": 0.14,
+						"seam_cost": 0.521
+					},
+					"spread_db": 2.6,
+					"seconds": 150.59,
+					"gain_db": -3.0,
+					"lufs": -17.4,
+					"seed": 65922,
+					"score": 0.979,
+					"parts": {
+						"clipped": 0.1,
+						"length": 0.01,
+						"seam": 0.52,
+						"spread": 0.0,
+						"loudness": 0.35
+					}
+				}
+			],
+			"prompt": "dark ambient, flooded underground cistern, water dripping in huge stone vaults, deep sub bass drone, distant muffled pump thuds, eerie bowed glass, cold green gloom, sparse, no drums, 60 bpm, instrumental, loopable",
+			"backend": "ace-server f65b160 (2026-10-28) --vae-chunk 256",
+			"loop": {
+				"start_s": 11.09,
+				"end_s": 159.604,
+				"crossfade_s": 1.5,
+				"match": 0.02,
+				"beat_match": 0.14,
+				"seam_cost": 0.171
+			},
+			"lufs": -16.2,
+			"seconds": 148.51,
+			"peak_db": -2.9,
+			"rms_db": -17.6
+		},
+		"assets_src/music/track06.ogg": {
+			"kind": "music",
+			"model": "ACE-Step-Music",
+			"seed": 64658,
+			"takes": 3,
+			"ask": 180.0,
+			"quality": 5,
+			"made": "2026-11-21",
+			"all_takes": [
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 0,
+					"loop": {
+						"start_s": 12.91,
+						"end_s": 151.792,
+						"crossfade_s": 1.5,
+						"match": 0.1,
+						"beat_match": 0.11,
+						"seam_cost": 0.32
+					},
+					"spread_db": 2.0,
+					"seconds": 138.88,
+					"gain_db": -3.2,
+					"lufs": -17.1,
+					"seed": 64656,
+					"score": 0.743,
+					"parts": {
+						"length": 0.15,
+						"seam": 0.32,
+						"spread": 0.0,
+						"loudness": 0.28
+					}
+				},
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 0,
+					"loop": {
+						"start_s": 15.3,
+						"end_s": 164.991,
+						"crossfade_s": 1.5,
+						"match": 0.03,
+						"beat_match": 0.09,
+						"seam_cost": 0.132
+					},
+					"spread_db": 5.2,
+					"seconds": 149.69,
+					"gain_db": -2.5,
+					"lufs": -20.4,
+					"seed": 64657,
+					"score": 1.536,
+					"parts": {
+						"length": 0.0,
+						"seam": 0.13,
+						"spread": 0.3,
+						"loudness": 1.1
+					}
+				},
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 0,
+					"loop": {
+						"start_s": 15.59,
+						"end_s": 166.795,
+						"crossfade_s": 1.5,
+						"match": 0.0,
+						"beat_match": 0.13,
+						"seam_cost": 0.133
+					},
+					"spread_db": 5.3,
+					"seconds": 151.21,
+					"gain_db": -3.0,
+					"lufs": -16.4,
+					"seed": 64658,
+					"score": 0.574,
+					"parts": {
+						"length": 0.02,
+						"seam": 0.13,
+						"spread": 0.32,
+						"loudness": 0.1
+					}
+				}
+			],
+			"prompt": "dark ambient, ossuary crypt and bone kilns, low wordless male choir drone, hollow wooden bone percussion, crackling fire, slow hand bells, ash and dread, sacred and wrong, 65 bpm, instrumental, loopable",
+			"backend": "ace-server f65b160 (2026-10-28) --vae-chunk 256",
+			"loop": {
+				"start_s": 15.59,
+				"end_s": 166.795,
+				"crossfade_s": 1.5,
+				"match": 0.0,
+				"beat_match": 0.13,
+				"seam_cost": 0.133
+			},
+			"lufs": -16.4,
+			"seconds": 151.21,
+			"peak_db": -2.7,
+			"rms_db": -19.4
+		},
+		"assets_src/music/track07.ogg": {
+			"kind": "music",
+			"model": "ACE-Step-Music",
+			"seed": 5345,
+			"takes": 3,
+			"ask": 180.0,
+			"quality": 5,
+			"made": "2026-11-21",
+			"all_takes": [
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 1,
+					"loop": {
+						"start_s": 13.14,
+						"end_s": 154.405,
+						"crossfade_s": 1.5,
+						"match": 0.56,
+						"beat_match": 0.12,
+						"seam_cost": 0.247
+					},
+					"spread_db": 6.1,
+					"seconds": 141.26,
+					"gain_db": -3.1,
+					"lufs": -21.0,
+					"seed": 5344,
+					"score": 2.158,
+					"parts": {
+						"clipped": 0.02,
+						"length": 0.12,
+						"seam": 0.25,
+						"spread": 0.52,
+						"loudness": 1.25
+					}
+				},
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 1,
+					"loop": {
+						"start_s": 21.15,
+						"end_s": 171.92,
+						"crossfade_s": 1.5,
+						"match": 0.0,
+						"beat_match": 0.1,
+						"seam_cost": 0.33
+					},
+					"spread_db": 2.5,
+					"seconds": 150.77,
+					"gain_db": -3.4,
+					"lufs": -20.4,
+					"seed": 5345,
+					"score": 1.46,
+					"parts": {
+						"clipped": 0.02,
+						"length": 0.01,
+						"seam": 0.33,
+						"spread": 0.0,
+						"loudness": 1.1
+					}
+				},
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 0,
+					"loop": {
+						"start_s": 11.3,
+						"end_s": 166.527,
+						"crossfade_s": 1.5,
+						"match": 0.02,
+						"beat_match": 0.1,
+						"seam_cost": 0.494
+					},
+					"spread_db": 1.3,
+					"seconds": 155.23,
+					"gain_db": -3.5,
+					"lufs": -23.9,
+					"seed": 5346,
+					"score": 2.539,
+					"parts": {
+						"length": 0.07,
+						"seam": 0.49,
+						"spread": 0.0,
+						"loudness": 1.97
+					}
+				}
+			],
+			"prompt": "dark industrial ambient, deep mine tunnels, rumbling earth, slow steam engine pistons, metal pings of pickaxes far away, low detuned synth drone, creaking timber, claustrophobic, 70 bpm, instrumental, loopable",
+			"backend": "ace-server f65b160 (2026-10-28) --vae-chunk 256",
+			"loop": {
+				"start_s": 21.15,
+				"end_s": 171.92,
+				"crossfade_s": 1.5,
+				"match": 0.0,
+				"beat_match": 0.1,
+				"seam_cost": 0.33
+			},
+			"lufs": -20.4,
+			"seconds": 150.77,
+			"peak_db": -2.9,
+			"rms_db": -21.4
+		},
+		"assets_src/music/track08.ogg": {
+			"kind": "music",
+			"model": "ACE-Step-Music",
+			"seed": 54929,
+			"takes": 3,
+			"ask": 180.0,
+			"quality": 5,
+			"made": "2026-11-21",
+			"all_takes": [
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 5,
+					"loop": {
+						"start_s": 13.35,
+						"end_s": 162.245,
+						"crossfade_s": 1.5,
+						"match": 0.0,
+						"beat_match": 0.12,
+						"seam_cost": 0.375
+					},
+					"spread_db": 4.2,
+					"seconds": 148.9,
+					"gain_db": -3.2,
+					"lufs": -15.7,
+					"seed": 54929,
+					"score": 0.615,
+					"parts": {
+						"clipped": 0.1,
+						"length": 0.01,
+						"seam": 0.38,
+						"spread": 0.05,
+						"loudness": 0.08
+					}
+				},
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 4,
+					"loop": {
+						"start_s": 9.7,
+						"end_s": 175.498,
+						"crossfade_s": 1.5,
+						"match": 0.04,
+						"beat_match": 0.24,
+						"seam_cost": 0.172
+					},
+					"spread_db": 4.5,
+					"seconds": 165.8,
+					"gain_db": -3.2,
+					"lufs": -13.8,
+					"seed": 54930,
+					"score": 1.138,
+					"parts": {
+						"clipped": 0.08,
+						"length": 0.21,
+						"seam": 0.17,
+						"spread": 0.12,
+						"loudness": 0.55
+					}
+				},
+				{
+					"raw_s": 180.0,
+					"clipped_runs": 0,
+					"loop": {
+						"start_s": 17.05,
+						"end_s": 174.714,
+						"crossfade_s": 1.5,
+						"match": 0.06,
+						"beat_match": 0.04,
+						"seam_cost": 0.19
+					},
+					"spread_db": 3.8,
+					"seconds": 157.66,
+					"gain_db": -3.0,
+					"lufs": -17.4,
+					"seed": 54931,
+					"score": 0.642,
+					"parts": {
+						"length": 0.1,
+						"seam": 0.19,
+						"spread": 0.0,
+						"loudness": 0.35
+					}
+				}
+			],
+			"prompt": "doom dark ambient, descending into an endless pit, huge slow cracked bell tolls, sub bass swells, distorted low strings, heat haze, dread building, no drums, 55 bpm, instrumental, loopable",
+			"backend": "ace-server f65b160 (2026-10-28) --vae-chunk 256",
+			"loop": {
+				"start_s": 13.35,
+				"end_s": 162.245,
+				"crossfade_s": 1.5,
+				"match": 0.0,
+				"beat_match": 0.12,
+				"seam_cost": 0.375
+			},
+			"lufs": -15.7,
+			"seconds": 148.9,
+			"peak_db": -2.5,
+			"rms_db": -17.9
+		},
+		"assets_src/music/track09.ogg": {
+			"kind": "music",
+			"model": "ACE-Step-Music",
+			"seed": 2050,
+			"takes": 3,
+			"ask": 144.0,
+			"quality": 5,
+			"made": "2026-11-21",
+			"all_takes": [
+				{
+					"raw_s": 144.0,
+					"clipped_runs": 0,
+					"loop": {
+						"start_s": 16.26,
+						"end_s": 135.553,
+						"crossfade_s": 1.5,
+						"match": 0.01,
+						"beat_match": 0.1,
+						"seam_cost": 0.195
+					},
+					"spread_db": 1.2,
+					"seconds": 119.29,
+					"gain_db": -3.1,
+					"lufs": -15.2,
+					"seed": 2049,
+					"score": 0.407,
+					"parts": {
+						"length": 0.01,
+						"seam": 0.2,
+						"spread": 0.0,
+						"loudness": 0.2
+					}
+				},
+				{
+					"raw_s": 144.0,
+					"clipped_runs": 1,
+					"loop": {
+						"start_s": 7.86,
+						"end_s": 126.97,
+						"crossfade_s": 1.5,
+						"match": 0.01,
+						"beat_match": 0.12,
+						"seam_cost": 0.155
+					},
+					"spread_db": 2.5,
+					"seconds": 119.11,
+					"gain_db": -3.5,
+					"lufs": -15.3,
+					"seed": 2050,
+					"score": 0.365,
+					"parts": {
+						"clipped": 0.02,
+						"length": 0.01,
+						"seam": 0.15,
+						"spread": 0.0,
+						"loudness": 0.17
+					}
+				},
+				{
+					"raw_s": 144.0,
+					"clipped_runs": 5,
+					"loop": {
+						"start_s": 7.94,
+						"end_s": 129.556,
+						"crossfade_s": 1.5,
+						"match": 0.0,
+						"beat_match": 0.19,
+						"seam_cost": 0.188
+					},
+					"spread_db": 2.9,
+					"seconds": 121.62,
+					"gain_db": -3.3,
+					"lufs": -15.3,
+					"seed": 2051,
+					"score": 0.49,
+					"parts": {
+						"clipped": 0.1,
+						"length": 0.03,
+						"seam": 0.19,
+						"spread": 0.0,
+						"loudness": 0.17
+					}
+				}
+			],
+			"prompt": "heavy industrial doom metal, crushing slow distorted baritone guitars, pounding taiko and anvil percussion, church bells, low brass, boss fight in a burning foundry, 90 bpm, instrumental, loopable",
+			"backend": "ace-server f65b160 (2026-10-28) --vae-chunk 256",
+			"loop": {
+				"start_s": 7.86,
+				"end_s": 126.97,
+				"crossfade_s": 1.5,
+				"match": 0.01,
+				"beat_match": 0.12,
+				"seam_cost": 0.155
+			},
+			"lufs": -15.3,
+			"seconds": 119.11,
+			"peak_db": -2.8,
+			"rms_db": -18.0
+		},
+		"assets_src/music/track10.ogg": {
+			"kind": "music",
+			"model": "ACE-Step-Music",
+			"seed": 73687,
+			"takes": 3,
+			"ask": 144.0,
+			"quality": 5,
+			"made": "2026-11-21",
+			"all_takes": [
+				{
+					"raw_s": 144.0,
+					"clipped_runs": 4,
+					"loop": {
+						"start_s": 17.67,
+						"end_s": 134.85,
+						"crossfade_s": 1.5,
+						"match": 0.15,
+						"beat_match": 0.17,
+						"seam_cost": 0.522
+					},
+					"spread_db": 1.6,
+					"seconds": 117.18,
+					"gain_db": -3.4,
+					"lufs": -15.8,
+					"seed": 73685,
+					"score": 0.699,
+					"parts": {
+						"clipped": 0.08,
+						"length": 0.05,
+						"seam": 0.52,
+						"spread": 0.0,
+						"loudness": 0.05
+					}
+				},
+				{
+					"raw_s": 144.0,
+					"clipped_runs": 9,
+					"loop": {
+						"start_s": 15.45,
+						"end_s": 134.969,
+						"crossfade_s": 1.5,
+						"match": 0.0,
+						"beat_match": 0.1,
+						"seam_cost": 0.087
+					},
+					"spread_db": 2.9,
+					"seconds": 119.52,
+					"gain_db": -3.5,
+					"lufs": -16.8,
+					"seed": 73686,
+					"score": 0.475,
+					"parts": {
+						"clipped": 0.18,
+						"length": 0.01,
+						"seam": 0.09,
+						"spread": 0.0,
+						"loudness": 0.2
+					}
+				},
+				{
+					"raw_s": 144.0,
+					"clipped_runs": 9,
+					"loop": {
+						"start_s": 13.02,
+						"end_s": 134.368,
+						"crossfade_s": 1.5,
+						"match": 0.04,
+						"beat_match": 0.21,
+						"seam_cost": 0.175
+					},
+					"spread_db": 3.2,
+					"seconds": 121.35,
+					"gain_db": -3.4,
+					"lufs": -15.9,
+					"seed": 73687,
+					"score": 0.402,
+					"parts": {
+						"clipped": 0.18,
+						"length": 0.02,
+						"seam": 0.17,
+						"spread": 0.0,
+						"loudness": 0.02
+					}
+				}
+			],
+			"prompt": "driving dark industrial, fast mechanical drum machine, anvil hits, distorted bass synth, steam hisses, metal clangs, arena fight in a foundry, aggressive, 130 bpm, instrumental, loopable",
+			"backend": "ace-server f65b160 (2026-10-28) --vae-chunk 256",
+			"loop": {
+				"start_s": 13.02,
+				"end_s": 134.368,
+				"crossfade_s": 1.5,
+				"match": 0.04,
+				"beat_match": 0.21,
+				"seam_cost": 0.175
+			},
+			"lufs": -15.9,
+			"seconds": 121.35,
+			"peak_db": -2.7,
+			"rms_db": -18.5
+		}
+	},
+	"checkpoints": {
+		"ACE-Step-Music": "acestep-v15-xl-sft-Q8_0.gguf, vae-BF16.gguf, Qwen3-Embedding-0.6B-BF16.gguf"
+	}
+}
