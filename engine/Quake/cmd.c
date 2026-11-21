@@ -236,15 +236,19 @@ quake -nosound +cmd amlev1
 */
 void Cmd_StuffCmds_f (void)
 {
-	extern cvar_t cmdline;
-	char		  cmds[CMDLINE_LENGTH];
-	int			  i, j, plus;
-
-	plus = false; // On Unix, argv[0] is command name
-
-	for (i = 0, j = 0; cmdline.string[i]; i++)
+	// Cinderkirk: built from argv rather than the "cmdline" cvar, which is cut
+	// at CMDLINE_LENGTH (long -basedir and -userdir paths lost the end of
+	// "+map start") and took a "+" inside any word, such as a path, as a command.
+	size_t len = 1;
+	for (int i = 1; i < com_argc; i++)
+		len += strlen (com_argv[i]) + 2;
+	char	*cmds = (char *)Mem_Alloc (len);
+	size_t	 j = 0;
+	qboolean plus = false;
+	for (int i = 1; i < com_argc; i++)
 	{
-		if (cmdline.string[i] == '+')
+		const char *a = com_argv[i];
+		if (a[0] == '+')
 		{
 			plus = true;
 			if (j > 0)
@@ -252,15 +256,23 @@ void Cmd_StuffCmds_f (void)
 				cmds[j - 1] = ';';
 				cmds[j++] = ' ';
 			}
+			a++;
 		}
-		else if (cmdline.string[i] == '-' && (i == 0 || cmdline.string[i - 1] == ' ')) // johnfitz -- allow hypenated map names with +map
+		else if (a[0] == '-') // johnfitz -- allow hypenated map names with +map
+		{
 			plus = false;
-		else if (plus)
-			cmds[j++] = cmdline.string[i];
+			continue;
+		}
+		if (!plus)
+			continue;
+		size_t n = strlen (a);
+		memcpy (cmds + j, a, n);
+		j += n;
+		cmds[j++] = ' ';
 	}
 	cmds[j] = 0;
-
 	Cbuf_InsertText (cmds);
+	Mem_Free (cmds);
 }
 
 void Cmd_Exec_f (void)

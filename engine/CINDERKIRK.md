@@ -11,6 +11,8 @@ This folder is [vkQuake](https://github.com/Novum/vkQuake) at tag **1.37.0**, wi
 | `Quake/sys_sdl_unix.c` | The user folder is `~/.cinderkirk` (the snap passes `-userdir` instead) |
 | `Quake/gl_vidsdl.c`, `Quake/steam.c` | The window title and Vulkan application name are Cinderkirk |
 | `Quake/gl_screen.c` | Centerprints draw `{+command}` as button glyphs (`glyph.c`). The LinuxGroove Games splash (`gfx/splash.png`, scaled to cover the screen) for 1.5 s at start-up, fading out; `-nosplash` skips it |
+| `Quake/cmd.c` | `+commands` on the command line are read from argv: the `cmdline` copy they came from stops at 256 characters (a long `-basedir` and `-userdir` cut `+map start` to `+map st`) and took a `+` inside a path as a command. **Upstream** |
+| `Quake/gl_model.c` | MD3 and MD5 skins load each distinct file once: a frame group whose skin name matches an earlier group's shares its texture. Before, every skin and glow map was uploaded four times (318 textures and 4.6 GB on the Pithead, and Foundry 2 ran a 12 GB card out of memory; now 149 and 1.5 GB). **Upstream** |
 | `Quake/host.c` | The game opens on the main menu unless the command line starts a map, a save, a demo or a connection |
 | `Quake/menu.c` | How to Play has Cinderkirk's three pages (`NUM_HELP_PAGES`), drawn by `tools/menu_art.py` |
 | `Quake/sbar.c` | HUD style 3, the Foundry bar, is the default and calls `sbar_foundry.c`; the classic and modern bars keep a strip for Pressure (the game code's stat 32) |
@@ -36,6 +38,7 @@ This folder is [vkQuake](https://github.com/Novum/vkQuake) at tag **1.37.0**, wi
 | `Quake/host.c`, `Quake/server.h` | `bots`: how many bots the game code keeps in a Pit fight |
 | `Quake/menu.c` | Host a game lists Cinderkirk's maps (the Pit fight arenas, then the Story by shaft), the game types are Pit fight and Co-op Story, the skills are the lift's (Apprentice to Founder's), and there's a Bots setting; none of id's map names are left |
 | `Quake/records.c`, `Quake/sbar.c`, `Quake/cl_parse.c` | Each Story map's best time, kills and secrets per skill, kept in `records.txt` in the user folder; the end of a map says whether it beat the best, and `_shaft_marks` (read only) tells the game which shafts have every map finished with all its secrets |
+| `Quake/gl_rmisc.c` | A player model with a PNG skin takes the player's colours through a mask, `<skin>_colors.png` (red the shirt colour, green the trousers'): each player's copy is tinted on the CPU and uploaded as its player texture. **Upstream:** worth offering, since replacement player skins can't be recoloured otherwise |
 | `Shaders/bloom.comp`, `Shaders/screen_effects.inc`, `Quake/r_passes.c`, `Quake/gl_vidsdl.c`, `Quake/gl_rmisc.c` | Bloom: the scene's bright parts at a quarter of its size, blurred across and down in two compute passes, added back in the screen effects pass. `r_bloom` (strength, 0 for none, default 0.6) and `r_bloom_threshold` (0.7). Options, Graphics has a Glow slider for it, and `menu_graphics` opens that page. **Upstream** |
 | `Misc/vq_pak/` | The built-in pak keeps only the crosshairs: vkQuake's console background (which carries id's logo), menus and fixes for id's maps are gone, so Cinderkirk's own are used |
 | `meson_options.txt` | User folders are on by default |

@@ -1,0 +1,21 @@
+#!/bin/sh
+# Copyright (C) The LinuxGroove team
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Adds Cinderkirk to your applications menu, pointing at this folder. Run it
+# again after moving the folder; remove ~/.local/share/applications/cinderkirk.desktop
+# to take it out.
+here=$(dirname "$(readlink -f "$0")")
+apps="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+mkdir -p "$apps"
+cat > "$apps/cinderkirk.desktop" <<END
+[Desktop Entry]
+Type=Application
+Name=Cinderkirk
+Comment=A bell foundry over a burning pit. Fight your way down.
+Exec="$here/cinderkirk"
+Icon=$here/cinderkirk.png
+Categories=Game;ActionGame;
+Keywords=shooter;fps;retro;boomer shooter;foundry;
+StartupWMClass=cinderkirk
+END
+echo "Cinderkirk is in your applications menu."

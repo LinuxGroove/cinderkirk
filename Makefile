@@ -7,6 +7,8 @@
 #   make models     build the creatures in Blender
 #   make weapons    build the weapons the player holds in Blender
 #   make pickups    build the pickups and the weapons on the floor in Blender
+#   make actors     build the stoker as others see him, gibs and projectiles in Blender
+#   make tarball   dist/cinderkirk-VERSION-linux-ARCH.tar.gz, to unpack and play anywhere
 #   make clean      remove build/ and dist/ (keeps fetched sources in build/src)
 #
 # The game runs from dist/: dist/cinderkirk is the engine, dist/cinder/ the game.
@@ -40,7 +42,7 @@ export LD_LIBRARY_PATH := $(abspath $(PREFIX))/lib
 # build/prefix's headers first (the snap's gnome extension adds older Vulkan ones to CFLAGS).
 export CFLAGS := -I$(abspath $(PREFIX))/include $(CFLAGS)
 
-.PHONY: all engine game deps tools librequake maps map run clean textures models weapons pickups check trenchbroom
+.PHONY: all engine game deps tools librequake maps map run clean textures models weapons pickups actors check trenchbroom tarball
 
 all: engine game
 
@@ -107,6 +109,10 @@ $(BUILD)/menu/.done: tools/menu_art.py assets/textures/bronze1.png assets/textur
 	$(PYTHON) tools/menu_art.py $(LQ)/gfx/palette.lmp $(BUILD)/menu assets/textures assets_src/materials/glyph_mask.png
 	touch $@
 
+$(BUILD)/sprites/.done: tools/sprites.py $(LQ)/.done
+	$(PYTHON) tools/sprites.py $(LQ)/gfx/palette.lmp $(BUILD)/sprites
+	touch $@
+
 $(BUILD)/hud/.done: tools/hud_svg.py $(wildcard assets_src/fonts/*.woff)
 	rm -rf $(BUILD)/hud
 	$(PYTHON) tools/hud_svg.py $(BUILD)/hud
@@ -117,7 +123,7 @@ $(BUILD)/hud/.done: tools/hud_svg.py $(wildcard assets_src/fonts/*.woff)
 # Music made by tools/lemonade/generate.py: music/trackNN.ogg, NN a map's worldspawn sounds.
 MUSIC := $(wildcard assets_src/music/track*.ogg)
 
-$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BUILD)/sound/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) $(MATERIALS) $(MODELS) $(GLYPHS) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py $(MUSIC)
+$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BUILD)/sound/.done $(BUILD)/sprites/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) $(MATERIALS) $(MODELS) $(GLYPHS) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py $(MUSIC)
 	rm -rf $(STAGE)
 	mkdir -p $(STAGE)/maps $(STAGE)/textures $(STAGE)/gfx
 	cp -r $(LQ)/gfx.wad $(LQ)/gfx $(LQ)/progs $(LQ)/sound $(LQ)/maps $(STAGE)/
@@ -128,13 +134,16 @@ $(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BU
 	cp -r $(BUILD)/sound/* $(STAGE)/sound/
 	mkdir -p $(STAGE)/music && for f in $(MUSIC); do cp $$f $(STAGE)/music/; done
 	cp $(TEXTURES) $(MATERIALS) $(STAGE)/textures/
-	cp $(MODELS) $(STAGE)/progs/
+	cp $(MODELS) $(BUILD)/sprites/*.spr $(STAGE)/progs/
 	cp $(BUILD)/menu/gfx/* gfx/splash.png $(STAGE)/gfx/
 	mkdir -p $(STAGE)/gfx/hud && cp $(BUILD)/hud/*.svg $(STAGE)/gfx/hud/
 	cp -r assets/glyphs $(STAGE)/gfx/hud/g && rm $(STAGE)/gfx/hud/g/License.txt
 	cp cinder/default.cfg cinder/quake.rc $(STAGE)/
 	mkdir -p $(DIST)/cinder
 	$(PYTHON) tools/pak.py $@ $(STAGE)
+
+tarball: $(DIST)/cinderkirk $(DIST)/cinder/pak0.pak
+	tools/tarball.sh $(DIST) $(BUILD) $(PREFIX)
 
 # TrenchBroom's game config and entity definitions, and the WAD it shows
 # textures from (dist/cinder/cinder.wad); see docs/mapping.md.
@@ -180,6 +189,15 @@ $(addprefix pickup-,$(PICKUPS)): pickup-%:
 	$(BLENDER) -b -P assets_src/models/pickups.py -- assets/models $(TEXRES) only=$*
 $(addprefix ground-,$(GROUND)): ground-%:
 	WORLD=1 $(BLENDER) -b -P assets_src/models/weapons.py -- assets/models $(TEXRES) only=$*
+
+# Builds the stoker as others see him (player.md3, its head and the eyes the
+# Soot Veil leaves), the gibs and the projectiles (actors.py), one Blender run
+# each, so make -j8 actors. The engine loads each in place of LibreQuake's .mdl.
+ACTORS := player h_player eyes gib1 gib2 gib3 zom_gib spike s_spike grenade missile lavaball bolt bolt2 bolt3
+.PHONY: actors $(addprefix actor-,$(ACTORS))
+actors: $(addprefix actor-,$(ACTORS))
+$(addprefix actor-,$(ACTORS)): actor-%:
+	$(BLENDER) -b -P assets_src/models/actors.py -- assets/models $(TEXRES) only=$*
 
 check:
 	$(PYTHON) -m py_compile tools/*.py maps_src/*.py assets_src/models/*.py
