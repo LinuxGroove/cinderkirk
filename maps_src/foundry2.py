@@ -150,7 +150,7 @@ def build():
     L.opening(2304, -64, -128, 2336, 64, 0)
     L.room(2336, -96, -128, 2464, 96, 64, wall="iron_rust1", floor="iron_plate1", ceiling="iron_rust1")
     L.light((2400, 0, 32), 160, WARM)
-    L.brush_entity("trigger_changelevel", [Box(2368, -64, -128, 2448, 64, -32, "trigger")], map="start")
+    L.brush_entity("trigger_changelevel", [Box(2368, -64, -128, 2448, 64, -32, "trigger")], map="foundry3")
     L.add("info_intermission", (700, -380, 160), mangle=(20, 20, 0))
     return L
 

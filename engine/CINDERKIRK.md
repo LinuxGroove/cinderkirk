@@ -21,6 +21,7 @@ This folder is [vkQuake](https://github.com/Novum/vkQuake) at tag **1.37.0**, wi
 | `Quake/in_sdl.c` | While the wheel is open the look stick, the gyro and the mouse point at it instead of turning the view; `IN_GamepadGlyphs` names the pad in use (Xbox, PlayStation, Switch, Steam Deck) |
 | `Quake/glyph.c` (new) | Button glyphs: text with `{+command}` shows the glyph of the key bound to it on the device used last (`{@look}` and `{@move}` for the sticks or the mouse), from `gfx/hud/g/<set>/<key>.svg`; `glyph_set` forces a set. Centerprints and the weapon wheel's hint use it. **Upstream** |
 | `Quake/rumble.c` (new), `Quake/in_sdl.c` | Named rumble patterns: the game sends `rumble <pattern>` (or `rumble <low> <high> <ms>`) to the player it happens to, for each weapon's shot, hits taken, the dash, Overpressure, vents, pickups, keys, secrets, landing and death. The pad no longer rumbles with every loud sound; `joy_rumble_sound 1` brings that back between patterns. **Upstream:** the command and the table |
+| `Quake/r_part.c` | `r_particles` defaults to 1, round particles: the square ones (2) look like blocks up close at high resolutions |
 | `Quake/menu.c` | No Mods item on the main menu (the only game folder is the game) |
 | `Quake/host.c` | The frame time is scaled by the wheel's slow motion |
 | `Quake/menu.c`, `Quake/gl_screen.c` | HUD Style offers Foundry, and `scr_style` starts at 3 |
