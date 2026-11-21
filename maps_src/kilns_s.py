@@ -21,7 +21,7 @@ COLD = (0.62, 0.70, 0.95)
 
 
 def build():
-    L = Level(wad="cinder.wad", message="The Reliquary", worldtype=0,
+    L = Level(wad="cinder.wad", sounds=6, message="The Reliquary", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="ossuary1", floor="crypt_stone1", ceiling="crypt_stone1")

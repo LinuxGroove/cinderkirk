@@ -22,7 +22,7 @@ CANDLE = (1.0, 0.8, 0.55)
 
 
 def build():
-    L = Level(wad="cinder.wad", message="The Drowned Chapel", worldtype=0,
+    L = Level(wad="cinder.wad", sounds=5, message="The Drowned Chapel", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=4, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="cist_brick1", floor="cist_stone1", ceiling="cist_brick1")

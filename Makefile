@@ -26,7 +26,7 @@ VIS_FLAGS   ?=
 # World size of each texture, in units (the WAD stand-in's size); 128 unless named.
 WAD_SIZES   ?= kirk_glyph1=64,ore_rock1=256,vein_rock1=256
 
-MAPS     := $(patsubst maps_src/%.py,%,$(wildcard maps_src/*.py))
+MAPS     := $(patsubst maps_src/%.py,%,$(wildcard maps_src/*.py)) $(patsubst maps_src/%.map,%,$(wildcard maps_src/*.map))
 BSPS     := $(patsubst %,$(BUILD)/maps/%.bsp,$(MAPS))
 QC       := $(wildcard quakec/*.qc quakec/*/*.qc) quakec/progs.src
 TEXTURES := $(filter-out %_norm.png %_gloss.png %_rough.png,$(wildcard assets/textures/*.png))
@@ -40,7 +40,7 @@ export LD_LIBRARY_PATH := $(abspath $(PREFIX))/lib
 # build/prefix's headers first (the snap's gnome extension adds older Vulkan ones to CFLAGS).
 export CFLAGS := -I$(abspath $(PREFIX))/include $(CFLAGS)
 
-.PHONY: all engine game deps tools librequake maps map run clean textures models weapons pickups check
+.PHONY: all engine game deps tools librequake maps map run clean textures models weapons pickups check trenchbroom
 
 all: engine game
 
@@ -86,6 +86,13 @@ $(BUILD)/maps/%.bsp: maps_src/%.py tools/mapkit.py $(BUILD)/maps/cinder.wad $(BI
 	cd $(BUILD)/maps && $(abspath $(BIN))/vis $(VIS_FLAGS) $*.bsp
 	cd $(BUILD)/maps && $(abspath $(BIN))/light $(LIGHT_FLAGS) $*.bsp
 
+# A level made in TrenchBroom (maps_src/<map>.map) builds the same way.
+$(BUILD)/maps/%.bsp: maps_src/%.map $(BUILD)/maps/cinder.wad $(BIN)/.done
+	cp maps_src/$*.map $(BUILD)/maps/$*.map
+	cd $(BUILD)/maps && $(abspath $(BIN))/qbsp $*.map
+	cd $(BUILD)/maps && $(abspath $(BIN))/vis $(VIS_FLAGS) $*.bsp
+	cd $(BUILD)/maps && $(abspath $(BIN))/light $(LIGHT_FLAGS) $*.bsp
+
 maps: $(BSPS)
 map:
 	$(MAKE) $(BUILD)/maps/$(MAP).bsp
@@ -107,7 +114,10 @@ $(BUILD)/hud/.done: tools/hud_svg.py $(wildcard assets_src/fonts/*.woff)
 
 # pak0.pak holds everything the game loads: LibreQuake's stand-ins first,
 # then Cinderkirk's own files over them.
-$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BUILD)/sound/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) $(MATERIALS) $(MODELS) $(GLYPHS) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py
+# Music made by tools/lemonade/generate.py: music/trackNN.ogg, NN a map's worldspawn sounds.
+MUSIC := $(wildcard assets_src/music/track*.ogg)
+
+$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BUILD)/sound/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) $(MATERIALS) $(MODELS) $(GLYPHS) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py $(MUSIC)
 	rm -rf $(STAGE)
 	mkdir -p $(STAGE)/maps $(STAGE)/textures $(STAGE)/gfx
 	cp -r $(LQ)/gfx.wad $(LQ)/gfx $(LQ)/progs $(LQ)/sound $(LQ)/maps $(STAGE)/
@@ -116,6 +126,7 @@ $(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BU
 		[ ! -f $(BUILD)/maps/$$m.lit ] || cp $(BUILD)/maps/$$m.lit $(STAGE)/maps/; \
 		[ ! -f $(BUILD)/maps/$$m.lux ] || cp $(BUILD)/maps/$$m.lux $(STAGE)/maps/; done
 	cp -r $(BUILD)/sound/cinder $(STAGE)/sound/
+	mkdir -p $(STAGE)/music && for f in $(MUSIC); do cp $$f $(STAGE)/music/; done
 	cp $(TEXTURES) $(MATERIALS) $(STAGE)/textures/
 	cp $(MODELS) $(STAGE)/progs/
 	cp $(BUILD)/menu/gfx/* gfx/splash.png $(STAGE)/gfx/
@@ -124,6 +135,12 @@ $(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BU
 	cp cinder/default.cfg cinder/quake.rc $(STAGE)/
 	mkdir -p $(DIST)/cinder
 	$(PYTHON) tools/pak.py $@ $(STAGE)
+
+# TrenchBroom's game config and entity definitions, and the WAD it shows
+# textures from (dist/cinder/cinder.wad); see docs/mapping.md.
+trenchbroom: $(BUILD)/maps/cinder.wad tools/trenchbroom.py $(wildcard quakec/*.qc quakec/*/*.qc)
+	$(PYTHON) tools/trenchbroom.py $(DIST)/trenchbroom
+	mkdir -p $(DIST)/cinder && cp $(BUILD)/maps/cinder.wad $(DIST)/cinder/
 
 run: all
 	cd $(DIST) && ./cinderkirk -basedir . $(ARGS)

@@ -33,7 +33,7 @@ def frame(L, inset0, inset1, top, tex, bottom=-384):
 
 
 def build():
-    L = Level(wad="cinder.wad", message="The Bell Pit", worldtype=0,
+    L = Level(wad="cinder.wad", sounds=4, message="The Bell Pit", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The cage's landing on the west side, at the top.

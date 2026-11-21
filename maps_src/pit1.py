@@ -23,7 +23,7 @@ G = 224                              # the gantry's height
 
 
 def build():
-    L = Level(wad="cinder.wad", message="The Cooling Yard", worldtype=0,
+    L = Level(wad="cinder.wad", sounds=10, message="The Cooling Yard", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=20, _range=0.6)
     L.room(-X, -Y, 0, X, Y, H, wall="firebrick1", floor="iron_plate1", ceiling="iron_rust1")
 

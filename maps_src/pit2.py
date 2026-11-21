@@ -31,7 +31,7 @@ def ring(L, z, tex="kirk_stone1"):
 
 
 def build():
-    L = Level(wad="cinder.wad", message="The Belfry", worldtype=0,
+    L = Level(wad="cinder.wad", sounds=10, message="The Belfry", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=20, _range=0.6)
     L.room(-R, -R, 0, R, R, H, wall="kirk_brick1", floor="floor_flag1", ceiling="ceil_timber1")
     for z in TIERS:

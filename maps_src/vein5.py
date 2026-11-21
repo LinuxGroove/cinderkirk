@@ -25,7 +25,7 @@ CX = 960                             # the casting pit's middle
 
 
 def build():
-    L = Level(wad="cinder.wad", message="The Founder's Mould", worldtype=0,
+    L = Level(wad="cinder.wad", sounds=9, message="The Founder's Mould", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=12, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="ore_rock1", floor="iron_plate1", ceiling="iron_rust1")

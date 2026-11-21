@@ -24,7 +24,7 @@ CANDLE = (1.0, 0.8, 0.55)
 
 
 def build():
-    L = Level(wad="cinder.wad", message="The Foundry Gate", worldtype=0,
+    L = Level(wad="cinder.wad", sounds=4, message="The Foundry Gate", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The gatehouse: x 0..512, floor 0, ceiling 256.

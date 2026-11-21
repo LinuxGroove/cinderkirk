@@ -24,7 +24,7 @@ BOTTOM, TOP = -1024, 0
 
 
 def build():
-    L = Level(wad="cinder.wad", message="The Flowstone Stair", worldtype=0,
+    L = Level(wad="cinder.wad", sounds=5, message="The Flowstone Stair", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=14, _range=0.6)
 
     # The cage, north of the top landing.
