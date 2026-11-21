@@ -95,7 +95,7 @@ cvar_t scr_showfps = {"scr_showfps", "0", CVAR_ARCHIVE};
 cvar_t scr_clock = {"scr_clock", "0", CVAR_NONE};
 cvar_t scr_autoclock = {"scr_autoclock", "1", CVAR_ARCHIVE};
 cvar_t scr_usekfont = {"scr_usekfont", "0", CVAR_NONE}; // 2021 re-release
-cvar_t scr_style = {"scr_style", "0", CVAR_ARCHIVE_GAME};
+cvar_t scr_style = {"scr_style", "3", CVAR_ARCHIVE_GAME}; // Cinderkirk: 3 is the Foundry bar
 
 cvar_t scr_viewsize = {"viewsize", "100", CVAR_ARCHIVE_GAME};
 cvar_t scr_viewsize_allow_shrinking = {"viewsize_allow_shrinking", "0", CVAR_ARCHIVE_GAME};

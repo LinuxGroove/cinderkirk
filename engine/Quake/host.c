@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // host.c -- coordinates spawning and killing of local servers
 
 #include "quakedef.h"
+#include "hud_svg.h" // Cinderkirk
 #include "bgmusic.h"
 #include "steam.h"
 #include "tasks.h"
@@ -803,6 +804,7 @@ qboolean Host_FilterTime (float time)
 		host_frametime = host_framerate.value;
 	else if (host_maxfps.value)								  // don't allow really long or short frames
 		host_frametime = CLAMP (0.0001, host_frametime, 0.1); // johnfitz -- use CLAMP
+	host_frametime *= Wheel_TimeScale (); // Cinderkirk: the weapon wheel slows time
 
 	return true;
 }
@@ -1256,6 +1258,7 @@ static void _Host_Frame (double time)
 				host_frametime *= host_timescale.value;
 			else if (host_framerate.value)
 				host_frametime = host_framerate.value;
+			host_frametime *= Wheel_TimeScale (); // Cinderkirk
 		}
 
 		CL_SendCmd ();

@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "quakedef.h"
+#include "hud_svg.h" // Cinderkirk
 #include "in_sdl.h"
 
 static qboolean textmode;
@@ -121,6 +122,11 @@ void IN_SetGamepadInputActive (qboolean active)
 static qboolean IN_JoyActive (void)
 {
 	return joy_enable.value && joy_active_controller && (joy_always_active.value || gamepad_input_active);
+}
+
+qboolean IN_GamepadInUse (void) // Cinderkirk: for the weapon wheel's hint
+{
+	return IN_JoyActive ();
 }
 
 /* total accumulated mouse movement since last frame,
@@ -754,6 +760,13 @@ void IN_JoyMove (usercmd_t *cmd)
 		lookRaw = temp;
 	}
 
+	// Cinderkirk: while the weapon wheel is open the look stick points at it
+	if (Wheel_Open ())
+	{
+		Wheel_Stick (lookRaw.x, lookRaw.y);
+		lookRaw.x = lookRaw.y = 0.0f;
+	}
+
 	moveDeadzone = IN_ApplyDeadzone (moveRaw, joy_deadzone_move.value, joy_outer_threshold_move.value);
 	lookDeadzone = IN_ApplyDeadzone (lookRaw, joy_deadzone_look.value, joy_outer_threshold_look.value);
 
@@ -871,6 +884,11 @@ static void IN_GyroMove (void)
 		break;
 	}
 
+	if (Wheel_Open ()) // Cinderkirk: the gyro points at the weapon wheel
+	{
+		Wheel_Mouse (-scale * gyro_yaw * gyro_yawsensitivity.value * 6.0f, scale * gyro_pitch * gyro_pitchsensitivity.value * 6.0f);
+		return;
+	}
 	cl.viewangles[YAW] += scale * gyro_yaw * gyro_yawsensitivity.value;
 	cl.viewangles[PITCH] -= scale * gyro_pitch * gyro_pitchsensitivity.value;
 	V_StopPitchDrift ();
@@ -894,6 +912,12 @@ void IN_MouseMove (usercmd_t *cmd)
 	// do pause check after resetting total_d* so mouse movements during pause don't accumulate
 	if (cl.paused || key_dest != key_game)
 		return;
+
+	if (Wheel_Open ()) // Cinderkirk: the mouse points at the weapon wheel
+	{
+		Wheel_Mouse (dmx, dmy);
+		return;
+	}
 
 	if ((in_strafe.state & 1) || (lookstrafe.value && (in_mlook.state & 1)))
 		cmd->sidemove_accumulator += m_side.value * dmx;

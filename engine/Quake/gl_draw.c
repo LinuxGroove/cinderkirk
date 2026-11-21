@@ -967,6 +967,107 @@ void Draw_SubPicLinearBlend (
 }
 
 /*
+================
+Draw_PicFromRGBA -- Cinderkirk
+
+A pic from RGBA pixels made at run time (the HUD's SVG, rasterised at the
+screen's resolution), drawn with linear filtering. Free it with Draw_FreePic.
+================
+*/
+qpic_t *Draw_PicFromRGBA (const char *name, int width, int height, byte *rgba)
+{
+	qpic_t *pic;
+	glpic_t gl;
+
+	pic = (qpic_t *)Mem_Alloc (sizeof (qpic_t) - 4 + sizeof (glpic_t));
+	pic->width = width;
+	pic->height = height;
+	gl.gltexture =
+		TexMgr_LoadImage (NULL, name, width, height, SRC_RGBA, rgba, "", (src_offset_t)rgba, TEXPREF_LINEAR | TEXPREF_ALPHA | TEXPREF_PERSIST | TEXPREF_NOPICMIP);
+	gl.sl = 0;
+	gl.sh = 1;
+	gl.tl = 0;
+	gl.th = 1;
+	memcpy ((void *)&(pic->data), &gl, sizeof (glpic_t));
+	return pic;
+}
+
+void Draw_FreePic (qpic_t *pic)
+{
+	glpic_t gl;
+
+	if (!pic)
+		return;
+	memcpy (&gl, pic->data, sizeof (glpic_t));
+	if (gl.gltexture)
+		TexMgr_FreeTexture (gl.gltexture);
+	Mem_Free (pic);
+}
+
+/*
+================
+Draw_PicRotated -- Cinderkirk
+
+Draws a pic w x h, turned by angle radians (clockwise on screen) about the
+point (px, py) of the pic, given as fractions of its size, which lands on
+(x, y). The HUD's Pressure needle and the weapon wheel's wedges use it.
+================
+*/
+void Draw_PicRotated (cb_context_t *cbx, float x, float y, float w, float h, qpic_t *pic, float px, float py, float angle, float *rgb, float alpha)
+{
+	glpic_t gl;
+	int		i;
+	float	c = cosf (angle), s = sinf (angle);
+
+	alpha *= draw_opacity;
+	if (alpha <= 0.0f || !pic)
+		return;
+	memcpy (&gl, pic->data, sizeof (glpic_t));
+	if (!gl.gltexture)
+		return;
+
+	vec4_t rgba = {255.0f, 255.0f, 255.0f, 255.0f * alpha};
+	if (rgb)
+		for (i = 0; i < 3; i++)
+			rgba[i] *= rgb[i];
+
+	VkBuffer		   buffer;
+	VkDeviceSize	   buffer_offset;
+	draw_pic_vertex_t *vertices = (draw_pic_vertex_t *)R_VertexAllocate (6 * sizeof (*vertices), &buffer, &buffer_offset);
+	draw_pic_vertex_t  corner_verts[4];
+	const float		   cx[4] = {0, 1, 1, 0}, cy[4] = {0, 0, 1, 1};
+
+	memset (&corner_verts, 255, sizeof (corner_verts));
+	for (i = 0; i < 4; ++i)
+	{
+		float dx = (cx[i] - px) * w, dy = (cy[i] - py) * h;
+		corner_verts[i].position[0] = x + dx * c - dy * s;
+		corner_verts[i].position[1] = y + dx * s + dy * c;
+		corner_verts[i].position[2] = 0.0f;
+		corner_verts[i].texcoord[0] = cx[i] ? gl.sh : gl.sl;
+		corner_verts[i].texcoord[1] = cy[i] ? gl.th : gl.tl;
+		corner_verts[i].color[0] = rgba[0];
+		corner_verts[i].color[1] = rgba[1];
+		corner_verts[i].color[2] = rgba[2];
+		corner_verts[i].color[3] = rgba[3];
+		corner_verts[i].texture_region[0] = gl.sl;
+		corner_verts[i].texture_region[1] = gl.tl;
+		corner_verts[i].texture_region[2] = gl.sh;
+		corner_verts[i].texture_region[3] = gl.th;
+	}
+	vertices[0] = corner_verts[0];
+	vertices[1] = corner_verts[1];
+	vertices[2] = corner_verts[2];
+	vertices[3] = corner_verts[2];
+	vertices[4] = corner_verts[3];
+	vertices[5] = corner_verts[0];
+
+	vkCmdBindVertexBuffers (cbx->cb, 0, 1, &buffer, &buffer_offset);
+	Draw_BindPicState (cbx, gl.gltexture, true, DRAW_FILTER_LINEAR);
+	vkCmdDraw (cbx->cb, 6, 1, 0, 0);
+}
+
+/*
 =============
 Draw_TransPicTranslate -- johnfitz -- rewritten to use texmgr to do translation
 

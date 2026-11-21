@@ -96,9 +96,14 @@ $(BUILD)/menu/.done: tools/menu_art.py assets/textures/bronze1.png assets/textur
 	$(PYTHON) tools/menu_art.py $(LQ)/gfx/palette.lmp $(BUILD)/menu assets/textures assets_src/materials/glyph_mask.png
 	touch $@
 
+$(BUILD)/hud/.done: tools/hud_svg.py $(wildcard assets_src/fonts/*.woff)
+	rm -rf $(BUILD)/hud
+	$(PYTHON) tools/hud_svg.py $(BUILD)/hud
+	touch $@
+
 # pak0.pak holds everything the game loads: LibreQuake's stand-ins first,
 # then Cinderkirk's own files over them.
-$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/sound/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) $(MODELS) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py
+$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BUILD)/sound/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) $(MODELS) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py
 	rm -rf $(STAGE)
 	mkdir -p $(STAGE)/maps $(STAGE)/textures $(STAGE)/gfx
 	cp -r $(LQ)/gfx.wad $(LQ)/gfx $(LQ)/progs $(LQ)/sound $(LQ)/maps $(STAGE)/
@@ -109,6 +114,7 @@ $(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/sound/.done $(
 	cp $(TEXTURES) $(STAGE)/textures/
 	cp $(MODELS) $(STAGE)/progs/
 	cp $(BUILD)/menu/gfx/* gfx/splash.png $(STAGE)/gfx/
+	mkdir -p $(STAGE)/gfx/hud && cp $(BUILD)/hud/*.svg $(STAGE)/gfx/hud/
 	cp cinder/default.cfg cinder/quake.rc $(STAGE)/
 	mkdir -p $(DIST)/cinder
 	$(PYTHON) tools/pak.py $@ $(STAGE)

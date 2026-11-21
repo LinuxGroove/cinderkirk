@@ -15,7 +15,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            cmake ninja-build meson pkg-config python3-pil python3-numpy glslang-tools bc \
+            cmake ninja-build meson pkg-config python3-pil python3-numpy python3-fonttools glslang-tools bc \
             libembree-dev libtbb-dev zlib1g-dev \
             libasound2-dev libpulse-dev libpipewire-0.3-dev libx11-dev libxext-dev libxrandr-dev \
             libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev libxkbcommon-dev \

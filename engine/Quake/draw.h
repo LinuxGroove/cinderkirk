@@ -49,6 +49,10 @@ void Draw_SubPic (cb_context_t *cbx, float x, float y, float w, float h, qpic_t 
 void Draw_SubPicLinear (cb_context_t *cbx, float x, float y, float w, float h, qpic_t *pic, float s1, float t1, float s2, float t2, float *rgb, float alpha);
 void Draw_SubPicLinearBlend (
 	cb_context_t *cbx, float x, float y, float w, float h, qpic_t *pic, float s1, float t1, float s2, float t2, float *rgb, float alpha);
+qpic_t *Draw_PicFromRGBA (const char *name, int width, int height, byte *rgba); // Cinderkirk
+void	Draw_FreePic (qpic_t *pic);															  // Cinderkirk
+void	Draw_PicRotated (
+	   cb_context_t *cbx, float x, float y, float w, float h, qpic_t *pic, float px, float py, float angle, float *rgb, float alpha); // Cinderkirk
 void	Draw_TransPicTranslate (cb_context_t *cbx, float x, float y, qpic_t *pic, int top, int bottom); // johnfitz -- more parameters
 void	Draw_ConsoleBackground (cb_context_t *cbx);														// johnfitz -- removed parameter int lines
 void	Draw_TileClear (cb_context_t *cbx, float x, float y, float w, float h);

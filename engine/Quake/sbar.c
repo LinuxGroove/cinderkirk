@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // sbar.c -- status bar code
 
 #include "quakedef.h"
+#include "hud_svg.h" // Cinderkirk
 
 #define STAT_MINUS 10 // num frame for '-' stats digit
 
@@ -284,6 +285,11 @@ void Sbar_Init (void)
 {
 	Cmd_AddCommand ("+showscores", Sbar_ShowScores);
 	Cmd_AddCommand ("-showscores", Sbar_DontShowScores);
+	{
+		extern cvar_t hud_scale;
+		Cvar_RegisterVariable (&hud_scale); // Cinderkirk
+		Wheel_Init ();
+	}
 
 	Sbar_LoadPics ();
 }
@@ -1303,6 +1309,17 @@ void Sbar_Draw (cb_context_t *cbx)
 
 	if (cl.intermission)
 		return; // johnfitz -- never draw sbar during intermission
+
+	// Cinderkirk: the Foundry status bar and the weapon wheel
+	Wheel_Frame ();
+	if (scr_style.value >= 3.0f)
+	{
+		if (Wheel_Open ())
+			Wheel_Draw (cbx); // the wheel has the room to itself
+		else
+			Sbar_DrawFoundry (cbx);
+		return;
+	}
 
 	GL_SetCanvas (cbx, CANVAS_DEFAULT); // johnfitz
 

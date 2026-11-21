@@ -1808,7 +1808,7 @@ static void M_GameOptions_AdjustSliders (int dir, qboolean mouse)
 			Cvar_SetValue ("viewsize", dir < 0 ? 100.0f : 110.0f);
 		break;
 	case GAME_OPT_HUD_STYLE:
-		Cvar_SetValue ("scr_style", ((int)scr_style.value + 3 + dir) % 3);
+		Cvar_SetValue ("scr_style", ((int)scr_style.value + 4 + dir) % 4); // Cinderkirk: and the Foundry bar
 		break;
 	case GAME_OPT_FAST_LOADING: // use fast loading when possible
 		Cvar_SetValue ("autofastload", ((int)autofastload.value + 2 + dir) % 2);
@@ -1977,8 +1977,10 @@ static void M_GameOptions_Draw (cb_context_t *cbx)
 				M_Print (cbx, MENU_VALUE_X, y, "Mod");
 			else if (scr_style.value < 2.0f)
 				M_Print (cbx, MENU_VALUE_X, y, "Classic");
-			else
+			else if (scr_style.value < 3.0f)
 				M_Print (cbx, MENU_VALUE_X, y, "Modern");
+			else
+				M_Print (cbx, MENU_VALUE_X, y, "Foundry");
 			break;
 
 		case GAME_OPT_CROSSHAIR:
