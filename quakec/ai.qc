@@ -505,6 +505,7 @@ float()	HoundCheckAttack;
 float()	BruteCheckAttack;
 float()	WraithCheckAttack;
 float()	RingerCheckAttack;
+float()	FounderCheckAttack;
 
 float() CheckAnyAttack =
 {
@@ -528,6 +529,8 @@ float() CheckAnyAttack =
 		return WraithCheckAttack ();
 	if (self.classname == "monster_bell_ringer")
 		return RingerCheckAttack ();
+	if (self.classname == "monster_founder")
+		return FounderCheckAttack ();
 	if (self.classname == "monster_wizard")
 		return WizardCheckAttack ();
 	return CheckAttack ();

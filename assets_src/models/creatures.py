@@ -216,6 +216,7 @@ TILES = {
     "bronze": ("bronze1", 0.5, (1.0, 1.0, 1.0)),
     "oak": ("oak1", 0.6, (1.0, 1.0, 1.0)),
     "firebrick": ("firebrick1", 0.5, (1.0, 1.0, 1.0)),
+    "mould": ("sand_mould1", 0.9, (0.85, 0.85, 0.85)),
 }
 
 
@@ -1921,9 +1922,133 @@ def bell_ringer():
     build(c, anims)
 
 
+# ------------------------------------------------------------------ the Founder
+
+def founder():
+    """The Founder: the man who cast the bell, grown into his own last mould.
+    From the waist down he is the clay cope of a bell mould, cracked, with
+    the iron still molten inside it; above it a furnace master of slag crust
+    in an iron cap, his forearms and hands running with iron that drips from
+    his fingers. About 3.8 m: the large hull, drawn big."""
+    k = 1.9
+    J = scaled(HUMAN, k, wide=1.3)
+    J["neck"], J["head"], J["crown"] = (0, -0.06, 3.00), (0, -0.10, 3.10), (0, -0.12, 3.44)
+    c = Creature("founder", humanoid(J), hull_bottom=-24.0)
+    px, py, pz = J["pelvis"]
+    # The mould: a bell's cope from the floor to the waist, hooped in iron,
+    # split where the iron inside shows through.
+    def split(a, z):                                    # jagged cracks, wider low down where it burst
+        n = noise.noise(Vector((math.cos(a) * 1.3, math.sin(a) * 1.3, z * 1.4)))
+        return z < pz - 0.15 and abs(n - 0.1) < 0.05 + 0.04 * (1.0 - z / pz)
+    prof = [(1.06, 0.0), (1.08, 0.08), (1.0, 0.16)]
+    for i in range(1, 15):                              # a bell's cope: flared at the lip, a waist, a shoulder
+        z = 0.16 + (pz - 0.16) * i / 15
+        u = z / pz
+        prof.append((0.98 - 0.62 * u + 0.18 * u * u * (1 - u) * 4, z))
+    prof += [(0.44, pz + 0.06), (0.32, pz + 0.12)]
+    cope = lathe("cope", prof, segs=64, shape=lambda a, z, x, y: (x, y * 0.92 + py, z), skip=split)
+    thicken(cope, 0.05)
+    c.add(cope, "mould", "pelvis")
+    core = lathe("core", [(0.98, 0.02), (0.84, 0.5), (0.66, 1.1), (0.5, 1.6), (0.38, pz)], segs=36,
+                 shape=lambda a, z, x, y: (x, y * 0.92 + py, z))
+    c.add(core, "slag", "pelvis")
+    for z, r in ((0.12, 1.06),):
+        hoop = prim("torus", major_radius=r, minor_radius=0.04, major_segments=48, minor_segments=8, location=(0, py, z))
+        hoop.scale = (1.0, 0.92, 1.0)
+        c.add(hoop, "iron", "pelvis")
+    # The man: slag crust from the waist up.
+    body = {n: J[n] for n in ("pelvis", "spine", "chest", "neck", "sho_l", "elb_l", "sho_r", "elb_r")}
+    e = [("pelvis", "spine"), ("spine", "chest"), ("chest", "neck")]
+    rad = {"pelvis": (0.42, 0.32), "spine": (0.44, 0.32), "chest": (0.52, 0.36), "neck": (0.19, 0.17)}
+    for sd in "lr":
+        e += [("chest", "sho_" + sd), ("sho_" + sd, "elb_" + sd)]
+        rad.update({"sho_" + sd: 0.21, "elb_" + sd: 0.16})
+    up = ["pelvis", "spine", "chest", "neck", "upper_l", "upper_r"]
+    c.add(skin_body("body", body, e, rad, "pelvis", seed=31.0, lumps=0.025), "crust", among=up, power=4.0)
+    collar = prim("torus", major_radius=0.24, minor_radius=0.05, major_segments=28, minor_segments=8,
+                  location=(0, J["neck"][1], J["neck"][2] - 0.06))
+    collar.scale = (1.15, 1.0, 1.0)
+    c.add(collar, "iron", "chest")
+    for sd in "lr":
+        el, wr, fi = Vector(J["elb_" + sd]), Vector(J["wri_" + sd]), Vector(J["fin_" + sd])
+        c.add(between("cone", el, wr, radius1=0.16, radius2=0.12, vertices=14), "crust", "fore_" + sd)   # forearms crusting over
+        c.add(between("cylinder", wr, fi, radius=0.11, vertices=12), "slag", "hand_" + sd)
+        fist = prim("uv_sphere", radius=0.17, segments=14, ring_count=10, location=tuple(wr.lerp(fi, 0.75)))
+        fist.scale = (0.85, 1.0, 1.25)
+        c.add(fist, "slag", "hand_" + sd)
+        band = prim("torus", major_radius=0.13, minor_radius=0.03, major_segments=20, minor_segments=6, location=tuple(el.lerp(wr, 0.1)))
+        c.add(band, "iron", "fore_" + sd)
+        for i, (dx, dy) in enumerate(((0.05, -0.03), (-0.04, 0.02), (0.0, -0.06))):
+            top = fi + Vector((dx, dy, -0.02))
+            c.add(between("cone", top, top + Vector((0, 0, -0.22 - 0.08 * i)), radius1=0.035, radius2=0.004, vertices=6),
+                  "slag", "hand_" + sd)                         # iron dripping from his fingers
+    # The head: crust, two coals, a founder's cap of iron and a beard run in slag.
+    hx, hy, hz = J["head"]
+    head = prim("uv_sphere", radius=0.29, segments=18, ring_count=12, location=(hx, hy - 0.02, hz + 0.16))
+    head.scale = (0.95, 1.05, 1.1)
+    c.add(head, "crust", "head")
+    cap = lathe("cap", [(0.29, hz + 0.24), (0.28, hz + 0.36), (0.22, hz + 0.45), (0.0, hz + 0.48)], segs=24,
+                shape=lambda a, z, x, y: (x + hx, y + hy - 0.02, z))
+    c.add(thicken(cap, 0.02), "iron", "head")
+    for sx in (-1, 1):
+        eye = prim("uv_sphere", radius=0.045, segments=10, ring_count=6, location=(hx + sx * 0.095, hy - 0.26, hz + 0.21))
+        eye.scale = (1.2, 0.6, 0.7)
+        c.add(eye, "ember", "head")
+    # A beard of crust over the chest, run through with iron.
+    beard = prim("uv_sphere", radius=0.24, segments=14, ring_count=10, location=(hx, hy - 0.24, hz - 0.08))
+    beard.scale = (0.85, 0.45, 1.1)
+    for v in beard.data.vertices:
+        if v.co.z < 0:
+            v.co.y *= 1.0 + v.co.z * 1.5
+    c.add(beard, "crust", "head")
+    for dx in (-0.07, 0.04):
+        top = Vector((hx + dx, hy - 0.29, hz + 0.02))
+        c.add(between("cone", top, top + Vector((0, -0.02, -0.36)), radius1=0.03, radius2=0.004, vertices=6), "slag", "head")
+
+    base = {"spine": (10, 0, 0), "chest": (8, 0, 0), "neck": (-16, 0, 0), "head": (-6, 0, 0),
+            "upper_l": (-10, 0, 14), "upper_r": (-10, 0, -14), "fore_l": (-30, 0, 0), "fore_r": (-30, 0, 0)}
+    stand = [(0.0, base), (0.5, pose_of(base, chest=(12, 0, 0), neck=(-20, 0, 0), move=(0, 0, 0.02))), (1.0, base)]
+    lurch = pose_of(base, pelvis=(0, 0, 8), chest=(10, 0, -10), upper_l=(-20, 0, 14), upper_r=(0, 0, -14), move=(0, 0, 0.04))
+    walk = [(0.0, base), (0.25, lurch), (0.5, base), (0.75, mirror(lurch)), (1.0, base)]
+    # The pour: both hands out and tipped, sweeping across.
+    out = pose_of(base, spine=(18, 0, 0), chest=(12, 0, 0), upper_l=(-75, 0, 10), upper_r=(-75, 0, -10),
+                  fore_l=(-15, 0, 0), fore_r=(-15, 0, 0), hand_l=(45, 0, 0), hand_r=(45, 0, 0), move=(0, -0.04, -0.06))
+    pour = [(0.0, base), (0.25, out), (0.5, pose_of(out, chest=(12, 0, -18))), (0.8, pose_of(out, chest=(12, 0, 18))),
+            (1.0, base)]
+    # The hurl: the right hand back and over, flinging a gout of iron.
+    back = pose_of(base, spine=(0, 0, -16), chest=(-8, 0, -20), upper_r=(-150, 0, -40), fore_r=(-50, 0, 0))
+    throw = pose_of(base, spine=(20, 0, 14), chest=(14, 0, 18), upper_r=(-70, 0, 20), fore_r=(-10, 0, 0), move=(0, -0.06, -0.05))
+    hurl = [(0.0, base), (0.45, back), (0.65, throw), (1.0, base)]
+    # The slam: both fists up, then down into the floor before him.
+    raise_ = pose_of(base, spine=(-6, 0, 0), chest=(-10, 0, 0), upper_l=(-165, 0, 10), upper_r=(-165, 0, -10),
+                     fore_l=(-20, 0, 0), fore_r=(-20, 0, 0), move=(0, 0.04, 0.04))
+    down = pose_of(base, spine=(36, 0, 0), chest=(20, 0, 0), upper_l=(-50, 0, 6), upper_r=(-50, 0, -6),
+                   fore_l=(-10, 0, 0), fore_r=(-10, 0, 0), move=(0, -0.08, -0.2))
+    slam = [(0.0, base), (0.45, raise_), (0.6, down), (0.8, down), (1.0, base)]
+    reel = pose_of(base, spine=(-10, 0, 8), chest=(-10, 0, 6), neck=(0, 0, -10), upper_l=(-40, 0, 30), move=(0, 0.04, 0))
+    pain = [(0.0, base), (0.35, reel), (1.0, base)]
+    # His death: he reaches up once, then slumps over the mould and it sinks.
+    reach = pose_of(base, spine=(-14, 0, 0), chest=(-14, 0, 0), neck=(-30, 0, 0), upper_l=(-170, 0, 20), upper_r=(-170, 0, -20),
+                    fore_l=(-10, 0, 0), fore_r=(-10, 0, 0))
+    slump = pose_of(base, spine=(50, 0, 0), chest=(30, 0, 0), neck=(10, 0, 0), upper_l=(-30, 0, 30), upper_r=(-20, 0, -30),
+                    fore_l=(-60, 0, 0), fore_r=(-60, 0, 0), move=(0, -0.1, -0.5))
+    sunk = pose_of(slump, pelvis=(12, 0, 0), move=(0, -0.2, -1.4))
+    death = [(0.0, base), (0.25, reach), (0.55, slump), (0.9, sunk), (1.0, sunk)]
+    anims = [
+        ("stand", 10, stand, True, None),
+        ("walk", 12, walk, True, None),
+        ("pour", 16, pour, False, None),
+        ("hurl", 12, hurl, False, None),
+        ("slam", 12, slam, False, None),
+        ("pain", 6, pain, False, None),
+        ("death", 20, death, False, None),
+    ]
+    build(c, anims)
+
+
 CREATURES = {"ashen": ashen, "censer": censer_bearer, "deacon": deacon, "hound": slag_hound,
              "gauger": gauger, "brute": crucible_brute, "clinker": clinker, "leech": leech,
-             "wraith": ash_wraith, "ringer": bell_ringer}
+             "wraith": ash_wraith, "ringer": bell_ringer, "founder": founder}
 
 if __name__ == "__main__":  # weapons.py imports the rest
     for name, make in CREATURES.items():

@@ -74,6 +74,7 @@ cinder/hound.qc         // Cinderkirk: slag hounds
 cinder/foundry.qc       // Cinderkirk: Gaugers, Crucible Brutes and clinkers
 cinder/cisterns.qc      // Cinderkirk: cistern leeches
 cinder/kilns.qc         // Cinderkirk: ash wraiths and bell-ringers
+cinder/vein.qc          // Cinderkirk: the Founder
 #endif
 
 #endlist

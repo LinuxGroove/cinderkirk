@@ -274,6 +274,19 @@ def sounds():
     yield "ringer_pain", normalise(lay((groan(0.6, 167, 70, 50, 0.8), 0), (bell(0.6, 220, 168, 4.0) * 0.3, 0)))
     yield "ringer_death", normalise(lay((groan(1.6, 169, 70, 30, 0.8) * envelope(len(t(1.6)), 0.02, 2), 0),
                                         (bell(2.5, 92, 170, 0.9) * 0.6, 0.6)))
+    # The Founder: a voice like a furnace door, iron poured and slammed.
+    yield "founder_sight", normalise(lay((groan(2.2, 171, 48, 70, 0.8), 0), (bell(2.0, 74, 172, 1.2) * 0.35, 0.3),
+                                         (steam(2.0, 173, 150, 900, 0.3, 2, 0.5) * 0.4, 0)))
+    yield "founder_idle", normalise(groan(1.6, 174, 45, 55, 0.6) * envelope(len(t(1.6)), 0.3, 2), 0.5)
+    tt = t(1.6)
+    yield "founder_pour", normalise(steam(1.6, 175, 300, 3000, 0.1, 2, 0.8) * (0.8 + 0.2 * np.sin(2 * np.pi * 9 * tt))
+                                    + crackle(1.6, 176, 0.03, 2) * 0.7)
+    yield "founder_hurl", normalise(lay((groan(0.5, 177, 70, 50, 0.7), 0), (steam(0.6, 178, 400, 2500, 0.02, 6) * 0.7, 0.15)))
+    yield "founder_slam", normalise(lay((lowpass(noise(0.9, 179), 220) * envelope(len(t(0.9)), 0.002, 5), 0),
+                                        (clank(1.2, [90, 233, 410], 180) * 0.6, 0), (crackle(0.8, 181, 0.04, 4) * 0.5, 0.05)))
+    yield "founder_pain", normalise(lay((groan(0.8, 182, 60, 42, 0.9), 0), (crackle(0.5, 183, 0.05, 6) * 0.4, 0)))
+    yield "founder_death", normalise(lay((groan(3.0, 184, 55, 24, 0.9) * envelope(len(t(3.0)), 0.05, 1.2), 0),
+                                         (crackle(2.5, 185, 0.06, 1.5) * 0.6, 0.4), (bell(3.0, 61, 186, 0.6) * 0.5, 1.2)))
     yield "deacon_throw", normalise(steam(0.6, 60, 300, 2000, 0.2, 4) + crackle(0.6, 61, 0.01, 4) * 0.6)
 
 
