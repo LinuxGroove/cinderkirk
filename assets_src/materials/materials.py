@@ -437,7 +437,7 @@ def m_column(g):
     s = soot(g, 0.8, seed=132, lo=0.45)
     col = g.mixc(1.0, col, g.mixc(s, (0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), blend="MULTIPLY")
     height = g.sub(g.add(g.mul(flute, 0.7), g.mul(grain, 0.15)), g.mul(drum, 0.5))
-    g.finish(col, 0.7, height, bump=1.0)
+    g.finish(col, g.mixf(grain, 0.78, 0.6), height, bump=1.0)
 
 
 def m_ceiling(g):
@@ -456,7 +456,7 @@ def m_ceiling(g):
     s = soot(g, 0.7, seed=141, lo=0.35)
     col = g.mixc(1.0, col, g.mixc(s, (0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), blend="MULTIPLY")
     height = g.sub(g.add(g.mul(joist, 0.8), g.mul(ring, 0.15)), g.mul(board, 0.3))
-    g.finish(col, 0.78, height, bump=1.0)
+    g.finish(col, g.mixf(ring, 0.84, 0.7), height, bump=1.0)
 
 
 def m_beam(g):
@@ -465,7 +465,7 @@ def m_beam(g):
     g.feed(sep.inputs[0], g.uv)
     n = g.noise(2.0, 6.0, 0.6, seed=150)
     ring = g.remap(g.math("SINE", g.add(g.mul(sep.outputs["Y"], TAU * 16.0), g.mul(n, 10.0))), -1.0, 1.0)
-    adze = g.remap(g.voronoi(6.0, "F1", seed=151), 0.0, 0.5)
+    adze = g.remap(g.noise(5.0, 3.0, 0.5, distort=0.3, seed=151), 0.3, 0.7)  # broad, shallow adze marks
     col = g.mixc(ring, (0.09, 0.05, 0.025), (0.19, 0.11, 0.055))
     col = g.mixc(g.mul(adze, 0.3), col, (0.05, 0.03, 0.015))
     su = g.math("FRACT", g.mul(sep.outputs["X"], 2.0))
@@ -474,8 +474,8 @@ def m_beam(g):
     rust = g.remap(g.noise(8.0, 5.0, 0.6, seed=152), 0.5, 0.65)
     iron = g.mixc(rust, (0.07, 0.07, 0.075), (0.25, 0.11, 0.04))
     col = g.mixc(strap, col, iron)
-    height = g.add(g.add(g.mul(adze, 0.4), g.mul(ring, 0.15)), g.add(g.mul(strap, 0.5), g.mul(rivet, 0.4)))
-    g.finish(col, g.mixf(strap, 0.75, 0.5), height, bump=0.9, metal=g.mul(strap, g.sub(1.0, rust)))
+    height = g.add(g.add(g.mul(adze, 0.12), g.mul(ring, 0.12)), g.add(g.mul(strap, 0.5), g.mul(rivet, 0.4)))
+    g.finish(col, g.mixf(strap, g.mixf(ring, 0.7, 0.82), 0.5), height, bump=0.6, metal=g.mul(strap, g.sub(1.0, rust)))
 
 
 def m_grid(g):
@@ -548,11 +548,14 @@ def m_ash(g):
     n = g.noise(4.0, 9.0, 0.65, seed=200)
     clink = g.remap(g.voronoi(18.0, "F1", seed=201), 0.0, 0.35, 1.0, 0.0)
     clink = g.mul(clink, g.remap(g.noise(3.0, 3.0, 0.5, seed=202), 0.5, 0.6))
-    col = g.mixc(n, (0.06, 0.058, 0.055), (0.17, 0.16, 0.15))
+    patch = g.noise(0.9, 4.0, 0.6, seed=204)
+    col = g.mixc(n, (0.05, 0.048, 0.045), (0.20, 0.19, 0.18))
+    col = g.mixc(g.remap(patch, 0.4, 0.7), col, (0.11, 0.08, 0.06))   # rusty, burnt patches
+    col = g.mixc(g.mul(g.remap(g.noise(30.0, 2.0, 0.5, seed=205), 0.6, 0.7), 0.6), col, (0.30, 0.29, 0.27))   # pale grit
     col = g.mixc(clink, col, (0.03, 0.022, 0.02))
     ember = g.mul(clink, g.remap(g.noise(9.0, 3.0, 0.5, seed=203), 0.72, 0.78))
     emit = g.mixc(ember, (0.0, 0.0, 0.0), (0.9, 0.25, 0.03))
-    g.finish(col, 0.95, g.add(g.mul(n, 0.4), g.mul(clink, 0.6)), bump=0.9, emit=emit, emit_strength=2.0)
+    g.finish(col, g.mixf(clink, g.mixf(n, 0.97, 0.85), 0.6), g.add(g.mul(n, 0.5), g.mul(clink, 0.8)), bump=1.0, emit=emit, emit_strength=2.0)
 
 
 def m_coal(g):
@@ -575,7 +578,7 @@ def m_sand(g):
     ring = g.voronoi(1.2, "F1", seed=222)
     print_ = g.mul(g.remap(g.math("ABSOLUTE", g.sub(ring, 0.25)), 0.03, 0.0), g.remap(g.noise(0.8, 2.0, 0.5, seed=223), 0.5, 0.56))
     col = g.mixc(g.mul(print_, 0.5), col, (0.08, 0.045, 0.025))
-    g.finish(col, 0.96, g.sub(g.mul(n, 0.2), g.mul(print_, 0.6)), bump=0.8, dist=0.01)
+    g.finish(col, g.mixf(damp, 0.98, 0.8), g.sub(g.mul(n, 0.2), g.mul(print_, 0.6)), bump=0.8, dist=0.01)
 
 
 def m_firebrick(g):
@@ -589,8 +592,8 @@ def m_firebrick(g):
     lick = g.remap(g.add(g.mul(g.noise(1.2, 5.0, 0.6, seed=231), 0.8), g.mul(g.math("SINE", g.mul(sep.outputs["Y"], TAU)), 0.08)), 0.45, 0.75)
     col = g.mixc(g.mul(lick, 0.9), col, g.mixc(lick, (0.25, 0.14, 0.06), (0.03, 0.02, 0.015)))
     col = g.mixc(mortar, col, (0.12, 0.10, 0.08))
-    height = g.add(g.mul(g.sub(1.0, mortar), 0.8), g.mul(chip, 0.15))
-    g.finish(col, g.add(0.82, g.mul(mortar, 0.1)), height, bump=1.0)
+    height = g.add(g.mul(g.sub(1.0, mortar), 1.2), g.mul(chip, 0.2))
+    g.finish(col, g.add(g.mixf(chip, 0.74, 0.86), g.mul(mortar, 0.1)), height, bump=1.3)
 
 
 def m_door(g):
