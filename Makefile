@@ -139,7 +139,8 @@ models:
 
 # Builds the view models (v_*.md3), one Blender run per weapon (one run for
 # all eight runs out of memory). Building and skinning a model is Python on one
-# core, so run them side by side: make -j8 weapons.
+# core, so run them side by side: make -j8 weapons (on a GPU the bakes
+# themselves take turns, see gpu_turn in creatures.py).
 WEAPONS := pick scattergun spitter bolt crucible steam mortar toll
 .PHONY: $(addprefix weapon-,$(WEAPONS))
 weapons: $(addprefix weapon-,$(WEAPONS))

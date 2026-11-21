@@ -17,7 +17,10 @@ to face +X in Quake units (32 a metre) with its feet at the hull's bottom.
 Copyright (C) The LinuxGroove team. GPL-2.0-or-later.
 """
 import math
+import contextlib
+import fcntl
 import os
+import tempfile
 import sys
 
 import bpy  # noqa: I001  (bpy first: it makes bmesh importable)
@@ -367,9 +370,28 @@ def bake(obj, kind, sources):
         else:
             bs = g.node("ShaderNodeBsdfDiffuse")
             g.t.links.new(bs.outputs["BSDF"], g.out.inputs["Surface"])
-    bpy.ops.object.bake(type="EMIT" if kind != "AO" else "AO")
+    # Bakes from runs side by side (make -j weapons) take turns on a GPU: eight
+    # at once ran a 12 GB card out of memory and Cycles left black or patchy skins.
+    with gpu_turn():
+        bpy.ops.object.bake(type="EMIT" if kind != "AO" else "AO")
     a = np.array(img.pixels[:], dtype=np.float32).reshape(RES, RES, 4)[::-1, :, :3]
+    if kind != "glow" and a.max() <= 0.0:
+        raise SystemExit(f"{obj.name}: the {kind} bake came out black (out of GPU memory?)")
     return a
+
+
+@contextlib.contextmanager
+def gpu_turn():
+    """Holds a lock file while baking on the GPU, so parallel runs take turns."""
+    if bpy.context.scene.cycles.device != "GPU":
+        yield
+        return
+    with open(os.path.join(tempfile.gettempdir(), "cinderkirk-gpu-bake.lock"), "w") as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(f, fcntl.LOCK_UN)
 
 
 def save_png(path, rgb):
