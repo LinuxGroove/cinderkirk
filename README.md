@@ -6,7 +6,7 @@ It's idea 25 in [game-ideas](https://github.com/LinuxGroove/game-ideas/blob/main
 
 ![The Casting Floor](docs/screenshots/casting-floor.jpg)
 
-More in [docs/screenshots](docs/screenshots/): the splash, the main menu, the gatehouse, the Casting Floor from above, the pattern shop, the pouring gallery, the quench pit, a Deacon with two Ashen, the status bar, the weapon wheel, all eight weapons in hand (`weapons.jpg`), and a pack of slag hounds (`slag-hounds.jpg`).
+More in [docs/screenshots](docs/screenshots/): the splash, the main menu, the gatehouse, the Casting Floor from above, the pattern shop, the pouring gallery, the quench pit, a Deacon with two Ashen, the status bar, the weapon wheel, all eight weapons in hand (`weapons.jpg`), a pack of slag hounds (`slag-hounds.jpg`), and the pickups: ammunition, health, armour and a weapon on the floor (`pickups.jpg`).
 
 ## Where it's at
 
@@ -18,7 +18,7 @@ More in [docs/screenshots](docs/screenshots/): the splash, the main menu, the ga
 - **The status bar and the weapon wheel** are vector art: `tools/hud_svg.py` writes them as SVG (text turned to paths from the game's fonts) and the engine rasterises them with nanosvg at the screen's own resolution, so they're as sharp at 4K as at 720p. The Pressure dial sits in the middle of the bar, with the eight weapons in a row above it. Hold LB (or Q) for the wheel: the right stick, the gyro or the mouse points, letting go equips, a tap goes back to the last weapon, and time slows to a third while it's open in single player.
 - **Button glyphs** follow the device used last: the keyboard and mouse, or an Xbox, PlayStation, Switch or Steam Deck pad (Kenney's Input Prompts, `tools/glyphs.py`). Messages name a command in braces, `{+jump}`, and show the button bound to it; the gatehouse teaches the dash, the wheel and Overpressure that way (`docs/screenshots/glyphs.jpg`).
 - **Normal and gloss maps** on the world: ericw-tools' light also writes the direction light comes from at each lightmap sample, so stone and brick show their relief against the level's real lights and gloss catches them as you move (`docs/screenshots/normal-maps.jpg`).
-- The Ashen, Censer-bearers, Deacons, slag hounds and the weapons are Cinderkirk's own; items, the other monsters and some sounds are still **stand-ins from LibreQuake** (BSD-3) until Cinderkirk's own are made, and the game code is LibreQuake's QuakeC (GPL-2.0). The menus already use Cinderkirk's words: Story, Pit Fights, Apprentice to Bellfounder.
+- The Ashen, Censer-bearers, Deacons, slag hounds, the weapons and the pickups (health, ammunition, armour, keys, the backpack) are Cinderkirk's own; the powerups, the other monsters and some sounds are still **stand-ins from LibreQuake** (BSD-3) until Cinderkirk's own are made, and the game code is LibreQuake's QuakeC (GPL-2.0). The menus already use Cinderkirk's words: Story, Pit Fights, Apprentice to Bellfounder.
 - Snap packaging for amd64 and arm64 (core24, strict), so it installs on Ubuntu and Ubuntu Core.
 
 Next, from the idea's plan: the four shafts of the Foundry.
@@ -48,7 +48,7 @@ Controls: a controller just works (left stick moves, right stick or gyro looks, 
 | `quakec/` | The game code, built with fteqcc into `build/progs.dat` |
 | `maps_src/` | Levels in code: each `<map>.py` writes a `.map` (TrenchBroom opens it) with `tools/mapkit.py` |
 | `assets_src/materials/` | Blender scripts that bake the world textures (`make textures`) |
-| `assets_src/models/` | `creatures.py` builds, rigs, animates and skins the creatures in Blender and writes them as MD3 (`make models`; `PREVIEW=dir` adds a sheet of their frames); `weapons.py` builds the weapons the player holds, with the stoker's glove, the same way (`make -j8 weapons`, one Blender run each, side by side; `VIEWSHOT=dir` shows them from the eye); `models.py` is the idea's mockup |
+| `assets_src/models/` | `creatures.py` builds, rigs, animates and skins the creatures in Blender and writes them as MD3 (`make models`; `PREVIEW=dir` adds a sheet of their frames); `weapons.py` builds the weapons the player holds, with the stoker's glove, the same way (`make -j8 weapons`, one Blender run each, side by side; `VIEWSHOT=dir` shows them from the eye, `WORLD=1` builds them as they lie on the floor); `pickups.py` builds health, ammunition, armour, keys and the backpack (`make -j8 pickups`, which also runs `weapons.py` with `WORLD=1`); `models.py` is the idea's mockup |
 | `assets/models/` | The creatures and the view models (`v_*`) as the game loads them: `<name>.md3`, its skin and `_luma` glow, and `.frames` (the frame order their QuakeC lists) |
 | `assets_src/fonts/` | Cinzel and Barlow Condensed, for the menus and the HUD |
 | `assets/textures/` | The baked textures: `<name>.png`, `_luma`, and `_norm` and `_gloss`, which the renderer shades with the light's direction from each map's `.lux` (`r_normalmaps`, `r_glossmaps`) |
@@ -60,7 +60,7 @@ Controls: a controller just works (left stick moves, right stick or gyro looks, 
 
 ## How it's built
 
-1. `tools/deps.sh` builds SDL 3, the Vulkan headers and loader (vkQuake needs 1.4.341) and `spirv-opt` into `build/prefix`; `tools/tools.sh` builds qbsp, vis, light and fteqcc into `build/bin`; `tools/librequake.sh` fetches LibreQuake's stand-ins at a pinned commit and compiles its ammo and health boxes.
+1. `tools/deps.sh` builds SDL 3, the Vulkan headers and loader (vkQuake needs 1.4.341) and `spirv-opt` into `build/prefix`; `tools/tools.sh` builds qbsp, vis, light and fteqcc into `build/bin`; `tools/librequake.sh` fetches LibreQuake's stand-ins at a pinned commit and compiles its little box models (the exploding barrels still use them).
 2. The engine builds with Meson against `build/prefix`.
 3. The QuakeC compiles to `build/progs.dat`.
 4. `tools/wad.py` turns the baked textures into a small WAD for qbsp (128 px stand-ins, so a texture repeats every 128 units); the engine draws the full 1024 px PNGs from `textures/` in their place, with their `_luma` glow.

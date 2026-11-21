@@ -126,6 +126,7 @@ class Creature:
         self.index = {b[0]: i for i, b in enumerate(bones)}
         self.hull_bottom = hull_bottom
         self.parts = []
+        self.flags = 0  # the MD3's model flags: 8 (EF_ROTATE) spins a pickup
 
     def add(self, o, material, bone=None, among=None, smooth=True, power=4.0, anchor=None):
         """Hangs a part on the skeleton: on one bone, or blended between the
@@ -589,7 +590,7 @@ def build(c, anims, effects=None):
     if os.environ.get("PREVIEW"):
         preview(c.name, names, positions, tris, st, albedo, os.environ["PREVIEW"])
     surf = {"name": c.name, "tris": tris, "st": st, "frames": positions, "normals": normals}
-    size = md3.write(os.path.join(OUT, c.name + ".md3"), [surf], names)
+    size = md3.write(os.path.join(OUT, c.name + ".md3"), [surf], names, c.flags)
     print("%s: %d triangles, %d vertices, %d frames, %d KiB" % (c.name, len(tris), len(st), len(names), size // 1024), flush=True)
     with open(os.path.join(OUT, c.name + ".frames"), "w") as fh:
         fh.write(" ".join(names) + "\n")

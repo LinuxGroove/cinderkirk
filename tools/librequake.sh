@@ -5,7 +5,7 @@
 #
 #   tools/librequake.sh [OUT] [BIN]   (default build/librequake, build/bin)
 #
-# The ammo and health boxes are little BSP models; they're compiled here
+# The boxes (the exploding ones are still used) are little BSP models; they're compiled here
 # from LibreQuake's .map sources with the tools in BIN.
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)

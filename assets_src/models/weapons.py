@@ -139,6 +139,8 @@ def rivets(w, pts, r=0.0055, bone="root"):
 def hand(w, top, down, fwd, elbow, fingers=4, grip_r=0.036):
     """The stoker's right glove closed round a grip: top is where the grip
     meets the gun, down runs along the grip, fwd towards the muzzle."""
+    if WORLD:
+        return
     d = P(down).normalized()
     f = (P(fwd) - d * P(fwd).dot(d)).normalized()
     s = d.cross(f).normalized()  # the hand's outside (right)
@@ -205,6 +207,11 @@ VIEW_AT = Vector([float(a) for a in os.environ.get("VIEW_AT", "-0.27,-0.62,-0.41
 VIEW_YAW = float(os.environ.get("VIEW_YAW", "7"))
 VIEW_PITCH = float(os.environ.get("VIEW_PITCH", "0"))
 VIEW_SCALE = float(os.environ.get("VIEW_SCALE", "1.5"))
+# WORLD=1 builds each weapon as it lies on the floor to be picked up instead
+# (g_<name>.md3): life size, no hand, one frame, spinning.
+WORLD = os.environ.get("WORLD") == "1"
+if WORLD:
+    VIEW_AT, VIEW_YAW, VIEW_PITCH, VIEW_SCALE = Vector((0, 0, 0)), 0.0, 0.0, 1.0
 VIEW = (Matrix.Translation(VIEW_AT) @ Matrix.Rotation(math.radians(VIEW_YAW), 4, "Z") @ Matrix.Rotation(math.radians(VIEW_PITCH), 4, "X")
         @ Matrix.Scale(VIEW_SCALE, 4) @ Matrix.Translation(-PIVOT))
 
@@ -569,6 +576,27 @@ def viewshot(name, names, positions, tris, st, albedo, out, size=None):
     o.file_format = "PNG"
     o.save()
 
+
+def world_build(w, anims, effects=None):
+    """A pickup: the weapon centred over its spot, its lowest point a hand
+    above the floor, at rest, turning as pickups do."""
+    bpy.context.view_layer.update()
+    pts = [o.matrix_world @ v.co for o in w.parts for v in o.data.vertices]
+    lo = Vector([min(p[i] for p in pts) for i in range(3)])
+    hi = Vector([max(p[i] for p in pts) for i in range(3)])
+    shift = Matrix.Translation(Vector((-(lo.x + hi.x) / 2, -(lo.y + hi.y) / 2, 0.25 - lo.z)))
+    for o in w.parts:
+        o.data.transform(shift @ o.matrix_world)
+        o.matrix_world = Matrix.Identity(4)
+    w.name = "g_" + w.name[2:]
+    w.flags = 8  # EF_ROTATE
+    w.hull_bottom = 0.0
+    _build(w, [("idle", 1, [(0.0, {})], False, None)])
+
+
+if WORLD:
+    _build = C.build
+    C.build = world_build
 
 if os.environ.get("VIEWSHOT"):
     os.environ["PREVIEW"] = os.environ["VIEWSHOT"]

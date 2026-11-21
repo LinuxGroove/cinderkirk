@@ -6,6 +6,7 @@
 #   make textures   bake the world textures in Blender (BLENDER=..., see README)
 #   make models     build the creatures in Blender
 #   make weapons    build the weapons the player holds in Blender
+#   make pickups    build the pickups and the weapons on the floor in Blender
 #   make clean      remove build/ and dist/ (keeps fetched sources in build/src)
 #
 # The game runs from dist/: dist/cinderkirk is the engine, dist/cinder/ the game.
@@ -39,7 +40,7 @@ export LD_LIBRARY_PATH := $(abspath $(PREFIX))/lib
 # build/prefix's headers first (the snap's gnome extension adds older Vulkan ones to CFLAGS).
 export CFLAGS := -I$(abspath $(PREFIX))/include $(CFLAGS)
 
-.PHONY: all engine game deps tools librequake maps map run clean textures models weapons check
+.PHONY: all engine game deps tools librequake maps map run clean textures models weapons pickups check
 
 all: engine game
 
@@ -148,6 +149,19 @@ WEAPONS := pick scattergun spitter bolt crucible steam mortar toll
 weapons: $(addprefix weapon-,$(WEAPONS))
 $(addprefix weapon-,$(WEAPONS)): weapon-%:
 	$(BLENDER) -b -P assets_src/models/weapons.py -- assets/models $(TEXRES) only=$*
+
+# Builds the pickups: health, ammo, armour, keys, the backpack (pickups.py) and
+# the weapons as they lie on the floor (g_*.md3, weapons.py with WORLD=1), one
+# Blender run each, so make -j8 pickups.
+PICKUPS := health_small health health_mega shells shells_big slag slag_big iron iron_big \
+	clappers clappers_big armour_leather armour_iron armour_bronze key_silver key_gold backpack
+GROUND  := steam spitter bolt crucible mortar toll
+.PHONY: pickups $(addprefix pickup-,$(PICKUPS)) $(addprefix ground-,$(GROUND))
+pickups: $(addprefix pickup-,$(PICKUPS)) $(addprefix ground-,$(GROUND))
+$(addprefix pickup-,$(PICKUPS)): pickup-%:
+	$(BLENDER) -b -P assets_src/models/pickups.py -- assets/models $(TEXRES) only=$*
+$(addprefix ground-,$(GROUND)): ground-%:
+	WORLD=1 $(BLENDER) -b -P assets_src/models/weapons.py -- assets/models $(TEXRES) only=$*
 
 check:
 	$(PYTHON) -m py_compile tools/*.py maps_src/*.py assets_src/models/*.py

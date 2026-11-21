@@ -249,7 +249,7 @@ float (entity e, float healamount, float ignore) T_Heal =
 
 /*QUAKED item_health (.3 .3 1) (0 0 0) (32 32 32) rotten megahealth
 {
-    model({"path": "maps/b_bh10.bsp", "skin": 0, "frame": 0});
+    model({"path": "progs/health_small.md3", "skin": 0, "frame": 0});
 }
 Health box. Normally gives 25 points.
 Rotten box heals 5-10 points,
@@ -271,10 +271,10 @@ void() item_health =
 
 	if (self.spawnflags & H_ROTTEN)
 	{
-		precache_model("maps/b_bh10.bsp");
+		precache_model("progs/health_small.md3");
 
 		precache_sound("items/r_item1.wav");
-		setmodel(self, "maps/b_bh10.bsp");
+		setmodel(self, "progs/health_small.md3");
 		self.noise = "items/r_item1.wav";
 		self.healamount = 15;
 		self.healtype = 0;
@@ -285,9 +285,9 @@ void() item_health =
 		if (deathmatch_no_mega_health())
 			return;
 
-		precache_model("maps/b_bh100.bsp");
+		precache_model("progs/health_mega.md3");
 		precache_sound("items/r_item2.wav");
-		setmodel(self, "maps/b_bh100.bsp");
+		setmodel(self, "progs/health_mega.md3");
 		self.noise = "items/r_item2.wav";
 		self.healamount = 100;
 		self.healtype = 2;
@@ -295,9 +295,9 @@ void() item_health =
 
 	else
 	{
-		precache_model("maps/b_bh25.bsp");
+		precache_model("progs/health.md3");
 		precache_sound("items/health1.wav");
-		setmodel(self, "maps/b_bh25.bsp");
+		setmodel(self, "progs/health.md3");
 		self.noise = "items/health1.wav";
 		self.healamount = 25;
 		self.healtype = 1;
@@ -478,8 +478,8 @@ void() item_armor1 =
 		return;
 
 	self.touch = armor_touch;
-	precache_model ("progs/armor.mdl");
-	setmodel (self, "progs/armor.mdl");
+	precache_model ("progs/armour_leather.md3");
+	setmodel (self, "progs/armour_leather.md3");
 	self.skin = 0;
 	setsize (self, '-16 -16 0', '16 16 56');
 	StartItem ();
@@ -497,9 +497,9 @@ void() item_armor2 =
 		return;
 
 	self.touch = armor_touch;
-	precache_model ("progs/armor.mdl");
-	setmodel (self, "progs/armor.mdl");
-	self.skin = 1;
+	precache_model ("progs/armour_iron.md3");
+	setmodel (self, "progs/armour_iron.md3");
+	self.skin = 0;
 	setsize (self, '-16 -16 0', '16 16 56');
 	StartItem ();
 };
@@ -516,9 +516,9 @@ void() item_armorInv =
 		return;
 
 	self.touch = armor_touch;
-	precache_model ("progs/armor.mdl");
-	setmodel (self, "progs/armor.mdl");
-	self.skin = 2;
+	precache_model ("progs/armour_bronze.md3");
+	setmodel (self, "progs/armour_bronze.md3");
+	self.skin = 0;
 	setsize (self, '-16 -16 0', '16 16 56');
 	StartItem ();
 };
@@ -758,7 +758,7 @@ void() weapon_touch =
 
 /*QUAKED weapon_supershotgun (0 .5 .8) (-16 -16 0) (16 16 32)
 {
-    model({"path": "progs/g_shot.mdl", "skin": 0, "frame": 0});
+    model({"path": "progs/g_steam.md3", "skin": 0, "frame": 0});
 }
 */
 
@@ -767,8 +767,8 @@ void() weapon_supershotgun =
 	if (deathmatch_no_weapons_on_map() || deathmatch_no_super_shotgun_on_map())
 		return;
 	
-	precache_model ("progs/g_shot.mdl");
-	setmodel (self, "progs/g_shot.mdl");
+	precache_model ("progs/g_steam.md3");
+	setmodel (self, "progs/g_steam.md3");
 	self.weapon = IT_SUPER_SHOTGUN;
 	self.netname = LOC_WEAPON_NAME_SUPER_SHOTGUN;
 	self.touch = weapon_touch;
@@ -778,7 +778,7 @@ void() weapon_supershotgun =
 
 /*QUAKED weapon_nailgun (0 .5 .8) (-16 -16 0) (16 16 32)
 {
-    model({"path": "progs/g_nail.mdl", "skin": 0, "frame": 0});
+    model({"path": "progs/g_spitter.md3", "skin": 0, "frame": 0});
 }
 */
 
@@ -787,8 +787,8 @@ void() weapon_nailgun =
 	if (deathmatch_no_weapons_on_map() || deathmatch_no_nailgun_on_map())
 		return;
 	
-	precache_model ("progs/g_nail.mdl");
-	setmodel (self, "progs/g_nail.mdl");
+	precache_model ("progs/g_spitter.md3");
+	setmodel (self, "progs/g_spitter.md3");
 	self.weapon = IT_NAILGUN;
 	self.netname = LOC_WEAPON_NAME_NAILGUN;
 	self.touch = weapon_touch;
@@ -798,7 +798,7 @@ void() weapon_nailgun =
 
 /*QUAKED weapon_supernailgun (0 .5 .8) (-16 -16 0) (16 16 32)
 {
-    model({"path": "progs/g_nail2.mdl", "skin": 0, "frame": 0});
+    model({"path": "progs/g_bolt.md3", "skin": 0, "frame": 0});
 }
 */
 
@@ -807,8 +807,8 @@ void() weapon_supernailgun =
 	if (deathmatch_no_weapons_on_map() || deathmatch_no_super_nailgun_on_map())
 		return;
 	
-	precache_model ("progs/g_nail2.mdl");
-	setmodel (self, "progs/g_nail2.mdl");
+	precache_model ("progs/g_bolt.md3");
+	setmodel (self, "progs/g_bolt.md3");
 	self.weapon = IT_SUPER_NAILGUN;
 	self.netname = LOC_WEAPON_NAME_SUPER_NAILGUN;
 	self.touch = weapon_touch;
@@ -818,7 +818,7 @@ void() weapon_supernailgun =
 
 /*QUAKED weapon_grenadelauncher (0 .5 .8) (-16 -16 0) (16 16 32)
 {
-    model({"path": "progs/g_rock.mdl", "skin": 0, "frame": 0});
+    model({"path": "progs/g_crucible.md3", "skin": 0, "frame": 0});
 }
 */
 
@@ -827,8 +827,8 @@ void() weapon_grenadelauncher =
 	if (deathmatch_no_weapons_on_map() || deathmatch_no_grenade_launcher_on_map())
 		return;
 
-	precache_model ("progs/g_rock.mdl");
-	setmodel (self, "progs/g_rock.mdl");
+	precache_model ("progs/g_crucible.md3");
+	setmodel (self, "progs/g_crucible.md3");
 	self.weapon = IT_GRENADE_LAUNCHER;
 	self.netname = LOC_WEAPON_NAME_GRENADE_LAUNCH;
 	self.touch = weapon_touch;
@@ -838,7 +838,7 @@ void() weapon_grenadelauncher =
 
 /*QUAKED weapon_rocketlauncher (0 .5 .8) (-16 -16 0) (16 16 32)
 {
-    model({"path": "progs/g_rock2.mdl", "skin": 0, "frame": 0});
+    model({"path": "progs/g_mortar.md3", "skin": 0, "frame": 0});
 }
 */
 
@@ -847,8 +847,8 @@ void() weapon_rocketlauncher =
 	if (deathmatch_no_weapons_on_map() || deathmatch_no_rocket_launcher_on_map())
 		return;
 	
-	precache_model ("progs/g_rock2.mdl");
-	setmodel (self, "progs/g_rock2.mdl");
+	precache_model ("progs/g_mortar.md3");
+	setmodel (self, "progs/g_mortar.md3");
 	self.weapon = IT_ROCKET_LAUNCHER;
 	self.netname = LOC_WEAPON_NAME_ROCKET_LAUNCH;
 	self.touch = weapon_touch;
@@ -859,7 +859,7 @@ void() weapon_rocketlauncher =
 
 /*QUAKED weapon_lightning (0 .5 .8) (-16 -16 0) (16 16 32)
 {
-    model({"path": "progs/g_light.mdl", "skin": 0, "frame": 0});
+    model({"path": "progs/g_toll.md3", "skin": 0, "frame": 0});
 }
 */
 
@@ -868,8 +868,8 @@ void() weapon_lightning =
 	if (deathmatch_no_weapons_on_map() || deathmatch_no_lightning_gun_on_map())
 		return;
 	
-	precache_model ("progs/g_light.mdl");
-	setmodel (self, "progs/g_light.mdl");
+	precache_model ("progs/g_toll.md3");
+	setmodel (self, "progs/g_toll.md3");
 	self.weapon = IT_LIGHTNING;
 	self.netname = LOC_WEAPON_NAME_THUNDERBOLT;
 	self.touch = weapon_touch;
@@ -992,7 +992,7 @@ float WEAPON_BIG2 = 1;
 
 /*QUAKED item_shells (0 .5 .8) (0 0 0) (32 32 32) big
 {
-    model({"path": "maps/b_shell1.bsp", "skin": 0, "frame": 0});
+    model({"path": "progs/shells_big.md3", "skin": 0, "frame": 0});
 }
 */
 
@@ -1005,15 +1005,15 @@ void() item_shells =
 
 	if (self.spawnflags & WEAPON_BIG2)
 	{
-		precache_model ("maps/b_shell1.bsp");
-		setmodel (self, "maps/b_shell1.bsp");
+		precache_model ("progs/shells_big.md3");
+		setmodel (self, "progs/shells_big.md3");
 		self.aflag = 40;
 	}
 
 	else
 	{
-		precache_model ("maps/b_shell0.bsp");
-		setmodel (self, "maps/b_shell0.bsp");
+		precache_model ("progs/shells.md3");
+		setmodel (self, "progs/shells.md3");
 		self.aflag = 20;
 	}
 
@@ -1025,7 +1025,7 @@ void() item_shells =
 
 /*QUAKED item_spikes (0 .5 .8) (0 0 0) (32 32 32) big
 {
-    model({"path": "maps/b_nail1.bsp", "skin": 0, "frame": 0});
+    model({"path": "progs/slag_big.md3", "skin": 0, "frame": 0});
 }
 */
 
@@ -1038,15 +1038,15 @@ void() item_spikes =
 
 	if (self.spawnflags & WEAPON_BIG2)
 	{
-		precache_model ("maps/b_nail1.bsp");
-		setmodel (self, "maps/b_nail1.bsp");
+		precache_model ("progs/slag_big.md3");
+		setmodel (self, "progs/slag_big.md3");
 		self.aflag = 50;
 	}
 
 	else
 	{
-		precache_model ("maps/b_nail0.bsp");
-		setmodel (self, "maps/b_nail0.bsp");
+		precache_model ("progs/slag.md3");
+		setmodel (self, "progs/slag.md3");
 		self.aflag = 25;
 	}
 
@@ -1058,7 +1058,7 @@ void() item_spikes =
 
 /*QUAKED item_rockets (0 .5 .8) (0 0 0) (32 32 32) big
 {
-    model({"path": "maps/b_rock1.bsp", "skin": 0, "frame": 0});
+    model({"path": "progs/iron_big.md3", "skin": 0, "frame": 0});
 }
 */
 
@@ -1071,15 +1071,15 @@ void() item_rockets =
 
 	if (self.spawnflags & WEAPON_BIG2)
 	{
-		precache_model ("maps/b_rock1.bsp");
-		setmodel (self, "maps/b_rock1.bsp");
+		precache_model ("progs/iron_big.md3");
+		setmodel (self, "progs/iron_big.md3");
 		self.aflag = 10;
 	}
 
 	else
 	{
-		precache_model ("maps/b_rock0.bsp");
-		setmodel (self, "maps/b_rock0.bsp");
+		precache_model ("progs/iron.md3");
+		setmodel (self, "progs/iron.md3");
 		self.aflag = 5;
 	}
 
@@ -1092,7 +1092,7 @@ void() item_rockets =
 
 /*QUAKED item_cells (0 .5 .8) (0 0 0) (32 32 32) big
 {
-    model({"path": "maps/b_batt1.bsp", "skin": 0, "frame": 0});
+    model({"path": "progs/clappers_big.md3", "skin": 0, "frame": 0});
 }
 */
 
@@ -1105,15 +1105,15 @@ void() item_cells =
 
 	if (self.spawnflags & WEAPON_BIG2)
 	{
-		precache_model ("maps/b_batt1.bsp");
-		setmodel (self, "maps/b_batt1.bsp");
+		precache_model ("progs/clappers_big.md3");
+		setmodel (self, "progs/clappers_big.md3");
 		self.aflag = 12;
 	}
 
 	else
 	{
-		precache_model ("maps/b_batt0.bsp");
-		setmodel (self, "maps/b_batt0.bsp");
+		precache_model ("progs/clappers.md3");
+		setmodel (self, "progs/clappers.md3");
 		self.aflag = 6;
 	}
 
@@ -1140,15 +1140,15 @@ void() item_weapon =
 	{
 		if (self.spawnflags & WEAPON_BIG)
 		{
-			precache_model ("maps/b_shell1.bsp");
-			setmodel (self, "maps/b_shell1.bsp");
+			precache_model ("progs/shells_big.md3");
+			setmodel (self, "progs/shells_big.md3");
 			self.aflag = 40;
 		}
 
 		else
 		{
-			precache_model ("maps/b_shell0.bsp");
-			setmodel (self, "maps/b_shell0.bsp");
+			precache_model ("progs/shells.md3");
+			setmodel (self, "progs/shells.md3");
 			self.aflag = 20;
 		}
 		self.weapon = 1;
@@ -1159,15 +1159,15 @@ void() item_weapon =
 	{
 		if (self.spawnflags & WEAPON_BIG)
 		{
-			precache_model ("maps/b_nail1.bsp");
-			setmodel (self, "maps/b_nail1.bsp");
+			precache_model ("progs/slag_big.md3");
+			setmodel (self, "progs/slag_big.md3");
 			self.aflag = 40;
 		}
 
 		else
 		{
-			precache_model ("maps/b_nail0.bsp");
-			setmodel (self, "maps/b_nail0.bsp");
+			precache_model ("progs/slag.md3");
+			setmodel (self, "progs/slag.md3");
 			self.aflag = 20;
 		}
 		self.weapon = 2;
@@ -1178,15 +1178,15 @@ void() item_weapon =
 	{
 		if (self.spawnflags & WEAPON_BIG)
 		{
-			precache_model ("maps/b_rock1.bsp");
-			setmodel (self, "maps/b_rock1.bsp");
+			precache_model ("progs/iron_big.md3");
+			setmodel (self, "progs/iron_big.md3");
 			self.aflag = 10;
 		}
 
 		else
 		{
-			precache_model ("maps/b_rock0.bsp");
-			setmodel (self, "maps/b_rock0.bsp");
+			precache_model ("progs/iron.md3");
+			setmodel (self, "progs/iron.md3");
 			self.aflag = 5;
 		}
 		self.weapon = 3;
@@ -1259,7 +1259,7 @@ void() key_setsounds =
 
 /*QUAKED item_key1 (0 .5 .8) (-16 -16 -24) (16 16 32)
 {
-    model({"path": "progs/w_s_key.mdl", "skin": 0, "frame": 0});
+    model({"path": "progs/key_silver.md3", "skin": 0, "frame": 0});
 }
 SILVER key
 In order for keys to work
@@ -1275,22 +1275,22 @@ void() item_key1 =
 {
 	if (world.worldtype == 0)
 	{
-		precache_model ("progs/w_s_key.mdl");
-		setmodel (self, "progs/w_s_key.mdl");
+		precache_model ("progs/key_silver.md3");
+		setmodel (self, "progs/key_silver.md3");
 		self.netname = LOC_KEY_NAME_SILVER;
 	}
 
 	else if (world.worldtype == 1)
 	{
-		precache_model ("progs/m_s_key.mdl");
-		setmodel (self, "progs/m_s_key.mdl");
+		precache_model ("progs/key_silver.md3");
+		setmodel (self, "progs/key_silver.md3");
 		self.netname = LOC_KEY_NAME_SILVER_RUNE;
 	}
 
 	else if (world.worldtype == 2)
 	{
-		precache_model2 ("progs/b_s_key.mdl");
-		setmodel (self, "progs/b_s_key.mdl");
+		precache_model2 ("progs/key_silver.md3");
+		setmodel (self, "progs/key_silver.md3");
 		self.netname = LOC_KEY_NAME_SILVER_CARD;
 	}
 
@@ -1303,7 +1303,7 @@ void() item_key1 =
 
 /*QUAKED item_key2 (0 .5 .8) (-16 -16 -24) (16 16 32)
 {
-    model({"path": "progs/w_g_key.mdl", "skin": 0, "frame": 0});
+    model({"path": "progs/key_gold.md3", "skin": 0, "frame": 0});
 }
 GOLD key
 In order for keys to work
@@ -1319,22 +1319,22 @@ void() item_key2 =
 {
 	if (world.worldtype == 0)
 	{
-		precache_model ("progs/w_g_key.mdl");
-		setmodel (self, "progs/w_g_key.mdl");
+		precache_model ("progs/key_gold.md3");
+		setmodel (self, "progs/key_gold.md3");
 		self.netname = LOC_KEY_NAME_GOLD;
 	}
 
 	if (world.worldtype == 1)
 	{
-		precache_model ("progs/m_g_key.mdl");
-		setmodel (self, "progs/m_g_key.mdl");
+		precache_model ("progs/key_gold.md3");
+		setmodel (self, "progs/key_gold.md3");
 		self.netname = LOC_KEY_NAME_GOLD_RUNE;
 	}
 
 	if (world.worldtype == 2)
 	{
-		precache_model2 ("progs/b_g_key.mdl");
-		setmodel (self, "progs/b_g_key.mdl");
+		precache_model2 ("progs/key_gold.md3");
+		setmodel (self, "progs/key_gold.md3");
 		self.netname = LOC_KEY_NAME_GOLD_CARD;
 	}
 
@@ -1862,7 +1862,7 @@ void() DropBackpack =
 	item.flags = FL_ITEM;
 	item.solid = SOLID_TRIGGER;
 	item.movetype = MOVETYPE_TOSS;
-	setmodel (item, "progs/backpack.mdl");
+	setmodel (item, "progs/backpack.md3");
 	setsize (item, '-16 -16 0', '16 16 56');
 	item.touch = BackpackTouch;
 

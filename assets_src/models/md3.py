@@ -55,7 +55,7 @@ def _surface(s, nframes):
     return out + tris.tobytes() + shaders + st.tobytes() + verts.tobytes()
 
 
-def write(path, surfaces, frame_names):
+def write(path, surfaces, frame_names, flags=0):
     nframes = len(frame_names)
     frames = b""
     for f, fname in enumerate(frame_names):
@@ -70,7 +70,7 @@ def write(path, surfaces, frame_names):
     o_surfs = o_tags
     o_end = o_surfs + len(surfs)
     data = b"IDP3" + struct.pack("<i", 15) + _name("cinderkirk", 64) + struct.pack(
-        "<9i", 0, nframes, 0, len(surfaces), 0, o_frames, o_tags, o_surfs, o_end) + frames + surfs
+        "<9i", flags, nframes, 0, len(surfaces), 0, o_frames, o_tags, o_surfs, o_end) + frames + surfs
     with open(path, "wb") as fh:
         fh.write(data)
     return len(data)
