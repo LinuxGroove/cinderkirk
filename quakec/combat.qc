@@ -79,6 +79,8 @@ float(entity targ, entity inflictor) CanDamage =
 /*============
 Killed
 ============*/
+void(entity targ, entity attacker, float take) Pressure_Damage;
+
 void(entity targ, entity attacker) Killed =
 {
 	local entity oself;
@@ -240,6 +242,7 @@ void(entity targ, entity inflictor, entity attacker, float damage) T_Damage=
 
 	// do the damage
 	targ.health = targ.health - take;
+	Pressure_Damage (targ, attacker, take);
 
 	if (targ.health <= 0)
 	{

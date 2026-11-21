@@ -598,6 +598,7 @@ void() PutClientInServer =
 	self.max_health = 100;
 	self.flags = FL_CLIENT;
 	self.air_finished = time + 12;
+	Pressure_Reset ();
 	self.dmg = 2;   		// initial water damage
 	self.super_damage_finished = 0;
 	self.radsuit_finished = 0;
@@ -1426,6 +1427,7 @@ void() PlayerPostThink =
 
 	CheckPowerups ();
 
+	Pressure_Frame ();
 	W_WeaponFrame (); // do weapon stuff
 };
 
@@ -1921,6 +1923,13 @@ void(entity targ, entity attacker) ClientObituary =
 			{
 				bprint (PRINT_MEDIUM, LOC_DEATH_SQUISH);
 				bprint (PRINT_MEDIUM, "\n");
+				return;
+			}
+
+			if (targ.deathtype == "scald")
+			{
+				targ.deathtype = string_null;
+				bprint (PRINT_MEDIUM, " held the pressure too long\n");
 				return;
 			}
 

@@ -1260,6 +1260,34 @@ static void Sbar_DrawModern (cb_context_t *cbx)
 Sbar_Draw
 ===============
 */
+/*
+===============
+Sbar_DrawPressure -- Cinderkirk
+
+The Pressure gauge, a strip above the status bar, read from the stat the
+game code sends (STAT_PRESSURE, 0 to 100). Red when full. A stand-in until
+the vector status bar's dial.
+===============
+*/
+#define STAT_PRESSURE 32
+static void Sbar_DrawPressure (cb_context_t *cbx)
+{
+	float p = CLAMP (0.0f, cl.statsf[STAT_PRESSURE], 100.0f);
+	float s = CLAMP (1.0f, scr_sbarscale.value, (float)glwidth / 320.0f);
+	float w = 144 * s, h = 4 * s;
+	float x = (glwidth - 320 * s) / 2 + 88 * s;
+	float y = glheight - q_max (sb_lines, 24 * s) - 7 * s; // the bar is drawn over the view when sb_lines is 0
+
+	if (cl.gametype == GAME_DEATHMATCH && !cl.statsf[STAT_PRESSURE])
+		return;
+	GL_SetCanvas (cbx, CANVAS_DEFAULT);
+	Draw_Fill (cbx, x - s, y - s, w + 2 * s, h + 2 * s, 0, 0.7f);
+	Draw_Fill (cbx, x, y, w * 0.8f, h, 4, 0.5f);
+	Draw_Fill (cbx, x + w * 0.8f, y, w * 0.2f, h, 247, 0.5f);
+	if (p > 0)
+		Draw_Fill (cbx, x, y, w * p / 100.0f, h, p >= 100.0f ? 251 : 236, 1.0f);
+}
+
 void Sbar_Draw (cb_context_t *cbx)
 {
 	float w; // johnfitz
@@ -1298,6 +1326,8 @@ void Sbar_Draw (cb_context_t *cbx)
 		Sbar_DrawClassic (cbx);
 	else
 		Sbar_DrawModern (cbx);
+	if (cl.stats[STAT_HEALTH] > 0)
+		Sbar_DrawPressure (cbx);
 }
 
 //=============================================================================

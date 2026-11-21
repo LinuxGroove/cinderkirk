@@ -50,7 +50,7 @@ Controls: a controller just works (left stick moves, right stick or gyro looks, 
 | `assets/textures/` | The baked textures: `<name>.png`, `_luma`, and `_norm` and `_gloss` for when the renderer uses them |
 | `cinder/` | Loose game files: `default.cfg` (controls and comfort defaults) and `quake.rc` |
 | `gfx/splash.png` | The LinuxGroove Games splash |
-| `tools/` | The build's helpers: `wad.py` (texture WADs), `pak.py`, `menu_art.py`, `make_icon.py`, `mapkit.py`, `deps.sh`, `tools.sh`, `librequake.sh`, `versions.sh` (every pinned version), `shoot.sh` (screenshots on a machine with no screen), `version.sh` |
+| `tools/` | The build's helpers: `wad.py` (texture WADs), `pak.py`, `menu_art.py`, `sfx.py` (the game's own sounds, synthesized), `make_icon.py`, `mapkit.py`, `deps.sh`, `tools.sh`, `librequake.sh`, `versions.sh` (every pinned version), `shoot.sh` (screenshots on a machine with no screen), `version.sh` |
 | `snap/` | The snap: `snapcraft.yaml`, the launcher and the desktop file |
 | `build/`, `dist/` | Made by `make`; `dist/` is the game, ready to run |
 

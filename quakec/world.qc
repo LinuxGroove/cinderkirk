@@ -360,6 +360,8 @@ void() worldspawn =
 
 	// 63 testing
 	lightstyle(63, "a");
+
+	Pressure_Init ();
 };
 
 void() StartFrame =

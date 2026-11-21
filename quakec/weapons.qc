@@ -1451,6 +1451,12 @@ void() QuadCheat =
 #endif // __QW__
 #endif // __LIBREQUAKE__
 
+// Overpressure, every weapon's alt-fire: filled in with the Cinderkirk weapons.
+void() W_Overpressure =
+{
+	Pressure_Spend (self, PRESSURE_MAX + 1);
+};
+
 void() ImpulseCommands =
 {
 	// cypress (07 feb 2024) -- pass self.impulse

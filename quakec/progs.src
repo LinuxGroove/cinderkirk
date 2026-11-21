@@ -22,6 +22,7 @@ lq1/cutscene_camera.qc  // LQ: svc_cutscene firing camera
 #endif
 
 combat.qc
+cinder/pressure.qc      // Cinderkirk: the Pressure gauge, the dash and vents
 
 items.qc
 weapons.qc

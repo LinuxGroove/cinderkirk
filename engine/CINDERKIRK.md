@@ -13,6 +13,7 @@ This folder is [vkQuake](https://github.com/Novum/vkQuake) at tag **1.37.0**, wi
 | `Quake/gl_screen.c` | The LinuxGroove Games splash (`gfx/splash.png`, scaled to cover the screen) for 1.5 s at start-up, fading out; `-nosplash` skips it |
 | `Quake/host.c` | The game opens on the main menu unless the command line starts a map, a save, a demo or a connection |
 | `Quake/menu.c` | How to Play has Cinderkirk's three pages (`NUM_HELP_PAGES`), drawn by `tools/menu_art.py` |
+| `Quake/sbar.c` | A Pressure gauge above the status bar, from the game code's stat 32 (a stand-in for the vector status bar's dial) |
 | `Quake/cl_main.c` | `cl_spawncmd`: console commands to run each time the player enters a level (`tools/shoot.sh` uses it for screenshots) |
 | `Misc/vq_pak/` | The built-in pak keeps only the crosshairs: vkQuake's console background (which carries id's logo), menus and fixes for id's maps are gone, so Cinderkirk's own are used |
 | `meson_options.txt` | User folders are on by default |

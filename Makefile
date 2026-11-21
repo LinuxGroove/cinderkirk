@@ -86,19 +86,24 @@ map:
 
 game: $(DIST)/cinder/pak0.pak
 
+$(BUILD)/sound/.done: tools/sfx.py
+	$(PYTHON) tools/sfx.py $(BUILD)/sound
+	touch $@
+
 $(BUILD)/menu/.done: tools/menu_art.py assets/textures/bronze1.png assets/textures/kirk_brick1.png assets_src/materials/glyph_mask.png $(LQ)/.done
 	$(PYTHON) tools/menu_art.py $(LQ)/gfx/palette.lmp $(BUILD)/menu assets/textures assets_src/materials/glyph_mask.png
 	touch $@
 
 # pak0.pak holds everything the game loads: LibreQuake's stand-ins first,
 # then Cinderkirk's own files over them.
-$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py
+$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/sound/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py
 	rm -rf $(STAGE)
 	mkdir -p $(STAGE)/maps $(STAGE)/textures $(STAGE)/gfx
 	cp -r $(LQ)/gfx.wad $(LQ)/gfx $(LQ)/progs $(LQ)/sound $(LQ)/maps $(STAGE)/
 	cp $(BUILD)/progs.dat $(STAGE)/
 	for m in $(MAPS); do cp $(BUILD)/maps/$$m.bsp $(STAGE)/maps/; \
 		[ ! -f $(BUILD)/maps/$$m.lit ] || cp $(BUILD)/maps/$$m.lit $(STAGE)/maps/; done
+	cp -r $(BUILD)/sound/cinder $(STAGE)/sound/
 	cp $(TEXTURES) $(STAGE)/textures/
 	cp $(BUILD)/menu/gfx/* gfx/splash.png $(STAGE)/gfx/
 	cp cinder/default.cfg cinder/quake.rc $(STAGE)/
