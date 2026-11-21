@@ -242,6 +242,18 @@ void(entity targ, entity inflictor, entity attacker, float damage) T_Damage=
 		return;
 
 
+	// Cinderkirk: creatures hit softer on Apprentice and harder on Master
+	// and Founder's.
+	if ((targ.flags & FL_CLIENT) && (attacker.flags & FL_MONSTER) && !deathmatch)
+	{
+		if (skill == 0)
+			take = ceil (take * 0.7);
+		else if (skill == 2)
+			take = ceil (take * 1.2);
+		else if (skill >= 3)
+			take = ceil (take * 1.4);
+	}
+
 	// do the damage
 	targ.health = targ.health - take;
 	if (targ.flags & FL_CLIENT && take > 0)

@@ -55,20 +55,30 @@ vector(vector at, vector mn, vector mx, float wide) Coop_Beside =
 	return '0 0 0';
 };
 
-// Called by walkmonster_start and flymonster_start: in co-op, maybe put a
-// second one of this creature beside it. Every third creature on Apprentice,
-// every second on Journeyman, and every one on Master and Founder's.
+// Called by walkmonster_start and flymonster_start: maybe put a second one
+// of this creature beside it. In co-op every third creature on Apprentice,
+// every second on Journeyman, and every one on Master and Founder's; alone,
+// every third on Master and every second on Founder's.
 void() Coop_Extra =
 {
 	local float every;
 	local vector to;
 	local entity e, was;
 
-	if (!coop || deathmatch || self.coop_copy || self.health > 1000)
+	if (deathmatch || self.coop_copy || self.health > 1000)
+		return;
+	if (!coop && skill < 2)
 		return;
 	coop_seen = coop_seen + 1;
 	every = 3;
-	if (skill >= 2)
+	if (!coop)
+	{
+		// Alone: a copy beside every third creature on Master, every
+		// second on Founder's (Apprentice's map flags leave some out).
+		if (skill >= 3)
+			every = 2;
+	}
+	else if (skill >= 2)
 		every = 1;
 	else if (skill >= 1)
 		every = 2;

@@ -33,6 +33,23 @@ def corners():
     return [(-R, R - W), (R - W, R - W), (R - W, -R), (-R, -R)]       # NW, NE, SE, SW
 
 
+def rail(L, x0, y0, x1, y1, z_from, z_to, axis):
+    """A wall 40 high along a flight, from its z_from end (x0 or y0 as
+    given, either way round) to its z_to end, in 64-unit lengths that step
+    down with the stair."""
+    a0, a1 = (x0, x1) if axis == "x" else (y0, y1)
+    n = max(1, int(abs(a1 - a0) // 64))
+    for k in range(n):
+        t0, t1 = a0 + (a1 - a0) * k / n, a0 + (a1 - a0) * (k + 1) / n
+        za, zb = z_from + (z_to - z_from) * k / n, z_from + (z_to - z_from) * (k + 1) / n
+        top, base = max(za, zb) + 40, min(za, zb) - 16
+        lo, hi = min(t0, t1), max(t0, t1)
+        if axis == "x":
+            L.solid(lo, min(y0, y1), base, hi, max(y0, y1), top, "iron_rust1")
+        else:
+            L.solid(min(x0, x1), lo, base, max(x0, x1), hi, top, "iron_rust1")
+
+
 def build():
     L = Level(wad="cinder.wad", light_wait=0.6, sounds=8, message="The Throat", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=10, _range=0.6)
@@ -60,7 +77,16 @@ def build():
                 L.steps(nx + W, ny, cx, ny + W, z2, z, axis="x", tex="kirk_stone1", base=z2 - 16)
             else:               # north along the west wall
                 L.steps(nx, cy + W, nx + W, ny, z, z2, axis="y", tex="kirk_stone1", base=z2 - 16)
-            # A lamp and a low wall on the well side of each landing.
+            # A low wall on the flight's well side, stepping down with it,
+            # and a lamp over each landing.
+            if i == 0:
+                rail(L, cx + W, cy, nx, cy + 8, z, z2, "x")
+            elif i == 1:
+                rail(L, nx, cy, nx + 8, ny + W, z, z2, "y")
+            elif i == 2:
+                rail(L, cx, ny + W - 8, nx + W, ny + W, z, z2, "x")
+            else:
+                rail(L, nx + W - 8, cy + W, nx + W, ny, z, z2, "y")
             L.light((cx + W / 2, cy + W / 2, z + 110), 220, CANDLE)
             z = z2
     # The bottom: a ring of floor round the slag, where the fire shows.

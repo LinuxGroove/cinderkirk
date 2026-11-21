@@ -1421,8 +1421,29 @@ ClientConnect
 
 called when a player connects to a server
 ============*/
+// Cinderkirk: a player who joins with a name someone else here has (most
+// often the default, Stoker) is numbered, so the obituaries say who's who.
+void() Client_NumberName =
+{
+	local entity p;
+	local float n;
+
+	n = 1;
+	for (p = find (world, classname, "player"); p; p = find (p, classname, "player"))
+		if (p != self && p.netname == self.netname)
+			n = n + 1;
+	if (n < 2)
+		return;
+	stuffcmd (self, "name \"");
+	stuffcmd (self, self.netname);
+	stuffcmd (self, " ");
+	stuffcmd (self, ftos (n));
+	stuffcmd (self, "\"\n");
+};
+
 void() ClientConnect =
 {
+	Client_NumberName ();
 	bprint (PRINT_HIGH, self.netname);
 	bprint (PRINT_HIGH, LOC_CLIENT_JOIN);
 	bprint (PRINT_HIGH, "\n");

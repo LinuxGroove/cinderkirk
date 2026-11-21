@@ -75,6 +75,12 @@ def brush_text(b, textures=None):
     return "\n".join(lines)
 
 
+# Skill spawnflags the engine reads: left out on Apprentice, Journeyman, or
+# Master and Founder's.
+NOT_EASY, NOT_NORMAL, NOT_HARD = 256, 512, 1024
+BOSSES = ("monster_founder", "monster_throat")
+
+
 @dataclass
 class Entity:
     classname: str
@@ -181,7 +187,27 @@ class Level:
             boxes = nxt
         return [b for b in boxes if b.x1 > b.x0 and b.y1 > b.y0 and b.z1 > b.z0] + self.details
 
+    def skill_flags(self):
+        """Apprentice leaves out every third ordinary creature (the engine
+        drops entities with spawnflags 256 on skill 0). Bosses, creatures
+        that fire or are fired by something, and creatures a map has already
+        given skill flags are left as they are. Master and Founder's add
+        creatures in the game code (coop.qc), not here."""
+        n = 0
+        for e in self.entities:
+            if not e.classname.startswith("monster_") or e.classname in BOSSES:
+                continue
+            if any(k in e.keys for k in ("target", "targetname", "killtarget")):
+                continue
+            flags = int(e.keys.get("spawnflags", 0))
+            if flags & (NOT_EASY | NOT_NORMAL | NOT_HARD):
+                continue
+            n += 1
+            if n % 3 == 0:
+                e.keys["spawnflags"] = flags | NOT_EASY
+
     def text(self):
+        self.skill_flags()
         world = Entity("worldspawn", self.world, self.world_brushes())
         return "\n".join([world.text()] + [e.text() for e in self.entities]) + "\n"
 
