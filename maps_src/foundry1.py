@@ -49,7 +49,11 @@ def build():
     L.add("item_health", (256, -192, 0))
     L.add("item_shells", (400, 64, 0))
     for x in (160, 416):
-        L.light((x, 0, 176), 240, WARM)
+        L.light((x, 0, 176), 300, WARM)
+    # The first thing a player sees: light the way in, not only the hall ahead.
+    L.light((64, 0, 160), 260, WARM)
+    for y in (-200, 200):
+        L.light((64, y, 96), 180, CANDLE)
     L.light((256, 200, 120), 160, CANDLE)
     L.light((256, -200, 120), 160, CANDLE)
 

@@ -202,6 +202,7 @@ $(addprefix actor-,$(ACTORS)): actor-%:
 check:
 	$(PYTHON) -m py_compile tools/*.py maps_src/*.py assets_src/models/*.py
 	for m in $(MAPS); do grep -q "LEAK" $(BUILD)/maps/$$m.log && { echo "$$m leaks"; exit 1; } || true; done
+	$(PYTHON) tools/stuck.py
 
 clean:
 	rm -rf $(BUILD)/engine $(BUILD)/maps $(BUILD)/stage $(BUILD)/progs.dat $(BUILD)/progs.lno $(DIST)

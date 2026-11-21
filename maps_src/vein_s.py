@@ -64,7 +64,7 @@ def build():
     for x, y in ((C0 + 120, -260), (C0 + 120, 260), (C1 - 80, -260), (C1 - 80, 260), (cx, -300), (cx, 300)):
         L.light((x, y, 200), 220, CANDLE)
 
-    L.add("monster_crucible_brute", (cx + 170, 0, 24), angle=180)
+    L.add("monster_crucible_brute", (cx + 60, 0, 24), angle=180)
     L.add("monster_censer", (cx + 200, -300, 72), angle=90)
     L.add("monster_censer", (cx - 200, 300, 72), angle=270)
     L.add("monster_clinker", (cx, -160, 430), angle=180, spawnflags=2)

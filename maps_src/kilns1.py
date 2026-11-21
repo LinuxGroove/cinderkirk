@@ -104,7 +104,7 @@ def build():
     L.add("monster_ashen", (200, 400, 24), angle=180)
     L.add("monster_censer", (0, -144, -100), angle=90)
     L.add("monster_ashen", (0, -496, -232), angle=90)
-    for x, y in ((-250, -1000), (250, -1250), (0, -1400)):
+    for x, y in ((-170, -1000), (170, -1250), (0, -1400)):
         L.add("monster_ash_wraith", (x, y, HALL + 120), angle=90)
     L.add("monster_deacon", (0, -1360, HALL + 24), angle=90)
     for x, y in ((-384, -1060), (384, -1060)):
@@ -113,7 +113,7 @@ def build():
     L.add("item_shells", (-240, 560, 0))
     L.add("item_health", (240, 560, 0))
     L.add("item_spikes", (40, -144, -128))
-    L.add("item_health", (-40, -1490, HALL))
+    L.add("item_health", (-120, -1400, HALL))
     L.add("item_rockets", (440, -1480, HALL))
     L.add("item_armor1", (-440, -1480, HALL))
     L.add("weapon_supershotgun", (0, 352, 0))

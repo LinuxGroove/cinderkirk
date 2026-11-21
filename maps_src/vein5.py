@@ -85,7 +85,7 @@ def build():
 
     # The Founder, and his congregation's last few.
     L.add("monster_founder", (CX + 64, 0, 24), angle=180, target="cope")
-    L.add("monster_censer", (CX + 480, -560, 24), angle=180)
+    L.add("monster_censer", (CX + 480, -560, 176), angle=180)
     L.add("monster_censer", (CX - 480, 560, 24), angle=0)
     L.add("monster_clinker", (CX - 480, 0, H - 8), angle=180, spawnflags=2)
     L.add("monster_clinker", (CX + 300, 300, H - 8), angle=180, spawnflags=2)
