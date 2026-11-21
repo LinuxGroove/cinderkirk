@@ -264,7 +264,8 @@ void(entity targ, entity inflictor, entity attacker, float damage) T_Damage=
 	oldself = self;
 	self = targ;
 
-	if ( (self.flags & FL_MONSTER) && attacker != world)
+	// Only monsters that can run after someone get mad (the Throat can't).
+	if ( (self.flags & FL_MONSTER) && attacker != world && self.th_run)
 	{
 		//get mad unless of the same class (except for soldiers)
 		if (self != attacker && attacker != self.enemy)
