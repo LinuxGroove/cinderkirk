@@ -38,3 +38,31 @@ void() target_skill =
 	}
 	self.use = target_skill_use;
 };
+
+/*QUAKED misc_seal_trophy (0 .5 .8) (-16 -16 -24) (16 16 32) FOUNDRY CISTERNS OSSUARY UNDERVEIN
+A Seal on the Pithead's shelf: shown, turning slowly, once its shaft is
+beaten (the same spawnflag as the shaft's item_sigil), and gone until then.
+*/
+void() misc_seal_trophy =
+{
+	string m;
+
+	if (deathmatch || !(serverflags & self.spawnflags & 15))
+	{
+		remove (self);
+		return;
+	}
+	if (self.spawnflags & 1)
+		m = "progs/end1.mdl";
+	else if (self.spawnflags & 2)
+		m = "progs/end2.mdl";
+	else if (self.spawnflags & 4)
+		m = "progs/end3.mdl";
+	else
+		m = "progs/end4.mdl";
+	precache_model (m);
+	setmodel (self, m);
+	self.solid = SOLID_NOT;
+	self.movetype = MOVETYPE_NOCLIP;
+	self.avelocity = '0 30 0';
+};

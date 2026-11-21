@@ -106,8 +106,10 @@ def build():
     L.add("light", (512, 0, -120), light=200, _color=SLAG)
 
     # The trophy shelf on the west wall.
-    L.solid(0, -224, 96, 32, 224, 104, "oak1")
-    L.solid(0, -224, 192, 32, 224, 200, "oak1")
+    L.solid(0, -224, 96, 48, 224, 104, "oak1")
+    L.solid(0, -224, 192, 48, 224, 200, "oak1")
+    for flag, y in ((1, -168), (2, -56), (4, 56), (8, 168)):   # a Seal for each shaft beaten
+        L.add("misc_seal_trophy", (24, y, 112), spawnflags=flag)
     L.light((96, 0, 160), 200, CANDLE)
 
     # Light: lamps hung from the headframe, braziers along the walls.

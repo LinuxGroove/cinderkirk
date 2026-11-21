@@ -13,8 +13,9 @@ More in [docs/screenshots](docs/screenshots/): the splash, the main menu, the ga
 **Phase 1, the engine and tool chain, with a first playable level.**
 
 - The engine is vkQuake 1.37.0, forked in `engine/` ([what changed](engine/CINDERKIRK.md)): its own game folder (`cinder/`), name and save folder, the LinuxGroove Games splash, and opening on the main menu. vkQuake already brings SDL 3 and Wayland, gyro aiming, flick stick, rumble, a render resolution separate from the menus and HUD, ambient occlusion, and external high-resolution textures with glow maps.
-- **The Pithead** (`maps_src/start.py`), the hub every run starts in: the lift lever's four notches set the skill (Apprentice, Journeyman, Master, Founder's), a cage down each shaft opens off the hall (only the Foundry's runs so far), the grate over the Throat lifts once all four shafts are beaten, and a trophy shelf waits on the west wall.
+- **The Pithead** (`maps_src/start.py`), the hub every run starts in: the lift lever's four notches set the skill (Apprentice, Journeyman, Master, Founder's), a cage down each shaft opens off the hall (only the Foundry's runs so far), the grate over the Throat lifts once all four shafts are beaten, and the trophy shelf on the west wall shows each shaft's Seal once it's taken (`misc_seal_trophy`).
 - **The Foundry Gate** (`maps_src/foundry1.py`), the Foundry shaft's first map: the gatehouse, the Casting Floor with a slag channel and a bridge, the silver key, and the belfry behind the key door. Its world textures are the 1024 px Blender bakes from the mockup, so 8 texels a unit.
+- **The rest of the Foundry shaft**: the Moulding Floor (`foundry2`: the core shop, the gold key and the drying ovens), the Furnace Row (`foundry3`: furnaces, the charging deck's lift, the silver key and the tapping yard), the Bell Pit (`foundry4`: terraces down to a bell's mould and back up to the gold door) and the Pour (`foundry5`: free the crane's two chains and the cope lifts off the Foundry Seal), with a secret map, the Ash Pit (`foundry_s`), through a cracked wall in the Furnace Row's coal store.
 - The menus, cursor, side plaque and console background are Cinderkirk's own, drawn at 4× so they stay sharp at 4K.
 - **Rumble** is designed, not loudness: each weapon's shot, a hit taken, the dash, Overpressure, a vent, a pickup and a secret have their own short pattern (`engine/Quake/rumble.c`), sent by the game code to the one player it happens to (`quakec/cinder/rumble.qc`).
 - **The status bar and the weapon wheel** are vector art: `tools/hud_svg.py` writes them as SVG (text turned to paths from the game's fonts) and the engine rasterises them with nanosvg at the screen's own resolution, so they're as sharp at 4K as at 720p. The Pressure dial sits in the middle of the bar, with the eight weapons in a row above it. Hold LB (or Q) for the wheel: the right stick, the gyro or the mouse points, letting go equips, a tap goes back to the last weapon, and time slows to a third while it's open in single player.
@@ -23,7 +24,7 @@ More in [docs/screenshots](docs/screenshots/): the splash, the main menu, the ga
 - The Ashen, Censer-bearers, Deacons, slag hounds, the weapons and the pickups (health, ammunition, armour, keys, the backpack) are Cinderkirk's own; the powerups, the other monsters and some sounds are still **stand-ins from LibreQuake** (BSD-3) until Cinderkirk's own are made, and the game code is LibreQuake's QuakeC (GPL-2.0). The menus already use Cinderkirk's words: Story, Pit Fights, Apprentice to Bellfounder.
 - Snap packaging for amd64 and arm64 (core24, strict), so it installs on Ubuntu and Ubuntu Core.
 
-Next, from the idea's plan: the four shafts of the Foundry.
+Next, from the idea's plan: the Cisterns, the Ossuary Kilns and the Undervein, then the Throat.
 
 ## Playing it
 

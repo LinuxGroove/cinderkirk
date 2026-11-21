@@ -153,10 +153,10 @@
 #define LOC_RUNE_GET					"You have the Seal"
 
 #define LOC_RUNE_LQ_YOU					"You"
-#define LOC_RUNE_LQ_BLOOD				" has the Foundry Seal"
-#define LOC_RUNE_LQ_BONE				" has the Cistern Seal"
-#define LOC_RUNE_LQ_MIND				" has the Kiln Seal"
-#define LOC_RUNE_LQ_SOUL				" has the Vein Seal"
+#define LOC_RUNE_LQ_BLOOD				" took the Foundry Seal"
+#define LOC_RUNE_LQ_BONE				" took the Cistern Seal"
+#define LOC_RUNE_LQ_MIND				" took the Kiln Seal"
+#define LOC_RUNE_LQ_SOUL				" took the Vein Seal"
 
 /*==============================================================================
 
