@@ -46,7 +46,7 @@ def build():
     for s in (-1, 1):
         y0, y1 = (Y - 96, Y) if s > 0 else (-Y, -Y + 96)
         L.opening(352, y0, -48, X1, y1, 0)
-        L.liquid(352, y0, -48, X1, y1, -16, "*slag1")
+        L.liquid(352, y0, -48, X1, y1, -16, "*lava_slag1")
         for x in range(480, X1, 320):
             L.light((x, (y0 + y1) / 2, 40), 260, EMBER)
     # The casting pit's rim, low enough to step over, round where he stands.

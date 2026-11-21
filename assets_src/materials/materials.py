@@ -960,7 +960,7 @@ MATERIALS = {
     "kirk_glyph1": m_glyph,
     "iron_plate1": m_iron,
     "floor_flag1": m_floor,
-    "*slag1": m_slag,
+    "*lava_slag1": m_slag,
     "bronze1": m_bronze,
     "cloth_char1": m_cloth,
     "leather1": m_leather,

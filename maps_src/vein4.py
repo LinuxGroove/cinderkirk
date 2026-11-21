@@ -46,7 +46,7 @@ def build():
     # The hall and the river across it, with stones standing in the slag.
     L.room(H0, -HY, 0, H1, HY, 512, wall="vein_rock1", floor="ore_rock1", ceiling="ore_rock1", floor_depth=64)
     L.opening(R0, -HY, -48, R1, HY, 0)
-    L.liquid(R0, -HY, -48, R1, HY, -16, "*slag1")
+    L.liquid(R0, -HY, -48, R1, HY, -16, "*lava_slag1")
     for x, y in ((1312, -96), (1424, -16), (1472, 112), (1360, 216), (1440, 340)):
         L.solid(x - 40, y - 40, -48, x + 40, y + 40, 0, "ore_rock1")
     for y in range(-HY + 96, HY, 256):

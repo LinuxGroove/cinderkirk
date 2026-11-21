@@ -108,7 +108,7 @@ def build():
     L.add("monster_ashen", (1420, 120, -40), angle=0)
     L.add("monster_ashen", (1420, -120, -40), angle=0)
     # Light: the slag, braziers along the walls, cold light from high up.
-    L.add("light", (1024, 0, -100), light=200, _color=SLAG, _surface="*slag1",
+    L.add("light", (1024, 0, -100), light=200, _color=SLAG, _surface="*lava_slag1",
           _surface_offset=12)
     for x in (760, 1260, 1440):
         L.light((x, -300, 64), 260, WARM)

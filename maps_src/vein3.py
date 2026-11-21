@@ -106,7 +106,7 @@ def build():
     W0, W1, WY0, WY1 = 1088, 2048, 1120, 1600
     L.room(W0, WY0, BOT, W1, WY1, BOT + 320, wall="vein_rock1", floor="vein_rock1", ceiling="ore_rock1", floor_depth=64)
     L.opening(1504, WY0 + 64, BOT - 48, 1600, WY1 - 64, BOT)                         # a slag crack across the floor
-    L.liquid(1504, WY0 + 64, BOT - 48, 1600, WY1 - 64, BOT - 16, "*slag1")
+    L.liquid(1504, WY0 + 64, BOT - 48, 1600, WY1 - 64, BOT - 16, "*lava_slag1")
     L.solid(1488, 1296, BOT - 8, 1616, 1424, BOT + 8, "iron_plate1")
     for y in (1200, 1520):
         L.light((1552, y, BOT + 40), 240, EMBER)

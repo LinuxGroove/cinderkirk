@@ -147,7 +147,7 @@ class Level:
             else:
                 self.solid(x0, y0 + run * i, bottom, x1, y0 + run * (i + 1), top, tex)
 
-    def liquid(self, x0, y0, z0, x1, y1, z1, tex="*slag1"):
+    def liquid(self, x0, y0, z0, x1, y1, z1, tex="*lava_slag1"):
         self.details.append(Box(x0, y0, z0, x1, y1, z1, tex))
 
     def add(self, classname, origin=None, **keys):

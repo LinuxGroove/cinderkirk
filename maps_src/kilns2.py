@@ -37,7 +37,7 @@ def kiln(L, x0, north):
     L.solid(x0 + 64, fy0 - (8 if north else 0), 120, x0 + 160, fy1 + (0 if north else 8), 136, "kirk_trim1")
     iy0, iy1 = (fy1, y1) if north else (y0, fy0)
     L.opening(x0 + 24, iy0, -40, x0 + 200, iy1, 0)
-    L.liquid(x0 + 24, iy0, -40, x0 + 200, iy1, -12, "*slag1")
+    L.liquid(x0 + 24, iy0, -40, x0 + 200, iy1, -12, "*lava_slag1")
     L.light((x0 + 112, (iy0 + iy1) / 2, 40), 220, EMBER)
     return x0 + 112, (iy0 + iy1) / 2
 

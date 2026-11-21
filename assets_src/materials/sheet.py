@@ -4,7 +4,7 @@ import sys, os
 from PIL import Image, ImageDraw, ImageFont
 src, out = sys.argv[1], sys.argv[2]
 names = ["kirk_brick1", "kirk_vbrick1", "kirk_stone1", "kirk_glyph1", "iron_plate1", "floor_flag1",
-         "#slag1", "bronze1", "cloth_char1", "leather1", "oak1"]
+         "#lava_slag1", "bronze1", "cloth_char1", "leather1", "oak1"]
 T, PAD, LAB = 200, 10, 26
 cols = ["", "_norm", "_gloss", "_luma"]
 font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 15)

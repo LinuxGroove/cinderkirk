@@ -40,7 +40,7 @@ def build():
     # with a bridge.
     for x in (448, 1344):
         L.opening(x - 48, -Y + 160, -48, x + 48, Y - 160, 0)
-        L.liquid(x - 48, -Y + 160, -48, x + 48, Y - 160, -16, "*slag1")
+        L.liquid(x - 48, -Y + 160, -48, x + 48, Y - 160, -16, "*lava_slag1")
         L.solid(x - 64, -64, -8, x + 64, 64, 8, "iron_plate1")
         for y in (-300, 300):
             L.light((x, y, 24), 220, EMBER)

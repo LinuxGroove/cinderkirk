@@ -89,7 +89,7 @@ def build():
     L.solid(B0 + 184, -BY + 160, 0, B0 + 192, BY, 36, "iron_rust1")
     L.steps(B0 + 192, -BY, B0 + 448, -BY + 160, 0, BF, axis="x", tex=PROP)
     L.opening(2304, -192, BF - 48, 2560, 192, BF)
-    L.liquid(2304, -192, BF - 48, 2560, 192, BF - 16, "*slag1")
+    L.liquid(2304, -192, BF - 48, 2560, 192, BF - 16, "*lava_slag1")
     for x in (2304, 2560):
         L.light((x, 0, BF + 40), 260, EMBER)
     L.light((2432, -300, BF + 40), 220, EMBER)

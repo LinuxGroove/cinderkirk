@@ -52,7 +52,7 @@ def build():
                    message="The casting floor. Nothing you carry will stop the Throat.\nKnock the four brakes off the bell's chains.")
 
     L.room(-R, -R, LAKE, R, R, TOP, wall="firebrick1", floor="vein_rock1", ceiling="iron_rust1")
-    L.liquid(-R, -R, LAKE, R, R, LAKE + 64, "*slag1")
+    L.liquid(-R, -R, LAKE, R, R, LAKE + 64, "*lava_slag1")
     # The floor, out over the slag round the open square, on its piers.
     for x0, y0, x1, y1 in ((-R, HOLE, R, R), (-R, -R, R, -HOLE), (-R, -HOLE, -HOLE, HOLE), (HOLE, -HOLE, R, HOLE)):
         L.solid(x0, y0, -16, x1, y1, 0, "iron_plate1")

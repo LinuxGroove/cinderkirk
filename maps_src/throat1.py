@@ -65,7 +65,7 @@ def build():
             z = z2
     # The bottom: a ring of floor round the slag, where the fire shows.
     L.opening(-R + W, -R + W, BOT - 48, R - W, R - W, BOT)
-    L.liquid(-R + W, -R + W, BOT - 48, R - W, R - W, BOT - 16, "*slag1")
+    L.liquid(-R + W, -R + W, BOT - 48, R - W, R - W, BOT - 16, "*lava_slag1")
     for x in (-200, 200):
         for y in (-200, 200):
             L.light((x, y, BOT + 48), 380, SLAG)
