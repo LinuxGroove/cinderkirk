@@ -2964,18 +2964,20 @@ static const menukeybind_t default_keybinds[] = {
 	{"*", ""}, // insertion point for bindlist.lst entries
 	{"", ""},
 	{"+attack", "Attack"},
+	{"impulse 21", "Overpressure"},
+	{"impulse 20", "Dash"},
+	{"+wheel", "Weapon wheel"},
 	{"impulse 10", "Next weapon"},
 	{"impulse 12", "Previous weapon"},
-	{"impulse 1", "Axe"},
-	{"impulse 2", "Shotgun"},
-	{"impulse 3", "Super Shotgun"},
-	{"impulse 4", "Nailgun"},
-	{"impulse 5", "Super Nailgun"},
-	{"impulse 6", "Grenade Launcher"},
-	{"impulse 7", "Rocket Launcher"},
-	{"impulse 8", "Thunderbolt"},
-	{"impulse 225", "Laser Cannon"},
-	{"impulse 226", "Mjolnir"},
+	// Cinderkirk's weapons by their wheel slots (arsenal.qc)
+	{"impulse 1", "Pick"},
+	{"impulse 2", "Scattergun"},
+	{"impulse 3", "Spitter"},
+	{"impulse 4", "Bolt Caster"},
+	{"impulse 5", "Crucible"},
+	{"impulse 6", "Steam Cannon"},
+	{"impulse 7", "Shot Mortar"},
+	{"impulse 8", "Tolling Iron"},
 	{"", ""},
 	{"*", ""}, // end of gameplay bindings
 	{"", ""},
@@ -3214,7 +3216,7 @@ static void M_Keys_Draw (cb_context_t *cbx)
 		// do not draw anything if the bindnames is empty, it means a plceholder separator.
 		if (strlen (bindnames[i + first_key].command) && (keys[0] == -1))
 		{
-			M_Print (cbx, KEY_STRING_DRAW_POS, y, "???");
+			M_Print (cbx, KEY_STRING_DRAW_POS, y, "-");
 		}
 		else
 		{

@@ -23,6 +23,11 @@ COLD = (0.62, 0.72, 1.0)
 CANDLE = (1.0, 0.8, 0.55)
 
 
+# The first map was the busiest in the game: on Apprentice and Journeyman the
+# Casting Floor's first wave loses its hound pack and a few others.
+HARD_ONLY = 256 | 512
+
+
 def build():
     L = Level(wad="cinder.wad", sounds=4, message="The Foundry Gate", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
@@ -44,7 +49,11 @@ def build():
     L.add("item_health", (256, -192, 0))
     L.add("item_shells", (400, 64, 0))
     for x in (160, 416):
-        L.light((x, 0, 176), 240, WARM)
+        L.light((x, 0, 176), 300, WARM)
+    # The first thing a player sees: light the way in, not only the hall ahead.
+    L.light((64, 0, 160), 260, WARM)
+    for y in (-200, 200):
+        L.light((64, y, 96), 180, CANDLE)
     L.light((256, 200, 120), 160, CANDLE)
     L.light((256, -200, 120), 160, CANDLE)
 
@@ -100,13 +109,13 @@ def build():
     L.add("monster_censer", (800, -160, -40), angle=0)
     L.add("monster_ashen", (860, 260, -40), angle=0)
     L.add("monster_ashen", (860, -280, -40), angle=0)
-    L.add("monster_slag_hound", (1250, 0, -40), angle=0)
-    L.add("monster_slag_hound", (1300, 200, -40), angle=0)
-    L.add("monster_slag_hound", (1300, -200, -40), angle=0)
+    L.add("monster_slag_hound", (1250, 0, -40), angle=0, spawnflags=HARD_ONLY)
+    L.add("monster_slag_hound", (1300, 200, -40), angle=0, spawnflags=HARD_ONLY)
+    L.add("monster_slag_hound", (1300, -200, -40), angle=0, spawnflags=HARD_ONLY)
     L.add("monster_deacon", (1390, 0, -40), angle=0)
-    L.add("monster_censer", (1450, -250, -40), angle=0)
+    L.add("monster_censer", (1450, -250, -40), angle=0, spawnflags=HARD_ONLY)
     L.add("monster_ashen", (1420, 120, -40), angle=0)
-    L.add("monster_ashen", (1420, -120, -40), angle=0)
+    L.add("monster_ashen", (1420, -120, -40), angle=0, spawnflags=HARD_ONLY)
     # Light: the slag, braziers along the walls, cold light from high up.
     L.add("light", (1024, 0, -100), light=200, _color=SLAG, _surface="*lava_slag1",
           _surface_offset=12)
@@ -146,7 +155,7 @@ def build():
     L.add("monster_ashen", (1380, 610, -40), angle=270)
     L.add("monster_ashen", (1250, 730, -40), angle=270)
     L.add("monster_censer", (1300, 816, 120), angle=270)
-    L.add("monster_censer", (1480, 820, 120), angle=270)
+    L.add("monster_censer", (1480, 820, 120), angle=270, spawnflags=HARD_ONLY)
     for x in (1200, 1440):                    # lamps hung from the ceiling
         L.solid(x - 8, 472, 136, x + 8, 488, 168, "lamp_amber1")
         L.solid(x - 2, 478, 168, x + 2, 482, 256, "iron_plate1")
@@ -217,9 +226,9 @@ def build():
     for x in (1888, 2144):                                    # the tank's iron lip
         L.solid(x, -224, -192, x + 32, 224, -184, "iron_rust1")
     L.add("monster_leech", (2000, -100, -280))
-    L.add("monster_leech", (2060, 120, -280))
+    L.add("monster_leech", (2060, 120, -280), spawnflags=HARD_ONLY)
     L.add("monster_censer", (2200, -260, -168), angle=180)
-    L.add("monster_censer", (2200, 260, -168), angle=180)
+    L.add("monster_censer", (2200, 260, -168), angle=180, spawnflags=HARD_ONLY)
     L.add("monster_ashen", (1950, 270, -168), angle=180)
     L.add("monster_ashen", (1950, -270, -168), angle=180)
     L.add("monster_deacon", (2180, 0, -168), angle=180)

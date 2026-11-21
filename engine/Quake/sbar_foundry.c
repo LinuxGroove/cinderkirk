@@ -280,7 +280,7 @@ void Sbar_DrawFoundry (cb_context_t *cbx)
 	Hud_Int (cbx, cl.stats[STAT_ARMOR] > 0 ? "digits" : "digits_dim", cl.stats[STAT_ARMOR], Left (92), Y (712), 54, 0);
 	Hud_Pic (cbx, "lab_health", Left (326), Y (659), 1, 1);
 	Hud_Pic (cbx, "health", Left (260), Y (657), 1, 1);
-	Hud_Int (cbx, cl.stats[STAT_HEALTH] <= 25 ? "digits_hot" : "digits", cl.stats[STAT_HEALTH], Left (324), Y (712), 54, 0);
+	Hud_Int (cbx, cl.stats[STAT_HEALTH] <= 25 ? "digits_hot" : "digits", q_max (cl.stats[STAT_HEALTH], 0), Left (324), Y (712), 54, 0);
 
 	Sbar_FoundryDial (cbx);
 

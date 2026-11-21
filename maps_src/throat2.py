@@ -135,8 +135,8 @@ def build():
     for x, y in ((-900, 0), (900, 0), (0, 900), (-900, -500), (900, 500)):
         L.add("item_health", (x, y, 0))
     for x, y in ((-700, -900), (700, 900)):
-        L.add("item_rockets", (x, y, 0))
-        L.add("item_cells", (x + 100, y, 0))
+        L.add("item_rockets", (x, y, DAIS))                         # on the daises
+        L.add("item_cells", (x + 100, y, DAIS))
     for x, y in ((-900, 400), (900, -400)):
         L.add("item_spikes", (x, y, 0))
         L.add("item_shells", (x, y + 80, 0))

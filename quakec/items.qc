@@ -80,10 +80,7 @@ local string    s;
 	s=ftos(rint(other.super_damage_finished - time));
 
 	bprint (PRINT_LOW, other.netname);
-	if (deathmatch == 4)
-		bprint (PRINT_LOW, " recovered an OctaPower with ");
-	else 
-		bprint (PRINT_LOW, " recovered a Quad with ");
+	bprint (PRINT_LOW, " took up a dropped Forge Heart with ");
 	bprint (PRINT_LOW, s);
 	bprint (PRINT_LOW, " seconds remaining!\n");
 
@@ -147,7 +144,7 @@ local string    s;
 	other.invisible_finished = self.cnt;
 	s=ftos(rint(other.invisible_finished - time));
 	bprint (PRINT_LOW, other.netname);
-	bprint (PRINT_LOW, " recovered a Ring with ");
+	bprint (PRINT_LOW, " took up a dropped Soot Veil with ");
 	bprint (PRINT_LOW, s);
 	bprint (PRINT_LOW, " seconds remaining!\n");
       

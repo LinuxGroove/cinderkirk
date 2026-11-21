@@ -63,11 +63,11 @@ def build():
     L.add("weapon_grenadelauncher", (700, 0, 0))
     for i, (x, y) in enumerate(((600, -300), (850, 0), (1000, -300), (1100, 100))):
         L.add("monster_slag_hound", (x, y, 24), angle=180)
-    for x, y in ((500, 0), (700, -300), (900, 200), (1000, -100)):
+    for x, y in ((600, -40), (700, -300), (900, 200), (900, -100)):
         L.add("monster_clinker", (x, y, 24), angle=180, spawnflags=2)
     L.add("monster_censer", (800, 460, 216), angle=270)
     L.add("monster_censer", (1100, -460, 216), angle=90)
-    L.add("monster_deacon", (1150, 0, 24), angle=180)
+    L.add("monster_deacon", (980, 40, 24), angle=180)
     for x in (400, 800, 1150):
         L.light((x, 0, 560), 380, COLD)
         L.light((x, -464, 300), 200, CANDLE)

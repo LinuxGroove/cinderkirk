@@ -957,7 +957,7 @@ static void Sbar_DrawClassic (cb_context_t *cbx)
 		Sbar_DrawFace (cbx, 112, 0, true);
 
 		// health
-		Sbar_DrawNum (cbx, 136, 0, cl.stats[STAT_HEALTH], 3, cl.stats[STAT_HEALTH] <= 25);
+		Sbar_DrawNum (cbx, 136, 0, q_max (cl.stats[STAT_HEALTH], 0), 3, cl.stats[STAT_HEALTH] <= 25);
 
 		// ammo icon
 		if (rogue)
@@ -1012,7 +1012,7 @@ static void Sbar_DrawModern (cb_context_t *cbx)
 
 	GL_SetCanvas (cbx, CANVAS_BOTTOMLEFT);
 	Sbar_DrawFace (cbx, 20, 135, false);
-	Sbar_DrawNum (cbx, 45, 135, cl.stats[STAT_HEALTH], 3, cl.stats[STAT_HEALTH] <= 25);
+	Sbar_DrawNum (cbx, 45, 135, q_max (cl.stats[STAT_HEALTH], 0), 3, cl.stats[STAT_HEALTH] <= 25);
 
 	{
 		// armor
