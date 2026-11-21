@@ -652,9 +652,10 @@ def preview(name, names, positions, tris, st, albedo, out, size=220):
     top = max(float(p[:, 2].max()) for p in positions)
     low = min(float(p[:, 2].min()) for p in positions)
     mid = (top + low) / 2
-    cam.location = (150, 100, mid + 30)
+    d = max(top - low + 30, 60) / 180          # stand back further from the big ones
+    cam.location = (150 * max(d, 1.0), 100 * max(d, 1.0), mid + 30 * max(d, 1.0))
     cam.rotation_euler = (Vector((0, 0, mid)) - Vector(cam.location)).to_track_quat("-Z", "Y").to_euler()
-    cam.data.lens = 50 * 180 / max(top - low + 30, 60) * 1.0
+    cam.data.lens = 50 / min(d, 1.0)
     sun = bpy.data.objects.new("sun", bpy.data.lights.new("sun", "SUN"))
     sun.data.energy = 7
     sun.rotation_euler = (0.8, 0.2, 2.2)
@@ -2060,9 +2061,139 @@ def founder():
     build(c, anims)
 
 
+# ------------------------------------------------------------------ the Throat
+
+def great_bell():
+    """The Great Bell, cracked on its second ring and hung over the Throat
+    for two hundred years: bronze gone green, the crack up its flank still
+    glowing, the clapper inside, four chains up from its crown. Built lip
+    down with its pivot at the crown, so the model's origin is where it
+    hangs. 10 m tall."""
+    H = 10.0
+    bones = [("bell", None, (0, 0, H), (0, 0, H - 2.0)), ("clapper", "bell", (0, 0, H - 0.6), (0, 0, 1.2))]
+    c = Creature("greatbell", bones, hull_bottom=-H * UNITS)
+    prof = [(7.6, 0.0), (7.9, 0.25), (7.5, 0.7), (6.6, 1.6), (5.6, 3.0), (5.0, 4.6), (4.75, 6.2), (4.55, 7.6),
+            (4.1, 8.8), (3.0, 9.6), (1.2, 9.95), (0.0, 10.0)]
+    bell = lathe("bell", prof, segs=72)
+    thicken(bell, 0.25)
+    c.add(bell, "bronze", "bell")
+    for z, r in ((0.45, 7.75), (3.3, 5.45), (7.7, 4.6)):
+        c.add(prim("torus", major_radius=r, minor_radius=0.12, major_segments=72, minor_segments=8, location=(0, 0, z)),
+              "bronze", "bell")
+    # The crack: a jagged run of molten seam up one flank from the lip.
+    pts, a, z = [], -0.35, 0.0
+    for i in range(14):
+        r = sample_profile(prof, z) + 0.06
+        pts.append(Vector((math.cos(a) * r, math.sin(a) * r, z)))
+        z += 0.55
+        a += 0.07 * (1 if i % 2 else -1) + 0.02 * i
+    for a0, b0 in zip(pts, pts[1:]):
+        c.add(between("cylinder", a0, b0, radius=0.1, vertices=6), "slag", "bell")
+    # The crown's canons and the chains.
+    for ang in (0.0, math.pi / 2):
+        loop = prim("torus", major_radius=0.7, minor_radius=0.18, major_segments=24, minor_segments=8,
+                    location=(0, 0, H + 0.4), rotation=(math.pi / 2, 0, ang))
+        c.add(loop, "iron", "bell")
+    for ang in range(4):
+        a = ang * math.pi / 2 + math.pi / 4
+        base = Vector((math.cos(a) * 2.6, math.sin(a) * 2.6, 9.3))
+        c.add(between("cylinder", base, Vector((math.cos(a) * 1.2, math.sin(a) * 1.2, H + 3.0)), radius=0.12, vertices=6),
+              "iron", "bell")
+    # The clapper: an iron bar and a ball, hot from two hundred years over the fire.
+    c.add(between("cylinder", (0, 0, H - 0.6), (0, 0, 1.8), radius=0.22, vertices=10), "iron", "clapper")
+    c.add(prim("uv_sphere", radius=0.8, segments=16, ring_count=10, location=(0, 0, 1.4)), "ember", "clapper")
+
+    def tilt(deg, clap):
+        return {"bell": (deg, 0, 0), "clapper": (clap, 0, 0)}
+    swing = [(0.0, tilt(4, -3)), (0.25, tilt(0, 2)), (0.5, tilt(-4, 3)), (0.75, tilt(0, -2)), (1.0, tilt(4, -3))]
+    ring = [(0.0, tilt(0, 0)), (0.15, tilt(9, -14)), (0.4, tilt(-7, 12)), (0.65, tilt(5, -8)), (1.0, tilt(0, 0))]
+    build(c, [("swing", 24, swing, True, None), ("ring", 16, ring, False, None)])
+
+
+def sample_profile(prof, z):
+    for (r0, z0), (r1, z1) in zip(prof, prof[1:]):
+        if z0 <= z <= z1:
+            return r0 + (r1 - r0) * (z - z0) / max(z1 - z0, 1e-6)
+    return prof[-1][0]
+
+
+def throat():
+    """The Throat: the pit itself, risen out of its own slag. A column of
+    crust 14 m tall that opens at the top into a mouth ringed with plates,
+    a gullet of live iron down the middle and a ring of coals for eyes under
+    the lip. It rises, spits, roars and sinks."""
+    TOP = 13.0
+    bones = [("base", None, (0, 0, 0), (0, 0, 5)), ("mid", "base", (0, 0, 5), (0, 0, 9.5)),
+             ("top", "mid", (0, 0, 9.5), (0, 0, TOP))]
+    for i in range(8):
+        a = i * math.tau / 8
+        rim = (math.cos(a) * 3.3, math.sin(a) * 3.3, TOP)
+        tip = (math.cos(a) * 4.6, math.sin(a) * 4.6, TOP + 2.4)
+        bones.append(("plate%d" % i, "top", rim, tip))
+    c = Creature("throat", bones, hull_bottom=-24.0)
+
+    def gnarl(a, z, x, y):
+        r = 1.0 + 0.12 * noise.noise(Vector((math.cos(a) * 2.0, math.sin(a) * 2.0, z * 0.35)))
+        return x * r, y * r, z
+    col = lathe("column", [(4.4, 0.0), (3.9, 2.0), (3.2, 5.0), (2.9, 8.0), (3.1, 10.5), (3.6, 12.2), (3.4, TOP),
+                           (2.6, TOP - 0.3), (1.8, TOP - 1.5)], segs=56, shape=gnarl)
+    c.add(col, "crust", among=["base", "mid", "top"], power=3.0)
+    cprof = [(4.4, 0.0), (3.9, 2.0), (3.2, 5.0), (2.9, 8.0), (3.1, 10.5), (3.6, 12.2)]
+    for i in range(6):                          # veins of live iron running down it
+        a, z, pts = i * math.tau / 6 + 0.4, 12.0, []
+        while z > 0.3:
+            r = sample_profile(cprof, z) * (1.0 + 0.12 * noise.noise(Vector((math.cos(a) * 2.0, math.sin(a) * 2.0, z * 0.35)))) + 0.05
+            pts.append(Vector((math.cos(a) * r, math.sin(a) * r, z)))
+            z -= 0.9
+            a += 0.08 * math.sin(z * 1.7 + i)
+        bones_for = lambda zz: ["base", "mid", "top"]
+        for a0, b0 in zip(pts, pts[1:]):
+            c.add(between("cylinder", a0, b0, radius=0.12, vertices=6), "slag", among=bones_for(a0.z), power=3.0)
+    gullet = prim("uv_sphere", radius=1.9, segments=24, ring_count=12, location=(0, 0, TOP - 1.6))
+    gullet.scale = (1.0, 1.0, 0.45)
+    c.add(gullet, "slag", "top")
+    for i in range(16):                         # teeth of slag round the inside of the lip
+        a = i * math.tau / 16 + 0.1
+        root = Vector((math.cos(a) * 2.7, math.sin(a) * 2.7, TOP - 0.2))
+        c.add(between("cone", root, root + Vector((-math.cos(a) * 0.9, -math.sin(a) * 0.9, -0.9)), radius1=0.22,
+                      radius2=0.02, vertices=6), "slag", "top")
+    for i in range(8):                          # the plates round the mouth
+        a = i * math.tau / 8
+        _, _, rim, tip = c.bones[c.index["plate%d" % i]]
+        rim, tip = Vector(rim), Vector(tip)
+        side = Vector((-math.sin(a), math.cos(a), 0))
+        plate = prim("cube", size=1.0, location=tuple(rim.lerp(tip, 0.5)))
+        plate.rotation_euler = (0, math.atan2(math.hypot(tip.x - rim.x, tip.y - rim.y), tip.z - rim.z), a)
+        plate.scale = (0.35, 1.9, (tip - rim).length * 1.15)
+        c.add(plate, "crust", "plate%d" % i)
+    for i in range(7):                          # coals for eyes under the lip
+        a = i * math.tau / 7 + 0.3
+        r = 3.45
+        eye = prim("uv_sphere", radius=0.22, segments=10, ring_count=6, location=(math.cos(a) * r, math.sin(a) * r, TOP - 1.4))
+        c.add(eye, "ember", "top")
+
+    def plates(deg):
+        return {"plate%d" % i: (0, deg, 0) for i in range(8)}
+
+    def pose(sway=(0, 0), open_=0.0, z=0.0, lurch=0.0):
+        p = {"mid": (sway[0], sway[1], 0), "top": (sway[0] + lurch, sway[1], 0), "move": (0, 0, z)}
+        p.update(plates(open_))
+        return p
+    rise = [(0.0, pose(z=-15.0, open_=-25)), (0.7, pose(z=-1.0, open_=-10, sway=(4, 0))), (1.0, pose(open_=10))]
+    idle = [(0.0, pose(sway=(2, 1), open_=4)), (0.5, pose(sway=(-2, -1), open_=12)), (1.0, pose(sway=(2, 1), open_=4))]
+    spit = [(0.0, pose(open_=6)), (0.4, pose(sway=(-8, 0), open_=20, lurch=-6)), (0.6, pose(sway=(10, 0), open_=34, lurch=8)),
+            (1.0, pose(open_=6))]
+    roar = [(0.0, pose(open_=6)), (0.25, pose(sway=(-5, 4), open_=40, lurch=-10)), (0.5, pose(sway=(5, -4), open_=44)),
+            (0.75, pose(sway=(-4, 2), open_=38)), (1.0, pose(open_=6))]
+    death = [(0.0, pose(open_=40)), (0.3, pose(sway=(6, 0), open_=-20, z=-2.0)), (0.7, pose(sway=(-4, 0), open_=-30, z=-9.0)),
+             (1.0, pose(open_=-30, z=-15.0))]
+    build(c, [("rise", 16, rise, False, None), ("idle", 12, idle, True, None), ("spit", 10, spit, False, None),
+              ("roar", 12, roar, False, None), ("death", 24, death, False, None)])
+
+
 CREATURES = {"ashen": ashen, "censer": censer_bearer, "deacon": deacon, "hound": slag_hound,
              "gauger": gauger, "brute": crucible_brute, "clinker": clinker, "leech": leech,
-             "wraith": ash_wraith, "ringer": bell_ringer, "founder": founder}
+             "wraith": ash_wraith, "ringer": bell_ringer, "founder": founder, "greatbell": great_bell, "throat": throat}
 
 if __name__ == "__main__":  # weapons.py imports the rest
     for name, make in CREATURES.items():

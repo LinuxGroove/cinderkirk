@@ -40,6 +40,7 @@
 #define LOC_EPILOGUE_2		"The Cisterns run cold again. Their\nSeal is yours: carry it up to the\nPithead and set it on the shelf."
 #define LOC_EPILOGUE_3		"The kilns are out. The Ossuary's\nSeal is yours: carry it up to the\nPithead and set it on the shelf."
 #define LOC_EPILOGUE_4		"The Founder is broken. The\nUndervein's Seal is yours: carry it\nup to the Pithead."
+#define LOC_EPILOGUE_END	"The bell came down into the Throat\nand stopped it like a cork. The fire\nunder Cinderkirk is banked for good.\n\nUp in the Pithead the night shift\nends. Out in the kirkyard the ash\nlies still, and stays down."
 #define LOC_EPILOGUE_RUNES	"Four Seals on the shelf. Down in the\nPithead the grate over the Throat\ngroans and lifts."
 #define LOC_EPILOGUE_FINALE	"The pit is shut. The bells of\nCinderkirk ring out over the town,\nand nobody is listening for anything\nelse. Well stoked."
 

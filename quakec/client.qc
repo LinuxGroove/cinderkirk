@@ -200,8 +200,9 @@ var struct
 	// Cinderkirk: the last map of each shaft.
 	{"maps/foundry5.bsp", 2, LOC_EPILOGUE_1, __NULL__},
 	{"maps/cisterns5.bsp", 2, LOC_EPILOGUE_2, __NULL__},
-	{"maps/ossuary5.bsp", 2, LOC_EPILOGUE_3, __NULL__},
-	{"maps/undervein5.bsp", 2, LOC_EPILOGUE_4, __NULL__}
+	{"maps/kilns5.bsp", 2, LOC_EPILOGUE_3, __NULL__},
+	{"maps/vein5.bsp", 2, LOC_EPILOGUE_4, __NULL__},
+	{"maps/throat2.bsp", 2, LOC_EPILOGUE_END, __NULL__}
 };
 // --cypress
 
