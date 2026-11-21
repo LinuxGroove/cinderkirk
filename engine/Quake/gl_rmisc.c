@@ -1759,7 +1759,7 @@ void R_CreatePipelineLayouts ()
 
 		ZEROED_STRUCT (VkPushConstantRange, push_constant_range);
 		push_constant_range.offset = 0;
-		push_constant_range.size = 22 * sizeof (float);
+		push_constant_range.size = 27 * sizeof (float); // Cinderkirk: as the world's, so switching keeps the constants
 		push_constant_range.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 
 		ZEROED_STRUCT (VkPipelineLayoutCreateInfo, pipeline_layout_create_info);
@@ -1777,7 +1777,7 @@ void R_CreatePipelineLayouts ()
 		vulkan_globals.basic_pipeline_layout.mboit_input_attachment_set = 1;
 
 		basic_descriptor_set_layouts[1] = vulkan_globals.input_attachment_set_layout.handle;
-		push_constant_range.size = 22 * sizeof (float);
+		push_constant_range.size = 27 * sizeof (float); // Cinderkirk: as the world's, so switching keeps the constants
 		err = vkCreatePipelineLayout (vulkan_globals.device, &pipeline_layout_create_info, NULL, &vulkan_globals.fte_particle_pipeline_layout.handle);
 		if (err != VK_SUCCESS)
 			Sys_Error ("vkCreatePipelineLayout failed with code %i", (int)err);
@@ -1792,7 +1792,7 @@ void R_CreatePipelineLayouts ()
 
 		ZEROED_STRUCT (VkPushConstantRange, push_constant_range);
 		push_constant_range.offset = 0;
-		push_constant_range.size = 22 * sizeof (float);
+		push_constant_range.size = 27 * sizeof (float); // Cinderkirk: as the world's, so switching keeps the constants
 		push_constant_range.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 
 		ZEROED_STRUCT (VkPipelineLayoutCreateInfo, pipeline_layout_create_info);
@@ -1812,13 +1812,16 @@ void R_CreatePipelineLayouts ()
 
 	{
 		// World
-		VkDescriptorSetLayout world_descriptor_set_layouts[5] = {
-			vulkan_globals.single_texture_set_layout.handle, vulkan_globals.single_texture_set_layout.handle, vulkan_globals.single_texture_set_layout.handle,
-			vulkan_globals.mboit_input_attachment_set_layout.handle, vulkan_globals.bmodel_instances_set_layout.handle};
+		// Cinderkirk: sets 5 and 6 are the light directions and the normal and gloss maps
+		VkDescriptorSetLayout world_descriptor_set_layouts[7] = {
+			vulkan_globals.single_texture_set_layout.handle,	   vulkan_globals.single_texture_set_layout.handle,
+			vulkan_globals.single_texture_set_layout.handle,	   vulkan_globals.mboit_input_attachment_set_layout.handle,
+			vulkan_globals.bmodel_instances_set_layout.handle, vulkan_globals.single_texture_set_layout.handle,
+			vulkan_globals.single_texture_set_layout.handle};
 
 		ZEROED_STRUCT (VkPushConstantRange, push_constant_range);
 		push_constant_range.offset = 0;
-		push_constant_range.size = 22 * sizeof (float);
+		push_constant_range.size = 27 * sizeof (float); // Cinderkirk: and the view position and normal map strengths
 		push_constant_range.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 
 		ZEROED_STRUCT (VkPipelineLayoutCreateInfo, pipeline_layout_create_info);
@@ -1844,7 +1847,7 @@ void R_CreatePipelineLayouts ()
 
 		ZEROED_STRUCT (VkPushConstantRange, push_constant_range);
 		push_constant_range.offset = 0;
-		push_constant_range.size = 22 * sizeof (float);
+		push_constant_range.size = 27 * sizeof (float); // Cinderkirk: as the world's, so switching keeps the constants
 		push_constant_range.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 
 		ZEROED_STRUCT (VkPipelineLayoutCreateInfo, pipeline_layout_create_info);
@@ -1872,7 +1875,7 @@ void R_CreatePipelineLayouts ()
 
 		ZEROED_STRUCT (VkPushConstantRange, push_constant_range);
 		push_constant_range.offset = 0;
-		push_constant_range.size = 22 * sizeof (float);
+		push_constant_range.size = 27 * sizeof (float); // Cinderkirk: as the world's, so switching keeps the constants
 		push_constant_range.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 
 		ZEROED_STRUCT (VkPipelineLayoutCreateInfo, pipeline_layout_create_info);
@@ -4684,6 +4687,11 @@ void R_Init (void)
 	// johnfitz
 
 	Cvar_RegisterVariable (&gl_zfix); // QuakeSpasm z-fighting fix
+	{
+		extern cvar_t r_normalmaps, r_glossmaps; // Cinderkirk
+		Cvar_RegisterVariable (&r_normalmaps);
+		Cvar_RegisterVariable (&r_glossmaps);
+	}
 	Cvar_RegisterVariable (&r_lavaalpha);
 	Cvar_RegisterVariable (&r_telealpha);
 	Cvar_RegisterVariable (&r_slimealpha);

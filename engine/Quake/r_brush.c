@@ -69,6 +69,11 @@ static uint32_t		  indirect_bmodel_start;
 #define INDIRECT_ZBIAS 1 // suport gl_zfix for nontransformed models. Costs extra indirect drawcalls
 extern cvar_t gl_zfix;
 
+// Cinderkirk: normal and gloss maps on the world
+cvar_t			   r_normalmaps = {"r_normalmaps", "1", CVAR_ARCHIVE};
+cvar_t			   r_glossmaps = {"r_glossmaps", "1", CVAR_ARCHIVE};
+static gltexture_t *flat_normal_texture, *flat_deluxe_texture;
+
 extern cvar_t vid_filter;
 extern cvar_t vid_palettize;
 
@@ -913,6 +918,7 @@ void R_DrawIndirectBrushes (cb_context_t *cbx, qboolean draw_water, qboolean tra
 			cbx->cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_globals.world_pipeline_layout.handle, 4, 1, &vulkan_globals.bmodel_instances_desc_set, 0, NULL);
 		const uint32_t instance_base = ((uint32_t)bmodel_instances_index * MAX_MODELS) + 1;
 		R_PushConstants (cbx, VK_SHADER_STAGE_ALL_GRAPHICS, 21 * sizeof (float), sizeof (uint32_t), &instance_base);
+		R_BindWorldNormalDefaults (cbx);
 	}
 
 	gltexture_t *lastfullbright = NULL;
@@ -942,6 +948,7 @@ void R_DrawIndirectBrushes (cb_context_t *cbx, qboolean draw_water, qboolean tra
 		{
 			vulkan_globals.vk_cmd_bind_descriptor_sets (
 				cbx->cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_globals.world_pipeline_layout.handle, 0, 1, &gl_texture->descriptor_set, 0, NULL);
+			R_BindNormalMap (cbx, draw_water ? NULL : texture->normalmap);
 			lasttexture = gl_texture;
 		}
 
@@ -1012,6 +1019,7 @@ void R_DrawIndirectBrushes (cb_context_t *cbx, qboolean draw_water, qboolean tra
 			{
 				vulkan_globals.vk_cmd_bind_descriptor_sets (
 					cbx->cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_globals.world_pipeline_layout.handle, 1, 1, &lightmap_texture->descriptor_set, 0, NULL);
+				R_BindDeluxeMap (cbx, lightmap_texture);
 				lastlightmap = lightmap_texture;
 			}
 		}
@@ -1131,6 +1139,14 @@ static int AllocBlock (int w, int h, int *x, int *y)
 			lightmaps = (struct lightmap_s *)Mem_Realloc (lightmaps, sizeof (*lightmaps) * lightmap_count);
 			memset (&lightmaps[texnum], 0, sizeof (lightmaps[texnum]));
 			lightmaps[texnum].data = (byte *)Mem_Alloc (LIGHTMAP_BYTES * LMBLOCK_WIDTH * LMBLOCK_HEIGHT);
+			lightmaps[texnum].deluxe_data = (byte *)Mem_Alloc (4 * LMBLOCK_WIDTH * LMBLOCK_HEIGHT);
+			for (i = 0; i < LMBLOCK_WIDTH * LMBLOCK_HEIGHT; ++i) // light from straight in front
+			{
+				lightmaps[texnum].deluxe_data[i * 4 + 0] = 128;
+				lightmaps[texnum].deluxe_data[i * 4 + 1] = 128;
+				lightmaps[texnum].deluxe_data[i * 4 + 2] = 255;
+				lightmaps[texnum].deluxe_data[i * 4 + 3] = 255;
+			}
 			for (i = 0; i < MAXLIGHTMAPS * 3 / 4; ++i)
 				lightmaps[texnum].lightstyle_data[i] = (byte *)Mem_Alloc (LIGHTMAP_BYTES * LMBLOCK_WIDTH * LMBLOCK_HEIGHT);
 			lightmaps[texnum].surface_indices = (uint32_t *)Mem_Alloc (sizeof (uint32_t) * LMBLOCK_WIDTH * LMBLOCK_HEIGHT);
@@ -1454,6 +1470,67 @@ static void GL_CreateSurfaceLightmap (msurface_t *surf, uint32_t surface_index)
 		lightstyles[i] += (surf->light_t * LMBLOCK_WIDTH + surf->light_s) * LIGHTMAP_BYTES;
 	}
 	R_FillLightstyleTextures (surf, lightstyles, LMBLOCK_WIDTH * LIGHTMAP_BYTES);
+
+	// Cinderkirk: the light's direction at each sample, from the first style
+	if (currentmodel->deluxedata && surf->samples && lightmaps[surf->lightmaptexturenum].deluxe_data)
+	{
+		const int	smax = (surf->extents[0] >> 4) + 1;
+		const int	tmax = (surf->extents[1] >> 4) + 1;
+		const byte *in = currentmodel->deluxedata + (surf->samples - currentmodel->lightdata);
+		byte	   *out = lightmaps[surf->lightmaptexturenum].deluxe_data + (surf->light_t * LMBLOCK_WIDTH + surf->light_s) * 4;
+		for (int t = 0; t < tmax; t++, out += LMBLOCK_WIDTH * 4)
+			for (int s = 0; s < smax; s++, in += 3)
+			{
+				out[s * 4 + 0] = in[0];
+				out[s * 4 + 1] = in[1];
+				out[s * 4 + 2] = in[2];
+			}
+	}
+}
+
+/*
+================
+R_BindWorldNormalDefaults -- Cinderkirk
+
+Flat normal and light direction pictures for draws that have none, and the
+view position and strengths the world shader's normal and gloss maps use.
+================
+*/
+void R_BindWorldNormalDefaults (cb_context_t *cbx)
+{
+	float consts[5] = {r_origin[0], r_origin[1], r_origin[2], r_normalmaps.value > 0 ? CLAMP (0.0f, r_normalmaps.value, 2.0f) : 0.0f,
+					   r_glossmaps.value > 0 ? 0.6f * CLAMP (0.0f, r_glossmaps.value, 3.0f) : 0.0f};
+
+	if (r_fullbright_cheatsafe || r_lightmap_cheatsafe)
+		consts[3] = consts[4] = 0.0f;
+	vulkan_globals.vk_cmd_bind_descriptor_sets (
+		cbx->cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_globals.world_pipeline_layout.handle, 5, 1, &flat_deluxe_texture->descriptor_set, 0, NULL);
+	vulkan_globals.vk_cmd_bind_descriptor_sets (
+		cbx->cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_globals.world_pipeline_layout.handle, 6, 1, &flat_normal_texture->descriptor_set, 0, NULL);
+	// The world layout's own: the pipeline bound now may be another one.
+	vulkan_globals.vk_cmd_push_constants (
+		cbx->cb, vulkan_globals.world_pipeline_layout.handle, VK_SHADER_STAGE_ALL_GRAPHICS, 22 * sizeof (float), 5 * sizeof (float), consts);
+}
+
+void R_BindNormalMap (cb_context_t *cbx, gltexture_t *normalmap)
+{
+	gltexture_t *t = normalmap ? normalmap : flat_normal_texture;
+	vulkan_globals.vk_cmd_bind_descriptor_sets (
+		cbx->cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_globals.world_pipeline_layout.handle, 6, 1, &t->descriptor_set, 0, NULL);
+}
+
+void R_BindDeluxeMap (cb_context_t *cbx, gltexture_t *lightmap_texture)
+{
+	gltexture_t *t = flat_deluxe_texture;
+	for (int i = 0; i < lightmap_count; i++)
+		if (lightmaps[i].texture == lightmap_texture)
+		{
+			if (lightmaps[i].deluxe_texture)
+				t = lightmaps[i].deluxe_texture;
+			break;
+		}
+	vulkan_globals.vk_cmd_bind_descriptor_sets (
+		cbx->cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_globals.world_pipeline_layout.handle, 5, 1, &t->descriptor_set, 0, NULL);
 }
 
 /*
@@ -1911,6 +1988,7 @@ void GL_BuildLightmaps (void)
 	for (i = 0; i < lightmap_count; i++)
 	{
 		Mem_Free (lightmaps[i].data);
+		SAFE_FREE (lightmaps[i].deluxe_data); // Cinderkirk
 		R_FreeDescriptorSet (lightmaps[i].descriptor_set, &vulkan_globals.lightmap_compute_set_layout);
 		if (lightmaps[i].workgroup_bounds_buffer != VK_NULL_HANDLE)
 			vkDestroyBuffer (vulkan_globals.device, lightmaps[i].workgroup_bounds_buffer, NULL);
@@ -2307,6 +2385,15 @@ void GL_SetupLightmapCompute (void)
 {
 	GL_AllocateWorkgroupBoundsBuffers ();
 
+	if (!flat_normal_texture) // Cinderkirk: kept for the whole session
+	{
+		static byte flat_normal[4] = {128, 128, 255, 0}, flat_deluxe[4] = {128, 128, 255, 255};
+		flat_normal_texture = TexMgr_LoadImage (
+			NULL, "flat_normal", 1, 1, SRC_RGBA, flat_normal, "", (src_offset_t)flat_normal, TEXPREF_NEAREST | TEXPREF_NOPICMIP | TEXPREF_PERSIST);
+		flat_deluxe_texture = TexMgr_LoadImage (
+			NULL, "flat_deluxe", 1, 1, SRC_RGBA, flat_deluxe, "", (src_offset_t)flat_deluxe, TEXPREF_NEAREST | TEXPREF_NOPICMIP | TEXPREF_PERSIST);
+	}
+
 	//
 	// upload all lightmaps that were filled
 	//
@@ -2325,6 +2412,17 @@ void GL_SetupLightmapCompute (void)
 
 		lm->texture = TexMgr_LoadImage (
 			cl.worldmodel, name, LMBLOCK_WIDTH, LMBLOCK_HEIGHT, SRC_LIGHTMAP, lm->data, "", (src_offset_t)lm->data, TEXPREF_LINEAR | TEXPREF_NOPICMIP);
+		if (lm->deluxe_data) // Cinderkirk
+		{
+			if (cl.worldmodel->deluxedata)
+			{
+				q_snprintf (name, sizeof (name), "deluxemap_%07i", i);
+				lm->deluxe_texture = TexMgr_LoadImage (
+					cl.worldmodel, name, LMBLOCK_WIDTH, LMBLOCK_HEIGHT, SRC_RGBA, lm->deluxe_data, "", 0,
+					TEXPREF_LINEAR | TEXPREF_NOPICMIP);
+			}
+			SAFE_FREE (lm->deluxe_data);
+		}
 		for (int j = 0; j < MAXLIGHTMAPS * 3 / 4; ++j)
 		{
 			q_snprintf (name, sizeof (name), "lightstyle%d_%07i", j, i);

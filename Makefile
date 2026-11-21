@@ -19,7 +19,7 @@ PYTHON   ?= python3
 export PYTHON
 BLENDER  ?= blender
 TEXRES   ?= 1024
-LIGHT_FLAGS ?= -extra4 -bounce -lit
+LIGHT_FLAGS ?= -extra4 -bounce -lit -lux
 VIS_FLAGS   ?=
 # World size of each texture, in units (the WAD stand-in's size); 128 unless named.
 WAD_SIZES   ?= kirk_glyph1=64
@@ -28,6 +28,7 @@ MAPS     := $(patsubst maps_src/%.py,%,$(wildcard maps_src/*.py))
 BSPS     := $(patsubst %,$(BUILD)/maps/%.bsp,$(MAPS))
 QC       := $(wildcard quakec/*.qc quakec/*/*.qc) quakec/progs.src
 TEXTURES := $(filter-out %_norm.png %_gloss.png %_rough.png,$(wildcard assets/textures/*.png))
+MATERIALS := $(wildcard assets/textures/*_norm.png assets/textures/*_gloss.png)
 MODELS   := $(wildcard assets/models/*.md3 assets/models/*.png)
 
 export PATH := $(abspath $(PREFIX))/bin:$(PATH)
@@ -103,15 +104,16 @@ $(BUILD)/hud/.done: tools/hud_svg.py $(wildcard assets_src/fonts/*.woff)
 
 # pak0.pak holds everything the game loads: LibreQuake's stand-ins first,
 # then Cinderkirk's own files over them.
-$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BUILD)/sound/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) $(MODELS) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py
+$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BUILD)/sound/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) $(MATERIALS) $(MODELS) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py
 	rm -rf $(STAGE)
 	mkdir -p $(STAGE)/maps $(STAGE)/textures $(STAGE)/gfx
 	cp -r $(LQ)/gfx.wad $(LQ)/gfx $(LQ)/progs $(LQ)/sound $(LQ)/maps $(STAGE)/
 	cp $(BUILD)/progs.dat $(STAGE)/
 	for m in $(MAPS); do cp $(BUILD)/maps/$$m.bsp $(STAGE)/maps/; \
-		[ ! -f $(BUILD)/maps/$$m.lit ] || cp $(BUILD)/maps/$$m.lit $(STAGE)/maps/; done
+		[ ! -f $(BUILD)/maps/$$m.lit ] || cp $(BUILD)/maps/$$m.lit $(STAGE)/maps/; \
+		[ ! -f $(BUILD)/maps/$$m.lux ] || cp $(BUILD)/maps/$$m.lux $(STAGE)/maps/; done
 	cp -r $(BUILD)/sound/cinder $(STAGE)/sound/
-	cp $(TEXTURES) $(STAGE)/textures/
+	cp $(TEXTURES) $(MATERIALS) $(STAGE)/textures/
 	cp $(MODELS) $(STAGE)/progs/
 	cp $(BUILD)/menu/gfx/* gfx/splash.png $(STAGE)/gfx/
 	mkdir -p $(STAGE)/gfx/hud && cp $(BUILD)/hud/*.svg $(STAGE)/gfx/hud/

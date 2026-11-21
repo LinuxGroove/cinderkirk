@@ -17,15 +17,24 @@ layout (push_constant) uniform PushConsts
 	vec3  fog_color;
 	float fog_density;
 	float alpha;
+	uint  instance_base;
+	float view_x; // Cinderkirk: for the gloss maps' highlights
+	float view_y;
+	float view_z;
+	float bump_scale;	  // how much the normal maps shade (0 is off)
+	float specular_scale; // how bright the gloss maps' highlights are
 }
 push_constants;
 
 layout (set = 0, binding = 0) uniform sampler2D diffuse_tex;
 layout (set = 1, binding = 0) uniform sampler2D lightmap_tex;
 layout (set = 2, binding = 0) uniform sampler2D fullbright_tex;
+layout (set = 5, binding = 0) uniform sampler2D deluxe_tex; // Cinderkirk: light directions, in texture space
+layout (set = 6, binding = 0) uniform sampler2D normal_tex; // Cinderkirk: normal in rgb, gloss in alpha
 
 layout (location = 0) in vec4 in_texcoords;
 layout (location = 1) in float in_fog_frag_coord;
+layout (location = 2) in vec3 in_position;
 
 layout (constant_id = 0) const bool use_fullbright = false;
 layout (constant_id = 1) const bool use_alpha_test = false;

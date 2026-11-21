@@ -462,6 +462,7 @@ static void Mod_FreeModelMemory (qmodel_t *mod)
 		mod->numtextures = 0;
 		SAFE_FREE (mod->visdata);
 		SAFE_FREE (mod->lightdata);
+		SAFE_FREE (mod->deluxedata);
 		SAFE_FREE (mod->entities);
 		for (int i = 0; i < PV_SIZE; ++i)
 			SAFE_FREE (mod->extradata[i]);
@@ -976,6 +977,8 @@ static textype_t Mod_TextureTypeFromName (const char *texname)
 Mod_LoadTextureTask
 =================
 */
+static void Mod_LoadNormalMap (qmodel_t *mod, texture_t *tx, const char *filename, unsigned int min_path_id, int extraflags); // Cinderkirk
+
 static void Mod_LoadTextureTask (int i, qmodel_t **ppmod)
 {
 	qmodel_t  *mod = *ppmod;
@@ -1065,6 +1068,7 @@ static void Mod_LoadTextureTask (int i, qmodel_t **ppmod)
 
 			tx->gltexture = TexMgr_LoadImage (mod, filename, fwidth, fheight, fmt, data, filename, 0, TEXPREF_MIPMAP | extraflags);
 			Mem_Free (data);
+			Mod_LoadNormalMap (mod, tx, filename, effective_min_path_id, extraflags);
 
 			// now try to load glow/luma image from the same place
 			q_snprintf (filename2, sizeof (filename2), "%s_glow", filename);
@@ -1371,6 +1375,94 @@ static void Mod_LoadTextures (qmodel_t *mod, byte *mod_base, lump_t *l)
 				tx2->alternate_anims = anims[0];
 		}
 	}
+}
+
+/*
+=================
+Mod_LoadDeluxe -- Cinderkirk
+
+The direction light comes from at each lightmap sample, from the .lux file
+ericw-tools' light writes with -lux: the same header as a .lit, then three
+bytes a sample, in the texture's own space (s, -t and the face's normal),
+for the normal maps.
+=================
+*/
+static void Mod_LoadDeluxe (qmodel_t *mod, lump_t *l)
+{
+	char		 luxfilename[MAX_OSPATH];
+	unsigned int path_id;
+	byte		*data;
+
+	mod->deluxedata = NULL;
+	if (!mod->lightdata || !l->filelen || mod->bspversion == BSPVERSION_QUAKE64)
+		return;
+	q_strlcpy (luxfilename, mod->name, sizeof (luxfilename));
+	COM_StripExtension (luxfilename, luxfilename, sizeof (luxfilename));
+	q_strlcat (luxfilename, ".lux", sizeof (luxfilename));
+	data = (byte *)COM_LoadFile (luxfilename, &path_id);
+	if (!data)
+		return;
+	if (path_id >= mod->path_id && data[0] == 'Q' && data[1] == 'L' && data[2] == 'I' && data[3] == 'T' && ReadLongUnaligned (data + 4) == 1 &&
+		com_filesize == 8 + (long long)l->filelen * 3)
+	{
+		mod->deluxedata = (byte *)Mem_AllocNonZero (l->filelen * 3);
+		memcpy (mod->deluxedata, data + 8, l->filelen * 3);
+	}
+	else
+		Con_DPrintf ("ignored %s\n", luxfilename);
+	Mem_Free (data);
+}
+
+/*
+=================
+Mod_LoadNormalMap -- Cinderkirk
+
+A texture's _norm (rgb) and _gloss (in alpha) from beside its image, as one
+picture for the world shader. Either may be missing.
+=================
+*/
+static void Mod_LoadNormalMap (qmodel_t *mod, texture_t *tx, const char *filename, unsigned int min_path_id, int extraflags)
+{
+	char		   name[MAX_OSPATH];
+	int			   nw = 0, nh = 0, gw = 0, gh = 0;
+	enum srcformat nfmt = SRC_RGBA, gfmt = SRC_RGBA;
+	byte		  *norm, *gloss, *out;
+	int			   i;
+
+	q_snprintf (name, sizeof (name), "%s_norm", filename);
+	norm = Image_LoadImage (name, &nw, &nh, &nfmt, min_path_id);
+	q_snprintf (name, sizeof (name), "%s_gloss", filename);
+	gloss = Image_LoadImage (name, &gw, &gh, &gfmt, min_path_id);
+	if (norm && nfmt != SRC_RGBA)
+		SAFE_FREE (norm);
+	if (gloss && (gfmt != SRC_RGBA || (norm && (gw != nw || gh != nh))))
+		SAFE_FREE (gloss);
+	if (!norm && !gloss)
+		return;
+	if (!norm)
+	{
+		nw = gw;
+		nh = gh;
+	}
+	out = norm ? norm : gloss;
+	for (i = 0; i < nw * nh; i++)
+	{
+		if (!norm)
+		{
+			out[i * 4 + 3] = out[i * 4]; // gloss alone: a flat normal
+			out[i * 4 + 0] = 128;
+			out[i * 4 + 1] = 128;
+			out[i * 4 + 2] = 255;
+		}
+		else
+			out[i * 4 + 3] = gloss ? gloss[i * 4] : 0;
+	}
+	q_snprintf (name, sizeof (name), "%s_normgloss", filename);
+	tx->normalmap = TexMgr_LoadImage (mod, name, nw, nh, SRC_RGBA, out, "", 0, TEXPREF_MIPMAP | (extraflags & ~TEXPREF_ALPHA));
+	if (norm)
+		Mem_Free (norm);
+	if (gloss)
+		Mem_Free (gloss);
 }
 
 /*
@@ -3158,6 +3250,7 @@ static void Mod_LoadBrushModel (qmodel_t *mod, const char *loadname, void *buffe
 	Mod_LoadEntities (mod, mod_base, &header->lumps[LUMP_ENTITIES]);
 	Mod_LoadTextures (mod, mod_base, &header->lumps[LUMP_TEXTURES]);
 	Mod_LoadLighting (mod, mod_base, &header->lumps[LUMP_LIGHTING]);
+	Mod_LoadDeluxe (mod, &header->lumps[LUMP_LIGHTING]);
 	Mod_LoadPlanes (mod, mod_base, &header->lumps[LUMP_PLANES]);
 	Mod_LoadTexinfo (mod, mod_base, &header->lumps[LUMP_TEXINFO]);
 	Mod_LoadFaces (mod, mod_base, &header->lumps[LUMP_FACES], bsp2);

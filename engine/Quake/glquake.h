@@ -670,11 +670,18 @@ struct lightmap_s
 	// the lightmap texture data needs to be kept in
 	// main memory so texsubimage can update properly
 	byte						  *data;			   //[4*LMBLOCK_WIDTH*LMBLOCK_HEIGHT];
+	byte						  *deluxe_data;		   // Cinderkirk: light directions, until uploaded
+	gltexture_t					  *deluxe_texture;	   // Cinderkirk: light directions for the normal maps
 	byte						  *lightstyle_data[4]; //[4*LMBLOCK_WIDTH*LMBLOCK_HEIGHT];
 	uint32_t					  *surface_indices;	   //[LMBLOCK_WIDTH*LMBLOCK_HEIGHT];
 	lm_compute_workgroup_bounds_t *workgroup_bounds;   //[(LMBLOCK_WIDTH/8)*(LMBLOCK_HEIGHT/8)];
 };
 extern struct lightmap_s *lightmaps;
+
+// Cinderkirk: normal and gloss maps on the world (r_brush.c)
+void R_BindWorldNormalDefaults (cb_context_t *cbx);
+void R_BindNormalMap (cb_context_t *cbx, gltexture_t *normalmap);
+void R_BindDeluxeMap (cb_context_t *cbx, gltexture_t *lightmap_texture);
 extern int				  lightmap_count; // allocated lightmaps
 
 extern qboolean r_fullbright_cheatsafe, r_lightmap_cheatsafe, r_drawworld_cheatsafe; // johnfitz

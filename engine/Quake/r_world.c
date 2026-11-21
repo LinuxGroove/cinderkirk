@@ -1182,8 +1182,11 @@ static void R_FlushBatch (
 		vkCmdSetDepthBias (cbx->cb, constant_factor, 0.0f, slope_factor);
 
 		if (!r_fullbright_cheatsafe)
+		{
 			vulkan_globals.vk_cmd_bind_descriptor_sets (
 				cbx->cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_globals.world_pipeline_layout.handle, 1, 1, &lightmap_texture->descriptor_set, 0, NULL);
+			R_BindDeluxeMap (cbx, lightmap_texture); // Cinderkirk
+		}
 		else
 			vulkan_globals.vk_cmd_bind_descriptor_sets (
 				cbx->cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_globals.world_pipeline_layout.handle, 1, 1, &greylightmap->descriptor_set, 0, NULL);
@@ -1283,6 +1286,7 @@ void R_DrawTextureChains_Water (cb_context_t *cbx, qmodel_t *model, entity_t *en
 		cbx->cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_globals.world_pipeline_layout.handle, 4, 1, &vulkan_globals.bmodel_instances_desc_set, 0, NULL);
 	const uint32_t instance_base = 0; // texture chain draws bake the entity transform into the mvp push constant
 	R_PushConstants (cbx, VK_SHADER_STAGE_ALL_GRAPHICS, 21 * sizeof (float), sizeof (uint32_t), &instance_base);
+	R_BindWorldNormalDefaults (cbx); // Cinderkirk
 
 	uint32_t brushpasses = 0;
 	for (type = TEXTYPE_FIRSTLIQUID; type <= TEXTYPE_LASTLIQUID; ++type)
@@ -1369,6 +1373,7 @@ void R_DrawTextureChains_Multitexture (cb_context_t *cbx, qmodel_t *model, entit
 		cbx->cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_globals.world_pipeline_layout.handle, 4, 1, &vulkan_globals.bmodel_instances_desc_set, 0, NULL);
 	const uint32_t instance_base = 0; // texture chain draws bake the entity transform into the mvp push constant
 	R_PushConstants (cbx, VK_SHADER_STAGE_ALL_GRAPHICS, 21 * sizeof (float), sizeof (uint32_t), &instance_base);
+	R_BindWorldNormalDefaults (cbx); // Cinderkirk
 
 	if (alpha_blend)
 	{
@@ -1403,8 +1408,11 @@ void R_DrawTextureChains_Multitexture (cb_context_t *cbx, qmodel_t *model, entit
 		texture_t	*texture = R_TextureAnimation (t, ent_frame);
 		gltexture_t *gl_texture = texture->gltexture;
 		if (!r_lightmap_cheatsafe)
+		{
 			vulkan_globals.vk_cmd_bind_descriptor_sets (
 				cbx->cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_globals.world_pipeline_layout.handle, 0, 1, &gl_texture->descriptor_set, 0, NULL);
+			R_BindNormalMap (cbx, texture->normalmap); // Cinderkirk
+		}
 
 		for (s = t->texturechains[chain]; s; s = s->texturechains[chain])
 		{

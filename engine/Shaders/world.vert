@@ -30,6 +30,7 @@ layout (location = 2) in vec2 in_texcoord2;
 
 layout (location = 0) out vec4 out_texcoords;
 layout (location = 1) out float out_fog_frag_coord;
+layout (location = 2) out vec3 out_position; // Cinderkirk: for the gloss maps
 
 out gl_PerVertex
 {
@@ -53,6 +54,7 @@ void main ()
 		}
 	}
 	gl_Position = push_constants.mvp * vec4 (position, 1.0f);
+	out_position = position;
 
 	out_fog_frag_coord = gl_Position.w;
 }

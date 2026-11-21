@@ -16,10 +16,11 @@ More in [docs/screenshots](docs/screenshots/): the splash, the main menu, the ga
 - **The Foundry Gate** (`maps_src/start.py`), the first level: the gatehouse, the Casting Floor with a slag channel and a bridge, the silver key, and the belfry behind the key door. Its world textures are the 1024 px Blender bakes from the mockup, so 8 texels a unit.
 - The menus, cursor, side plaque and console background are Cinderkirk's own, drawn at 4× so they stay sharp at 4K.
 - **The status bar and the weapon wheel** are vector art: `tools/hud_svg.py` writes them as SVG (text turned to paths from the game's fonts) and the engine rasterises them with nanosvg at the screen's own resolution, so they're as sharp at 4K as at 720p. The Pressure dial sits in the middle of the bar, with the eight weapons in a row above it. Hold LB (or Q) for the wheel: the right stick, the gyro or the mouse points, letting go equips, a tap goes back to the last weapon, and time slows to a third while it's open in single player.
+- **Normal and gloss maps** on the world: ericw-tools' light also writes the direction light comes from at each lightmap sample, so stone and brick show their relief against the level's real lights and gloss catches them as you move (`docs/screenshots/normal-maps.jpg`).
 - The Ashen, Censer-bearers and Deacons are Cinderkirk's own; slag hounds, the weapon models, items and most sounds are still **stand-ins from LibreQuake** (BSD-3) until Cinderkirk's own are made, and the game code is LibreQuake's QuakeC (GPL-2.0). The menus already use Cinderkirk's words: Story, Pit Fights, Apprentice to Bellfounder.
 - Snap packaging for amd64 and arm64 (core24, strict), so it installs on Ubuntu and Ubuntu Core.
 
-Next, from the idea's plan: normal and gloss maps in the renderer, the weapons and slag hounds as models from Blender, button glyphs that follow the last device used, and the four shafts of the Foundry.
+Next, from the idea's plan: the weapons and slag hounds as models from Blender, button glyphs that follow the last device used, and the four shafts of the Foundry.
 
 ## Playing it
 
@@ -49,7 +50,7 @@ Controls: a controller just works (left stick moves, right stick or gyro looks, 
 | `assets_src/models/` | `creatures.py` builds, rigs, animates and skins the creatures in Blender and writes them as MD3 (`make models`; `PREVIEW=dir` adds a sheet of their frames); `models.py` is the idea's mockup |
 | `assets/models/` | The creatures as the game loads them: `<name>.md3`, its skin and `_luma` glow, and `.frames` (the frame order their QuakeC lists) |
 | `assets_src/fonts/` | Cinzel and Barlow Condensed, for the menus and the HUD |
-| `assets/textures/` | The baked textures: `<name>.png`, `_luma`, and `_norm` and `_gloss` for when the renderer uses them |
+| `assets/textures/` | The baked textures: `<name>.png`, `_luma`, and `_norm` and `_gloss`, which the renderer shades with the light's direction from each map's `.lux` (`r_normalmaps`, `r_glossmaps`) |
 | `cinder/` | Loose game files: `default.cfg` (controls and comfort defaults) and `quake.rc` |
 | `gfx/splash.png` | The LinuxGroove Games splash |
 | `tools/` | The build's helpers: `wad.py` (texture WADs), `pak.py`, `menu_art.py`, `hud_svg.py` (the status bar and weapon wheel as SVG), `sfx.py` (the game's own sounds, synthesized), `make_icon.py`, `mapkit.py`, `deps.sh`, `tools.sh`, `librequake.sh`, `versions.sh` (every pinned version), `shoot.sh` (screenshots on a machine with no screen), `version.sh` |

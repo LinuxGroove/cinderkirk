@@ -113,6 +113,7 @@ typedef struct texture_s
 	src_offset_t		source_offset;			  // offset from start of BSP file for BSP textures
 	struct gltexture_s *gltexture;				  // johnfitz -- pointer to gltexture
 	struct gltexture_s *fullbright;				  // johnfitz -- fullbright mask texture
+	struct gltexture_s *normalmap;				  // Cinderkirk: _norm in rgb, _gloss in alpha
 	struct gltexture_s *warpimage;				  // johnfitz -- for water animation
 	atomic_uint32_t		update_warp;			  // johnfitz -- update warp this frame
 	struct msurface_s  *texturechains[chain_num]; // for texture chains
@@ -699,6 +700,7 @@ typedef struct qmodel_s
 
 	byte		*visdata;
 	byte		*lightdata;
+	byte		*deluxedata; // Cinderkirk: light directions from a .lux, laid out as lightdata
 	char		*entities;
 	unsigned int entities_crc; // entities lump CRC16
 
