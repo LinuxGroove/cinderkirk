@@ -28,15 +28,15 @@ def build():
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The gatehouse: x 0..512, floor 0, ceiling 256.
-    L.room(0, -256, 0, 512, 256, 256)
+    L.room(0, -256, 0, 512, 256, 256, ceiling="ceil_timber1")
     # Pillars 64 wide on the 64 grid, so each glyph stone shows one whole mark.
     for y in (-256, 224):
         for x in (128, 320):
-            L.solid(x, y, 0, x + 64, y + 32, 256, "kirk_stone1")
+            L.solid(x, y, 0, x + 64, y + 32, 256, "kirk_column1")
             gy0, gy1 = (y + 32, y + 34) if y < 0 else (y - 2, y)
             L.solid(x, gy0, 64, x + 64, gy1, 128, "kirk_glyph1")
     for x in (64, 192, 320, 448):
-        L.solid(x, -256, 208, x + 24, 256, 232, "oak1")
+        L.solid(x, -256, 208, x + 24, 256, 232, "oak_beam1")
     L.add("info_player_start", (48, 0, 24), angle=0)
     L.add("info_player_deathmatch", (48, 128, 24), angle=0)
     L.add("info_player_deathmatch", (48, -128, 24), angle=0)
@@ -58,7 +58,15 @@ def build():
     L.opening(512, -96, 0, 544, 96, 192)
 
     # The Casting Floor: x 544..1568, floor -64, ceiling 384.
-    L.room(544, -384, -64, 1568, 384, 384, floor_depth=128)
+    L.room(544, -384, -64, 1568, 384, 384, ceiling="ceil_timber1", floor_depth=128)
+    # Sooted brick to chest height and a carved band along both long walls,
+    # broken for the door to the pattern shop.
+    for (x0, x1) in ((640, 1568),):
+        L.solid(x0, -384, -64, x1, -376, 32, "kirk_brick2")
+        L.solid(x0, -384, 32, x1, -372, 64, "kirk_trim1")
+    for (x0, x1) in ((640, 1136), (1216, 1568)):
+        L.solid(x0, 376, -64, x1, 384, 32, "kirk_brick2")
+        L.solid(x0, 372, 32, x1, 384, 64, "kirk_trim1")
     L.steps(544, -96, 640, 96, 0, -64, base=-64)
     L.solid(544, -384, -64, 640, -96, 0, "kirk_stone1")   # the landing either side
     L.solid(544, 96, -64, 640, 384, 0, "kirk_stone1")
@@ -66,9 +74,9 @@ def build():
     L.opening(928, -384, -160, 1120, 384, -64)
     L.solid(928, -416, -192, 1120, 416, -160, "kirk_stone1")
     L.liquid(928, -384, -160, 1120, 384, -112)
-    L.solid(928, -64, -80, 1120, 64, -64, "iron_plate1")
+    L.solid(928, -64, -80, 1120, 64, -64, "iron_grid1")
     for y0 in (-64, 56):
-        L.solid(928, y0, -64, 1120, y0 + 8, -24, "iron_plate1")
+        L.solid(928, y0, -64, 1120, y0 + 8, -24, "iron_rust1")
         for x in (928, 1016, 1104):
             L.solid(x, y0, -64, x + 16, y0 + 8, 0, "bronze1")
     # Pillars with glyph stones, and the tie beams.
@@ -77,7 +85,7 @@ def build():
             L.solid(x, y, -64, x + 64, y + 32, 384, "kirk_stone1")
             gy0, gy1 = (y + 32, y + 34) if y < 0 else (y - 2, y)
             L.solid(x, gy0, 0, x + 64, gy1, 64, "kirk_glyph1")
-        L.solid(x + 16, -384, 300, x + 48, 384, 332, "oak1")
+        L.solid(x + 16, -384, 300, x + 48, 384, 332, "oak_beam1")
     # The plinth at the far end, with slag on it.
     L.solid(1440, -48, -64, 1536, 48, -32, "bronze1")
     L.add("item_spikes", (1488, 0, -32))
@@ -116,7 +124,7 @@ def build():
 
     # The pattern shop, off the north side of the hall: x 1088..1536, floor -64.
     L.opening(1136, 384, -64, 1216, 416, 96)
-    L.room(1088, 416, -64, 1536, 864, 256, wall="kirk_brick1", floor="oak1")
+    L.room(1088, 416, -64, 1536, 864, 256, wall="plaster1", floor="oak1", ceiling="ceil_timber1")
     for y in (544, 672):                      # racks of wooden patterns, chest high
         for x0, x1 in ((1120, 1296), (1344, 1440)):
             L.solid(x0, y, -64, x1, y + 16, 16, "oak1")
@@ -136,8 +144,10 @@ def build():
     L.add("monster_ashen", (1250, 730, -40), angle=270)
     L.add("monster_censer", (1300, 816, 120), angle=270)
     L.add("monster_censer", (1480, 820, 120), angle=270)
-    L.light((1200, 480, 160), 220, WARM)
-    L.light((1440, 480, 160), 220, WARM)
+    for x in (1200, 1440):                    # lamps hung from the ceiling
+        L.solid(x - 8, 472, 136, x + 8, 488, 168, "lamp_amber1")
+        L.solid(x - 2, 478, 168, x + 2, 482, 256, "iron_plate1")
+        L.light((x, 480, 116), 220, WARM)
     L.light((1300, 816, 200), 200, CANDLE)
     L.light((1180, 816, 150), 160, (0.85, 0.85, 1.0))
     L.light((1300, 640, 200), 180, WARM)
@@ -145,16 +155,17 @@ def build():
     # Cracked stone in the shop's west wall, and the closet behind it (secret).
     L.opening(1056, 592, -64, 1088, 688, 32)
     L.brush_entity("func_cracked", [_box(1056, 592, -64, 1088, 688, 32, "kirk_crack1")])
-    L.room(960, 576, -64, 1056, 704, 64, wall="kirk_stone1")
+    L.room(960, 576, -64, 1056, 704, 64, wall="kirk_stone1", floor="coal1")
     L.brush_entity("trigger_secret", [_box(968, 584, -64, 1048, 696, 0, "trigger")])
     L.add("item_armor2", (1000, 640, -64))
     L.add("item_health", (1000, 600, -64), spawnflags=2)
-    L.light((1008, 640, 40), 200, SLAG)
+    L.light((1008, 640, 40), 200, (1.0, 0.82, 0.62))   # whiter, so the pickups show their colours
 
     # The pouring gallery, above the south side: x 560..1504, its floor at 128.
     L.opening(560, -448, 0, 640, -384, 112)
-    L.room(560, -800, 0, 1504, -448, 384, wall="kirk_brick1", floor="iron_plate1")
-    L.solid(656, -800, 0, 1504, -448, 128, "kirk_stone1")
+    L.room(560, -800, 0, 1504, -448, 384, wall="firebrick1", floor="iron_plate1", ceiling="ceil_timber1")
+    L.solid(656, -800, 0, 1504, -448, 124, "kirk_stone1")
+    L.solid(656, -800, 124, 1504, -448, 128, "ash_floor1")
     L.solid(560, -800, 0, 656, -608, 128, "kirk_stone1")
     L.steps(560, -608, 656, -448, 128, 0, axis="y", base=0)
     for x in (960, 1160):                                  # windows down onto the hall
@@ -189,7 +200,7 @@ def build():
 
     # The key door to the quench pit.
     L.opening(1568, -64, -64, 1600, 64, 64)
-    L.brush_entity("func_door", [_box(1568, -64, -64, 1600, 64, 64, "iron_plate1")],
+    L.brush_entity("func_door", [_box(1568, -64, -64, 1600, 64, 64, "door_iron1")],
                    angle=-1, spawnflags=16, speed=80, wait=-1, lip=8)
 
     # The quench pit: x 1600..2240, floor -192, a tank of black water.
@@ -201,7 +212,7 @@ def build():
     L.opening(1888, -224, -320, 2176, 224, -192)
     L.liquid(1888, -224, -320, 2176, 224, -216, "*water1")
     for x in (1888, 2144):                                    # the tank's iron lip
-        L.solid(x, -224, -192, x + 32, 224, -184, "iron_plate1")
+        L.solid(x, -224, -192, x + 32, 224, -184, "iron_rust1")
     L.add("monster_fish", (2000, -100, -280))
     L.add("monster_fish", (2060, 120, -280))
     L.add("monster_censer", (2200, -260, -168), angle=180)
@@ -228,13 +239,13 @@ def build():
                    angle=0, target="belfry_gate", wait=-1, lip=4)
     L.light((2200, -160, -100), 120, (0.85, 0.85, 1.0))
     L.opening(2240, -64, -192, 2272, 64, -64)
-    L.brush_entity("func_door", [_box(2240, -64, -192, 2272, 64, -64, "iron_plate1")],
+    L.brush_entity("func_door", [_box(2240, -64, -192, 2272, 64, -64, "door_iron1")],
                    angle=-1, targetname="belfry_gate", speed=100, wait=-1, lip=8)
 
     # The belfry: x 2272..2656, floor -192, tall.
-    L.room(2272, -192, -192, 2656, 192, 384)
+    L.room(2272, -192, -192, 2656, 192, 384, floor="kiln_tile1", ceiling="ceil_timber1")
     for x in (2336, 2528):
-        L.solid(x, -192, 280, x + 32, 192, 312, "oak1")
+        L.solid(x, -192, 280, x + 32, 192, 312, "oak_beam1")
     L.solid(2440, -8, 200, 2456, 8, 296, "iron_plate1")          # the bell's hanger
     L.solid(2400, -48, 120, 2496, 48, 200, "bronze1")            # and the bell
     L.solid(2384, -64, 104, 2512, 64, 120, "bronze1")
