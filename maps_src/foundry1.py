@@ -216,8 +216,8 @@ def build():
     L.liquid(1888, -224, -320, 2176, 224, -216, "*water1")
     for x in (1888, 2144):                                    # the tank's iron lip
         L.solid(x, -224, -192, x + 32, 224, -184, "iron_rust1")
-    L.add("monster_fish", (2000, -100, -280))
-    L.add("monster_fish", (2060, 120, -280))
+    L.add("monster_leech", (2000, -100, -280))
+    L.add("monster_leech", (2060, 120, -280))
     L.add("monster_censer", (2200, -260, -168), angle=180)
     L.add("monster_censer", (2200, 260, -168), angle=180)
     L.add("monster_ashen", (1950, 270, -168), angle=180)
