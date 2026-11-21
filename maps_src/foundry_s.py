@@ -23,7 +23,7 @@ CANDLE = (1.0, 0.8, 0.55)
 
 
 def build():
-    L = Level(wad="cinder.wad", sounds=4, message="The Ash Pit", worldtype=0,
+    L = Level(wad="cinder.wad", light_wait=0.6, sounds=4, message="The Ash Pit", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=4, _range=0.6)
 
     # The chute you came down, ending on a ledge above the pit.
