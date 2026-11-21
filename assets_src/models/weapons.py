@@ -562,7 +562,7 @@ def viewshot(name, names, positions, tris, st, albedo, out, size=None):
         sc.render.filepath = path
         bpy.ops.render.render(write_still=True)
         im = bpy.data.images.load(path)
-        a = np.array(im.pixels[:], dtype=np.float32).reshape(360, 640, 4)[::-1, :, :3]
+        a = C.pixels(im).reshape(360, 640, 4)[::-1, :, :3]
         bpy.data.images.remove(im)
         a[324:] *= 0.35  # where the status bar covers it
         sheet.append(a)

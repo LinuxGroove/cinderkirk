@@ -374,7 +374,7 @@ def bake(obj, kind, sources):
     # at once ran a 12 GB card out of memory and Cycles left black or patchy skins.
     with gpu_turn():
         bpy.ops.object.bake(type="EMIT" if kind != "AO" else "AO")
-    a = np.array(img.pixels[:], dtype=np.float32).reshape(RES, RES, 4)[::-1, :, :3]
+    a = pixels(img).reshape(RES, RES, 4)[::-1, :, :3]
     if kind != "glow" and a.max() <= 0.0:
         raise SystemExit(f"{obj.name}: the {kind} bake came out black (out of GPU memory?)")
     return a
@@ -392,6 +392,13 @@ def gpu_turn():
             yield
         finally:
             fcntl.flock(f, fcntl.LOCK_UN)
+
+
+def pixels(img):
+    """An image's pixels as a flat float32 array (foreach_get, far quicker than pixels[:])."""
+    a = np.empty(len(img.pixels), dtype=np.float32)
+    img.pixels.foreach_get(a)
+    return a
 
 
 def save_png(path, rgb):
@@ -631,7 +638,7 @@ def preview(name, names, positions, tris, st, albedo, out, size=220):
         sc.render.filepath = path
         bpy.ops.render.render(write_still=True)
         im = bpy.data.images.load(path)
-        a = np.array(im.pixels[:], dtype=np.float32).reshape(size, size, 4)[::-1, :, :3]
+        a = pixels(im).reshape(size, size, 4)[::-1, :, :3]
         bpy.data.images.remove(im)
         r, cidx = divmod(k, cols)
         sheet[r * size:(r + 1) * size, cidx * size:(cidx + 1) * size] = a
