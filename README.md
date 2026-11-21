@@ -32,7 +32,7 @@ More in [docs/screenshots](docs/screenshots/): the splash, the main menu, the ga
 - The Ashen, Censer-bearers, Deacons, slag hounds, Gaugers (steam lances that hiss before they fire), Crucible Brutes (they pour slag along the floor) and clinkers (they hang from ceilings, drop and burst), cistern leeches, ash wraiths (they drift as a cloud nothing can hit and are solid only while they swoop), bell-ringers (their toll runs along the floor: jump it), the Founder (he pours iron along the floor, flings it, slams the floor so it rings out round him, and past half his health the roof drips iron on you), the weapons, the stoker as other players see him (with each player's colours on his jacket and coat), the gibs, the projectiles, the explosion and bubble sprites (`tools/sprites.py`), the pickups (health, ammunition, armour, keys, the backpack) and the powerups (the Forge Heart, the Founder's Mantle, the Soot Veil and the Quench Suit) are Cinderkirk's own; so are every sound in Story and Pit fights (the stoker, doors, lifts, levers, pickups, weapons, water and the ambient beds, all synthesized by `tools/sfx.py` and `tools/sfx_world.py`); the monsters the maps don't use and their sounds are still **stand-ins from LibreQuake** (BSD-3) until Cinderkirk's own are made, and the game code is LibreQuake's QuakeC (GPL-2.0). The menus already use Cinderkirk's words: Story, Pit Fights, Apprentice to Bellfounder.
 - **Making levels in TrenchBroom**: `make trenchbroom` writes a game config and every entity (from the game code's QUAKED comments, with the creatures' and pickups' models) for TrenchBroom, and a level saved as `maps_src/<map>.map` builds with the rest; see [docs/mapping.md](docs/mapping.md).
 - **Music**: each map's `sounds` picks a track (`music/trackNN.ogg`): one for the Pithead, each shaft, the Throat, the end of a map, the big fights and Pit fights. Dark ambient and industrial, made with ACE-Step by `tools/lemonade/generate.py` from the prompts in `tools/lemonade/audio.json` (`assets_src/music/GENERATED.md` has each track's seed).
-- Snap packaging for amd64 and arm64 (core24, strict), so it installs on Ubuntu and Ubuntu Core.
+- Snap packaging for amd64 and arm64 (core24, strict), so it installs on Ubuntu and Ubuntu Core, and a tarball to unpack and play on any Linux from 2024 on (`make tarball`; the **Tarball** workflow attaches one per architecture to each GitHub release).
 
 Next: the renderer (HDR lightmaps, bloom and tone mapping, normal and gloss maps on models), then polish for release.
 
@@ -42,6 +42,8 @@ Next: the renderer (HDR lightmaps, bloom and tone mapping, normal and gloss maps
 sudo snap install cinderkirk_*.snap --dangerous   # a snap from CI's artifacts
 cinderkirk
 ```
+
+Or unpack a tarball from a release and run `./cinderkirk` in its folder (`./install-desktop-entry` adds it to the applications menu).
 
 From source on Ubuntu 24.04 (the packages are listed in `.github/workflows/ci.yml`):
 

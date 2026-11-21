@@ -11,6 +11,7 @@ This folder is [vkQuake](https://github.com/Novum/vkQuake) at tag **1.37.0**, wi
 | `Quake/sys_sdl_unix.c` | The user folder is `~/.cinderkirk` (the snap passes `-userdir` instead) |
 | `Quake/gl_vidsdl.c`, `Quake/steam.c` | The window title and Vulkan application name are Cinderkirk |
 | `Quake/gl_screen.c` | Centerprints draw `{+command}` as button glyphs (`glyph.c`). The LinuxGroove Games splash (`gfx/splash.png`, scaled to cover the screen) for 1.5 s at start-up, fading out; `-nosplash` skips it |
+| `Quake/cmd.c` | `+commands` on the command line are read from argv: the `cmdline` copy they came from stops at 256 characters (a long `-basedir` and `-userdir` cut `+map start` to `+map st`) and took a `+` inside a path as a command. **Upstream** |
 | `Quake/host.c` | The game opens on the main menu unless the command line starts a map, a save, a demo or a connection |
 | `Quake/menu.c` | How to Play has Cinderkirk's three pages (`NUM_HELP_PAGES`), drawn by `tools/menu_art.py` |
 | `Quake/sbar.c` | HUD style 3, the Foundry bar, is the default and calls `sbar_foundry.c`; the classic and modern bars keep a strip for Pressure (the game code's stat 32) |

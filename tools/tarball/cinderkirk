@@ -1,0 +1,10 @@
+#!/bin/sh
+# Copyright (C) The LinuxGroove team
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Starts Cinderkirk from wherever this folder was unpacked. Settings, saves
+# and screenshots go in ~/.local/share/cinderkirk.
+here=$(dirname "$(readlink -f "$0")")
+user="${XDG_DATA_HOME:-$HOME/.local/share}/cinderkirk"
+mkdir -p "$user"
+export LD_LIBRARY_PATH="$here/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+exec "$here/bin/cinderkirk" -basedir "$here" -userdir "$user" "$@"

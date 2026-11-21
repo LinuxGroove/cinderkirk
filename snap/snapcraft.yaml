@@ -15,9 +15,9 @@ description: |
   - Made for controllers and handhelds: gyro aiming, flick stick and
     rumble, and fully playable with a keyboard and mouse
   - Comfortable by default: no view bob, roll or kick
-  - Early days: this build has the first level, The Foundry Gate, with
-    stand-in creatures and weapons from LibreQuake while Cinderkirk's own
-    are made
+  - A campaign from the Pithead down four shafts to the Throat and the
+    Founder, alone or in co-op for up to four
+  - Pit fights for 2 to 8 on LAN or online, with bots to fill the arena
 icon: snap/gui/cinderkirk.png
 grade: devel
 confinement: strict

@@ -8,6 +8,7 @@
 #   make weapons    build the weapons the player holds in Blender
 #   make pickups    build the pickups and the weapons on the floor in Blender
 #   make actors     build the stoker as others see him, gibs and projectiles in Blender
+#   make tarball   dist/cinderkirk-VERSION-linux-ARCH.tar.gz, to unpack and play anywhere
 #   make clean      remove build/ and dist/ (keeps fetched sources in build/src)
 #
 # The game runs from dist/: dist/cinderkirk is the engine, dist/cinder/ the game.
@@ -41,7 +42,7 @@ export LD_LIBRARY_PATH := $(abspath $(PREFIX))/lib
 # build/prefix's headers first (the snap's gnome extension adds older Vulkan ones to CFLAGS).
 export CFLAGS := -I$(abspath $(PREFIX))/include $(CFLAGS)
 
-.PHONY: all engine game deps tools librequake maps map run clean textures models weapons pickups actors check trenchbroom
+.PHONY: all engine game deps tools librequake maps map run clean textures models weapons pickups actors check trenchbroom tarball
 
 all: engine game
 
@@ -140,6 +141,9 @@ $(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BU
 	cp cinder/default.cfg cinder/quake.rc $(STAGE)/
 	mkdir -p $(DIST)/cinder
 	$(PYTHON) tools/pak.py $@ $(STAGE)
+
+tarball: $(DIST)/cinderkirk $(DIST)/cinder/pak0.pak
+	tools/tarball.sh $(DIST) $(BUILD) $(PREFIX)
 
 # TrenchBroom's game config and entity definitions, and the WAD it shows
 # textures from (dist/cinder/cinder.wad); see docs/mapping.md.
