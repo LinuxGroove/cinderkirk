@@ -965,14 +965,21 @@ def robed_body(c, J, k, robe_r, hem_r, seed, sleeve=0.075, glove="leather"):
     c.add(skirt, "robe", among=["pelvis", "thigh_l", "thigh_r", "shin_l", "shin_r"], power=2.5, anchor=("pelvis", 0.45))
 
 
-def hood(c, J, k, inner_mat="dark"):
+def hood(c, J, k, inner_mat="dark", mat="hood", rag=0.0):
+    """A cowl over the head and a mantle on the shoulders; `rag` crumples
+    them (the wraith's is ash, not cloth)."""
     hx, hy, hz = J["head"]
 
     def shape(a, z, x, y):
+        if rag:
+            r = 1.0 + rag * noise.noise(Vector((math.cos(a) * 2.0, math.sin(a) * 2.0, z * 9.0 / k)))
+            x, y = x * r, y * r
         t = (z - hz) / (0.3 * k)
         y = y + hy + 0.03 * k + 0.05 * k * t
         if t > 0.9:
             y += 0.12 * k * (t - 0.9)
+        if rag:
+            y -= rag * 0.5 * k * max(0.0, t - 0.5)        # the cowl's peak slumps forward
         return x + hx, y, z
 
     def skip(a, z):
@@ -982,14 +989,15 @@ def hood(c, J, k, inner_mat="dark"):
                        (0.11 * k, hz + 0.23 * k), (0.05 * k, hz + 0.29 * k), (0.01 * k, hz + 0.31 * k)],
               segs=32, shape=shape, skip=skip)
     thicken(h, 0.015 * k)
-    c.add(h, "hood", "head")
+    c.add(h, mat, "head")
     inner = prim("uv_sphere", radius=0.115 * k, segments=16, ring_count=8, location=(hx, hy - 0.0 * k, hz + 0.07 * k))
     c.add(inner, inner_mat, "head")
     mantle = lathe("mantle", [(0.07 * k, hz - 0.05 * k), (0.2 * k, hz - 0.12 * k), (0.27 * k, J["sho_l"][2] - 0.02 * k),
                               (0.25 * k, J["sho_l"][2] - 0.12 * k)], segs=32,
-                   shape=lambda a, z, x, y: (x * 1.05, y * 0.8 + J["chest"][1], z + 0.02 * k * math.sin(6 * a)))
+                   shape=lambda a, z, x, y: (x * 1.05, y * 0.8 + J["chest"][1],
+                                             z + 0.02 * k * math.sin(6 * a) - rag * 0.3 * k * max(0.0, math.sin(5 * a + 1.0))))
     thicken(mantle, 0.012 * k)
-    c.add(mantle, "robe", among=["chest", "neck"], power=3.0)
+    c.add(mantle, "robe" if mat == "hood" else mat, among=["chest", "neck"], power=3.0)
 
 
 def censer_bearer():
@@ -1761,7 +1769,7 @@ def ash_wraith():
                             (0.03, 0.1), (0.0, 0.04)], segs=40, shape=stream)
     thicken(trail, 0.01)
     c.add(trail, "ash", among=["pelvis", "trail1", "trail2", "trail3"], power=2.0)
-    hood(c, J, k)
+    hood(c, J, k, mat="ash", rag=0.3)
     hx, hy, hz = J["head"]
     for x in (-0.04, 0.04):
         eye = prim("uv_sphere", radius=0.022, segments=10, ring_count=6, location=(hx + x, hy - 0.135, hz + 0.08))
@@ -1835,7 +1843,7 @@ def bell_ringer():
     bell = lathe("bell", [(0.10, 2.70), (0.30, 2.62), (0.38, 2.42), (0.40, 2.15), (0.46, 1.92), (0.58, 1.74),
                           (0.64, 1.64), (0.60, 1.60)], segs=54,
                  shape=lambda a, z, x, y: (x, y * 0.9 + ch.y, z),
-                 skip=lambda a, z: 1.84 < z < 2.44 and (a % (math.tau / 9)) > math.tau / 9 * 0.5)   # cut into ribs
+                 skip=lambda a, z: 1.84 < z < 2.44 and (a % (math.tau / 9)) > math.tau / 9 * 0.4)   # cut into ribs
     thicken(bell, 0.03)
     c.add(bell, "bronze", among=["chest", "spine"], power=6.0)
     for z in (2.5, 1.7):
@@ -1843,13 +1851,15 @@ def bell_ringer():
                     location=(0, ch.y, z))
         band.scale = (1.0, 0.9, 1.0)
         c.add(band, "bronze", among=["chest", "spine"], power=6.0)
-    clap = prim("uv_sphere", radius=0.13, segments=14, ring_count=8, location=tuple(ch + Vector((0, 0, -0.55))))
-    c.add(clap, "iron", "clapper")
-    c.add(between("cylinder", ch + Vector((0, 0, 0.15)), ch + Vector((0, 0, -0.45)), radius=0.025, vertices=8), "iron", "clapper")
+    clap = prim("uv_sphere", radius=0.13, segments=14, ring_count=8, location=tuple(ch + Vector((0, 0, -0.32))))
+    c.add(clap, "ember", "clapper")          # hot from tolling, so it shows through the slots
+    c.add(between("cylinder", ch + Vector((0, 0, 0.15)), ch + Vector((0, 0, -0.25)), radius=0.025, vertices=8), "iron", "clapper")
     for sd in "lr":
-        hand = prim("uv_sphere", radius=0.08, segments=12, ring_count=8, location=J["fin_" + sd])
-        hand.scale = (0.8, 1.0, 1.3)
-        c.add(hand, "ash", "hand_" + sd)
+        w, f = Vector(J["wri_" + sd]), Vector(J["fin_" + sd])
+        c.add(between("cylinder", w, f, radius=0.065, vertices=10), "ash", "hand_" + sd)      # the hand from the wrist on
+        fist = prim("uv_sphere", radius=0.085, segments=12, ring_count=8, location=tuple(w.lerp(f, 0.7)))
+        fist.scale = (0.8, 1.0, 1.2)
+        c.add(fist, "ash", "hand_" + sd)
     # The head: small, hooded in sacking, two coals for eyes.
     hx, hy, hz = J["head"]
     skull = prim("uv_sphere", radius=0.15, segments=16, ring_count=10, location=(hx, hy, hz + 0.12))
