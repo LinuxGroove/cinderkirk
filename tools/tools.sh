@@ -26,6 +26,9 @@ fi
 
 if [ ! -x "$BIN/fteqcc" ]; then
     fetch "$SRC/fteqw" "$FTEQW_REPO" "$FTEQW_REF"
+    # Its CMake builds for this CPU only (-march=native), and CI caches the
+    # result for runners that may have older ones.
+    sed -i 's/ -m\(arch\|cpu\)=native//' "$SRC/fteqw/CMakeLists.txt"
     cmake -S "$SRC/fteqw" -B "$SRC/fteqw/build" -G Ninja -DCMAKE_BUILD_TYPE=Release
     ninja -C "$SRC/fteqw/build" -j"$JOBS" fteqcc
     install -m 755 "$SRC/fteqw/build/fteqcc" "$BIN/fteqcc"
