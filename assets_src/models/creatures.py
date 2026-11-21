@@ -315,7 +315,7 @@ def shade(name):
         c = g.ramp(crack, [(0.0, (1, 1, 1)), (0.04, (0, 0, 0))])
         col = g.mixc(c, col, (0.02, 0.012, 0.008))
         heat = g.ramp(g.noise(3.0, 2.0, 0.5, seed=3.0), [(0.52, (0, 0, 0)), (0.62, (1, 1, 1))])
-        glow = g.mixc(g.mixc(heat, (0, 0, 0), c, blend="MULTIPLY"), (0, 0, 0), (1.0, 0.33, 0.06))
+        glow = g.mixc(g.mixc(heat, (0, 0, 0), c), (0, 0, 0), (1.0, 0.33, 0.06))
         return g, col, glow
     if name == "bone":
         n = g.noise(10.0, 5.0, 0.6, seed=5.0)
@@ -335,13 +335,23 @@ def shade(name):
         c = g.ramp(crack, [(0.0, (1, 1, 1)), (0.025, (0, 0, 0))])
         col = g.mixc(c, col, (0.30, 0.07, 0.015))
         heat = g.ramp(g.noise(2.5, 2.0, 0.5, seed=62.0), [(0.45, (0.0, 0.0, 0.0)), (0.65, (1, 1, 1))])
-        glow = g.mixc(g.mixc(heat, (0, 0, 0), c, blend="MULTIPLY"), (0, 0, 0), (1.0, 0.36, 0.05))
+        glow = g.mixc(g.mixc(heat, (0, 0, 0), c), (0, 0, 0), (1.0, 0.36, 0.05))
         return g, col, glow
     if name == "slag":
         n = g.noise(30.0, 5.0, 0.6, seed=13.0)
         col = g.ramp(n, [(0.35, (0.5, 0.12, 0.02)), (0.65, (0.9, 0.45, 0.1))])
         glow = g.ramp(n, [(0.3, (0.7, 0.18, 0.02)), (0.7, (1.0, 0.7, 0.3))])
         return g, col, glow
+    if name == "leech":
+        # Wet leech skin: grey-green, darker bands across, a pale belly stripe.
+        n = g.noise(12.0, 5.0, 0.6, seed=90.0)
+        col = g.ramp(n, [(0.3, (0.03, 0.04, 0.03)), (0.7, (0.10, 0.12, 0.08))])
+        band = g.ramp(g.noise(30.0, 1.0, 0.3, seed=91.0), [(0.45, (1, 1, 1)), (0.55, (0, 0, 0))])
+        col = g.mixc(band, col, (0.015, 0.02, 0.015))
+        return g, col, None
+    if name == "flesh":
+        n = g.noise(20.0, 4.0, 0.6, seed=92.0)
+        return g, g.ramp(n, [(0.3, (0.25, 0.03, 0.03)), (0.7, (0.5, 0.08, 0.06))]), None
     if name == "ember":
         return g, (0.5, 0.2, 0.05), (1.0, 0.55, 0.15)
     if name == "dark":
@@ -1640,8 +1650,75 @@ def clinker():
     build(c, anims)
 
 
+# ------------------------------------------------------------------ cistern leeches
+
+def leech():
+    """A cistern leech: a ribbed grey-green worm as long as a man, flat as a
+    belt, with a round sucker ringed in teeth at the front. Built facing -Y,
+    level, at the hull's middle so it swims at a stoker's chest."""
+    n = 7
+    L = 1.5
+    pts = [(0.0, -L / 2 + L * i / (n - 1), 0.75) for i in range(n)]
+    bones = [("seg%d" % i, "seg%d" % (i - 1) if i else None, pts[i], pts[i + 1] if i + 1 < n else (0, pts[i][1] + 0.2, 0.75))
+             for i in range(n)]
+    c = Creature("leech", bones, hull_bottom=-24.0)
+    joints = {"j%d" % i: p for i, p in enumerate(pts)}
+    joints["tail"] = (0, pts[-1][1] + 0.18, 0.75)
+    edges = [("j%d" % i, "j%d" % (i + 1)) for i in range(n - 1)] + [("j%d" % (n - 1), "tail")]
+    rad = {}
+    for i in range(n):
+        t = i / (n - 1)
+        w = 0.09 + 0.07 * math.sin(math.pi * (0.25 + 0.75 * t))
+        rad["j%d" % i] = (w, w * 0.45)
+    rad["tail"] = (0.04, 0.02)
+
+    def ribs(p, nn):
+        g = 0.5 + 0.5 * math.sin(p.y * math.tau / 0.06)
+        return p - nn * 0.006 * g
+    body = skin_body("body", joints, edges, rad, "j0", seed=5, lumps=0.003, shape=ribs)
+    c.add(body, "leech", among=[b[0] for b in bones], power=4.0)
+    # The sucker: a ring of lip round a red throat, teeth pointing in.
+    x0, y0, z0 = pts[0]
+    lip = prim("torus", major_radius=0.085, minor_radius=0.03, major_segments=20, minor_segments=8, location=(x0, y0 - 0.03, z0))
+    lip.rotation_euler = (math.pi / 2, 0, 0)
+    c.add(lip, "leech", "seg0")
+    throat = prim("uv_sphere", radius=0.07, segments=14, ring_count=8, location=(x0, y0 - 0.01, z0))
+    throat.scale = (1.0, 0.5, 1.0)
+    c.add(throat, "flesh", "seg0")
+    for i in range(12):
+        a = math.tau * i / 12
+        p = Vector((x0 + 0.075 * math.cos(a), y0 - 0.05, z0 + 0.075 * math.sin(a)))
+        c.add(between("cone", p, p + Vector((-0.04 * math.cos(a), 0.0, -0.04 * math.sin(a))), radius1=0.009, radius2=0.001,
+                      vertices=4), "bone", "seg0")
+    # Two rows of pale eyespots along the back.
+    for i in range(1, n - 1):
+        for sx in (-1, 1):
+            e = prim("uv_sphere", radius=0.012, segments=6, ring_count=4, location=(sx * 0.04, pts[i][1], 0.75 + 0.055))
+            c.add(e, "ember", "seg%d" % i)
+
+    def wave(phase, amp, lift=0.0):
+        p = {}
+        for i in range(1, n):
+            p["seg%d" % i] = (lift * math.sin(phase + i * 0.9), 0, amp * math.sin(phase + i * 0.9) * (1 if i else 0))
+        return p
+    swim = [(k / 8, wave(math.tau * k / 8, 22, 6)) for k in range(9)]
+    hold = wave(0, 10, 0)
+    latch = [(0.0, hold), (0.5, pose_of(hold, seg1=(20, 0, 0), seg2=(10, 0, 0), move=(0, -0.05, 0))), (1.0, hold)]
+    pain = [(0.0, wave(0, 8)), (0.4, wave(1.5, 40, 20)), (1.0, wave(3, 8))]
+    curl = {"seg%d" % i: (0, 0, 35) for i in range(1, n)}
+    curl["move"] = (0, 0, -0.3)
+    death = [(0.0, wave(0, 10)), (0.5, pose_of(curl, seg0=(0, 60, 0))), (1.0, pose_of(curl, seg0=(0, 150, 0), move=(0, 0, -0.6)))]
+    anims = [
+        ("swim", 8, swim, True, None),
+        ("latch", 6, latch, True, None),
+        ("pain", 4, pain, False, None),
+        ("death", 8, death, False, None),
+    ]
+    build(c, anims)
+
+
 CREATURES = {"ashen": ashen, "censer": censer_bearer, "deacon": deacon, "hound": slag_hound,
-             "gauger": gauger, "brute": crucible_brute, "clinker": clinker}
+             "gauger": gauger, "brute": crucible_brute, "clinker": clinker, "leech": leech}
 
 if __name__ == "__main__":  # weapons.py imports the rest
     for name, make in CREATURES.items():

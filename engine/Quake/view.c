@@ -258,7 +258,7 @@ void V_DriftPitch (void)
 ==============================================================================
 */
 
-const cshift_t cshift_water = {{130, 80, 50}, 128};
+const cshift_t cshift_water = {{18, 46, 40}, 160}; // Cinderkirk: the cisterns' black-green water, not brown
 const cshift_t cshift_slime = {{0, 25, 5}, 150};
 const cshift_t cshift_lava = {{255, 80, 0}, 150};
 

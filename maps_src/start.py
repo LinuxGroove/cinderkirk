@@ -27,8 +27,8 @@ SKILLS = ("Apprentice", "Journeyman", "Master", "Founder's")
 CAGES = (
     ("The Foundry", (448, 512, 576, 544), (448, 544, 576, 672), "foundry1",
      "The Foundry: casting halls, slag channels and pattern shops"),
-    ("The Cisterns", (1024, 192, 1056, 320), (1056, 192, 1184, 320), None,
-     "The Cisterns: the cage isn't running yet"),
+    ("The Cisterns", (1024, 192, 1056, 320), (1056, 192, 1184, 320), "cisterns1",
+     "The Cisterns: flooded vaults, quench tanks, and what lives in the water"),
     ("The Undervein", (1024, -320, 1056, -192), (1056, -320, 1184, -192), None,
      "The Undervein: the cage isn't running yet"),
     ("The Ossuary Kilns", (640, -544, 768, -512), (640, -672, 768, -544), None,

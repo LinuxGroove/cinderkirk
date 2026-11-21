@@ -29,6 +29,7 @@ This folder is [vkQuake](https://github.com/Novum/vkQuake) at tag **1.37.0**, wi
 | `Quake/r_brush.c`, `Quake/r_world.c`, `Shaders/world.vert`, `Shaders/world.frag`, `Shaders/world_common.inc` | Normal and gloss maps on the world: the bumps are shaded against the lightmap's direction (a flat normal changes nothing), and gloss adds a highlight towards the light that moves with the view. `r_normalmaps` (0 to 2) and `r_glossmaps` (0 to 3) set how strong; textures or maps without them draw as before. **Upstream** |
 | `Quake/gl_rmisc.c` | The world pipeline layout has two more sets (light directions, normal and gloss) and 27 floats of push constants (the view position and the two strengths); the basic, GUI, alias and MD5 layouts grew to 27 too, since `R_BindPipeline` zeroes the push constants whenever the size changes and the world's would otherwise be lost |
 | `Makefile` (repository) | `light` runs with `-lux`, and the pak carries the `.lux` and the `_norm` and `_gloss` pictures |
+| `Quake/view.c` | Under water the view is tinted the Cisterns' black-green, not brown |
 | `Quake/cl_main.c` | `cl_spawncmd`: console commands to run each time the player enters a level (`tools/shoot.sh` uses it for screenshots) |
 | `Misc/vq_pak/` | The built-in pak keeps only the crosshairs: vkQuake's console background (which carries id's logo), menus and fixes for id's maps are gone, so Cinderkirk's own are used |
 | `meson_options.txt` | User folders are on by default |

@@ -819,9 +819,9 @@ def m_cistern_water(g):
     """Cistern water: still, deep green-black, a scum of lime on the top in
     places. Drawn unlit like every liquid, so kept dark."""
     ripple = g.noise(2.0, 6.0, 0.55, distort=0.3, seed=380)
-    col = g.mixc(ripple, (0.004, 0.010, 0.008), (0.012, 0.026, 0.020))
+    col = g.mixc(ripple, (0.002, 0.005, 0.004), (0.006, 0.013, 0.010))
     scum = g.remap(g.noise(1.4, 6.0, 0.6, seed=381), 0.62, 0.72)
-    col = g.mixc(g.mul(scum, 0.6), col, (0.05, 0.055, 0.045))
+    col = g.mixc(g.mul(scum, 0.6), col, (0.025, 0.028, 0.022))
     g.finish(col, g.mixf(scum, 0.06, 0.6), g.mul(ripple, 0.5), bump=0.3)
 
 

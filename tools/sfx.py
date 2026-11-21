@@ -244,6 +244,17 @@ def sounds():
     tt = t(0.8)
     pop = np.sin(2 * np.pi * np.cumsum(np.geomspace(180, 50, len(tt))) / RATE) * np.exp(-tt * 12)
     yield "clinker_burst", normalise(pop + crackle(0.8, 138, 0.05, 5) + 0.6 * steam(0.8, 139, 1000, 8000, 0.002, 7))
+    # Cistern leeches: wet, under water, and the sucker.
+    tt = t(0.6)
+    gulp = lowpass(noise(0.6, 140), 600) * envelope(len(tt), 0.05, 4)
+    yield "leech_sight", normalise(gulp + 0.4 * groan(0.6, 141, 70, 110, 0.3) * envelope(len(tt), 0.1, 5))
+    tt = t(0.35)
+    yield "leech_bite", normalise(lowpass(noise(0.35, 142), 900) * np.exp(-tt * 9) + 0.5 * np.sin(2 * np.pi * 85 * tt) * np.exp(-tt * 12))
+    tt = t(0.5)
+    yield "leech_feed", normalise(lowpass(noise(0.5, 143), 400) * (0.6 + 0.4 * np.sin(2 * np.pi * 5 * tt)) * envelope(len(tt), 0.05, 4), 0.5)
+    yield "leech_pain", normalise(lowpass(noise(0.3, 144), 1200) * envelope(len(t(0.3)), 0.01, 9))
+    yield "leech_death", normalise(lay((lowpass(noise(0.8, 145), 500) * envelope(len(t(0.8)), 0.01, 4), 0),
+                                       (groan(0.6, 146, 90, 40, 0.3) * envelope(len(t(0.6)), 0.05, 4) * 0.4, 0.1)))
     yield "deacon_throw", normalise(steam(0.6, 60, 300, 2000, 0.2, 4) + crackle(0.6, 61, 0.01, 4) * 0.6)
 
 

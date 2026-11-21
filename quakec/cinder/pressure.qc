@@ -94,10 +94,26 @@ void(vector org, vector dir, float count) Pressure_Steam =
 	The Bellows dash: a burst a few metres the way the stoker is moving
 	(forward when standing still), on the ground or in the air.
 */
+.float leech_count;		// how many leeches are fastened on (cisterns.qc)
+void(entity p) Leech_ShakeOff;
+
 void() Pressure_Dash =
 {
 	local vector dir;
 
+	// With leeches on, the dash throws them off, under water too.
+	if (self.leech_count > 0 && time >= self.dash_finished)
+	{
+		if (!Pressure_Spend (self, DASH_COST))
+			return;
+		Leech_ShakeOff (self);
+		self.velocity_z = Pressure_Max (self.velocity_z, 260);
+		self.dash_finished = time + DASH_COOLDOWN;
+		sound (self, CHAN_BODY, "cinder/dash.wav", 1, ATTN_NORM);
+		Rumble (self, "dash");
+		Pressure_Steam (self.origin, '0 0 60', 24);
+		return;
+	}
 	if (time < self.dash_finished || self.waterlevel >= 2)
 		return;
 	if (!Pressure_Spend (self, DASH_COST))
