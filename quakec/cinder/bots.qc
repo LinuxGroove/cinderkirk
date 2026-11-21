@@ -206,6 +206,8 @@ float(float dist) Bot_Weapon =
 	return IT_AXE;
 };
 
+float bot_wall;				// set by Bot_Clear: it was a wall in the way, not a drop or slag
+
 // How far it can walk along a yaw before a wall, a drop or slag (0 to 1 of 64).
 float(float yaw) Bot_Clear =
 {
@@ -214,9 +216,13 @@ float(float yaw) Bot_Clear =
 	dir = [cos (yaw * M_PI / 180), sin (yaw * M_PI / 180), 0];
 	from = self.origin;
 	to = from + dir * 64;
+	bot_wall = FALSE;
 	tracebox (from, self.mins + '0 0 18', self.maxs, to, FALSE, self);		// step height clears
 	if (trace_fraction < 1)
+	{
+		bot_wall = TRUE;
 		return trace_fraction * 0.5;
+	}
 	// Ground under the next step, and nothing hot there.
 	traceline (to, to - '0 0 160', TRUE, self);
 	if (trace_fraction == 1)
@@ -229,7 +235,7 @@ float(float yaw) Bot_Clear =
 void() Bot_Move =
 {
 	local vector to, dir;
-	local float want, best, best_yaw, i, y, c, dist;
+	local float want, best, best_yaw, best_wall, i, y, c, dist;
 
 	// Where it wants to go.
 	if (self.bot_goal)
@@ -260,6 +266,7 @@ void() Bot_Move =
 		{
 			best = c;
 			best_yaw = y;
+			best_wall = bot_wall;
 		}
 		if (c >= 0.99)
 			break;
@@ -280,7 +287,7 @@ void() Bot_Move =
 		{
 			self.bot_yaw = anglemod (best_yaw + 90 + random () * 180);
 			self.bot_unstick = time + 0.8;
-			if (time > self.bot_jump_next)
+			if (time > self.bot_jump_next && Bot_Clear (self.v_angle_y) >= 0.99)
 			{
 				self.button2 = TRUE;
 				self.bot_jump_next = time + 1;
@@ -290,8 +297,8 @@ void() Bot_Move =
 		self.bot_check_time = time + 0.7;
 	}
 
-	// Jump a low thing in the way.
-	if (best < 0.99 && (self.flags & FL_ONGROUND) && time > self.bot_jump_next)
+	// Jump a low thing in the way (never a drop or slag).
+	if (best < 0.99 && best_wall && (self.flags & FL_ONGROUND) && time > self.bot_jump_next)
 	{
 		dir = [cos (best_yaw * M_PI / 180), sin (best_yaw * M_PI / 180), 0];
 		tracebox (self.origin + '0 0 40', self.mins, self.maxs, self.origin + '0 0 40' + dir * 48, FALSE, self);
@@ -314,10 +321,17 @@ void() Bot_Move =
 			self.bot_strafe = random () < 0.5 ? -1 : 1;
 			self.bot_strafe_next = time + 0.5 + random () * 1.2;
 		}
-		self.movement_y = self.movement_y + self.bot_strafe * 280;
-		if (dist < 140 && self.weapon != IT_AXE)
+		// Only sidestep or back off where there's floor and no slag.
+		if (Bot_Clear (self.v_angle_y - self.bot_strafe * 90) < 0.99)
+			self.bot_strafe = 0 - self.bot_strafe;
+		if (Bot_Clear (self.v_angle_y - self.bot_strafe * 90) >= 0.99)
+			self.movement_y = self.movement_y + self.bot_strafe * 280;
+		if (dist < 140 && self.weapon != IT_AXE && Bot_Clear (self.v_angle_y + 180) >= 0.99)
 			self.movement_x = -200;
 	}
+	// Whatever it ended up doing, don't walk it into the slag.
+	if (self.movement != '0 0 0' && Bot_Clear (self.v_angle_y + vectoyaw ([self.movement_x, 0 - self.movement_y, 0])) < 0.15)
+		self.movement = '0 0 0';
 };
 
 void() Bot_Aim =
