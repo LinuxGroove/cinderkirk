@@ -266,6 +266,14 @@ def sounds():
     yield "wraith_pain", normalise(lay((groan(0.4, 156, 260, 180, 0.9), 0), (steam(0.3, 157, 800, 4000, 0.01, 8) * 0.5, 0)))
     yield "wraith_death", normalise(lay((groan(1.0, 158, 220, 60, 0.9) * envelope(len(t(1.0)), 0.02, 2), 0),
                                         (steam(1.4, 159, 200, 2500, 0.3, 2, 0.4) * 0.7, 0.2)))
+    # Bell-ringers: the great toll, deep and long; a groan of iron when they see you.
+    yield "ringer_toll", normalise(lay((bell(3.0, 98, 160, 0.7), 0), (bell(2.5, 196, 161, 1.0) * 0.4, 0.0),
+                                       (lowpass(noise(0.4, 162), 300) * envelope(len(t(0.4)), 0.001, 8) * 0.8, 0)))
+    yield "ringer_sight", normalise(lay((groan(1.4, 163, 55, 80, 0.7), 0), (bell(1.4, 140, 164, 2.0) * 0.4, 0.2)))
+    yield "ringer_swing", normalise(steam(0.4, 165, 200, 1500, 0.05, 6) + 0.4 * groan(0.4, 166, 90, 60, 0.5))
+    yield "ringer_pain", normalise(lay((groan(0.6, 167, 70, 50, 0.8), 0), (bell(0.6, 220, 168, 4.0) * 0.3, 0)))
+    yield "ringer_death", normalise(lay((groan(1.6, 169, 70, 30, 0.8) * envelope(len(t(1.6)), 0.02, 2), 0),
+                                        (bell(2.5, 92, 170, 0.9) * 0.6, 0.6)))
     yield "deacon_throw", normalise(steam(0.6, 60, 300, 2000, 0.2, 4) + crackle(0.6, 61, 0.01, 4) * 0.6)
 
 

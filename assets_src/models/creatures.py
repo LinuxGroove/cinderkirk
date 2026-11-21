@@ -1804,9 +1804,111 @@ def ash_wraith():
     build(c, anims, {"crumble": crumble})
 
 
+# ------------------------------------------------------------------ bell-ringers
+
+def bell_ringer():
+    """A bell-ringer: a gaunt giant of ash with a bronze bell where its ribs
+    should be, the clapper hanging inside, and a ringer's mallet in its right
+    hand. It tolls itself, and the toll runs out along the floor. About 3.2 m:
+    the large hull."""
+    k = 1.7
+    J = scaled(HUMAN, k, wide=1.3)
+    J["neck"], J["head"], J["crown"] = (0, -0.06, 2.68), (0, -0.1, 2.76), (0, -0.12, 3.06)
+    ch = Vector(J["chest"])
+    mal0 = Vector(J["fin_r"])
+    mal1 = mal0 + Vector((0.0, -0.25, -0.85))
+    bones = humanoid(J, [("clapper", "chest", tuple(ch + Vector((0, 0, 0.15))), tuple(ch + Vector((0, 0, -0.55)))),
+                         ("mallet", "hand_r", tuple(mal0), tuple(mal1))])
+    c = Creature("ringer", bones, hull_bottom=-24.0)
+    body = {n: J[n] for n in ("pelvis", "spine", "chest", "neck", "hip_l", "knee_l", "ankle_l", "toe_l", "hip_r", "knee_r",
+                              "ankle_r", "toe_r", "sho_l", "elb_l", "wri_l", "sho_r", "elb_r", "wri_r")}
+    e = [("pelvis", "spine"), ("spine", "chest"), ("chest", "neck")]
+    rad = {"pelvis": (0.22, 0.17), "spine": (0.13, 0.11), "chest": (0.14, 0.12), "neck": (0.09, 0.08)}
+    for sd in "lr":
+        e += [("pelvis", "hip_" + sd), ("hip_" + sd, "knee_" + sd), ("knee_" + sd, "ankle_" + sd), ("ankle_" + sd, "toe_" + sd),
+              ("chest", "sho_" + sd), ("sho_" + sd, "elb_" + sd), ("elb_" + sd, "wri_" + sd)]
+        rad.update({"hip_" + sd: 0.16, "knee_" + sd: 0.11, "ankle_" + sd: 0.085, "toe_" + sd: (0.09, 0.05),
+                    "sho_" + sd: 0.13, "elb_" + sd: 0.095, "wri_" + sd: 0.075})
+    c.add(skin_body("body", body, e, rad, "pelvis", seed=21.0, lumps=0.015), "ash", power=4.0,
+          among=[b[0] for b in bones if b[0] not in ("clapper", "mallet", "head", "hand_l", "hand_r")])
+    # The bell, round the chest from the neck to the hips, open at the mouth.
+    bell = lathe("bell", [(0.10, 2.70), (0.30, 2.62), (0.38, 2.42), (0.40, 2.15), (0.46, 1.92), (0.58, 1.74),
+                          (0.64, 1.64), (0.60, 1.60)], segs=54,
+                 shape=lambda a, z, x, y: (x, y * 0.9 + ch.y, z),
+                 skip=lambda a, z: 1.84 < z < 2.44 and (a % (math.tau / 9)) > math.tau / 9 * 0.5)   # cut into ribs
+    thicken(bell, 0.03)
+    c.add(bell, "bronze", among=["chest", "spine"], power=6.0)
+    for z in (2.5, 1.7):
+        band = prim("torus", major_radius=0.40 if z > 2 else 0.63, minor_radius=0.018, major_segments=40, minor_segments=6,
+                    location=(0, ch.y, z))
+        band.scale = (1.0, 0.9, 1.0)
+        c.add(band, "bronze", among=["chest", "spine"], power=6.0)
+    clap = prim("uv_sphere", radius=0.13, segments=14, ring_count=8, location=tuple(ch + Vector((0, 0, -0.55))))
+    c.add(clap, "iron", "clapper")
+    c.add(between("cylinder", ch + Vector((0, 0, 0.15)), ch + Vector((0, 0, -0.45)), radius=0.025, vertices=8), "iron", "clapper")
+    for sd in "lr":
+        hand = prim("uv_sphere", radius=0.08, segments=12, ring_count=8, location=J["fin_" + sd])
+        hand.scale = (0.8, 1.0, 1.3)
+        c.add(hand, "ash", "hand_" + sd)
+    # The head: small, hooded in sacking, two coals for eyes.
+    hx, hy, hz = J["head"]
+    skull = prim("uv_sphere", radius=0.15, segments=16, ring_count=10, location=(hx, hy, hz + 0.12))
+    skull.scale = (0.9, 1.05, 1.1)
+    c.add(skull, "bone", "head")
+    hd = prim("uv_sphere", radius=0.19, segments=16, ring_count=10, location=(hx, hy + 0.05, hz + 0.16))
+    hd.scale = (1.0, 1.0, 1.15)
+    for v in hd.data.vertices:
+        if v.co.y < -0.08:
+            v.co.y = -0.08
+    c.add(hd, "hood", "head")
+    for sx in (-1, 1):
+        eye = prim("uv_sphere", radius=0.03, segments=8, ring_count=6, location=(hx + sx * 0.06, hy - 0.14, hz + 0.14))
+        c.add(eye, "ember", "head")
+    # The mallet.
+    c.add(between("cylinder", mal0 + (mal0 - mal1) * 0.1, mal1, radius=0.03, vertices=8), "oak", "mallet")
+    c.add(between("cylinder", mal1 + Vector((-0.2, 0, 0)), mal1 + Vector((0.2, 0, 0)), radius=0.11, vertices=14), "iron", "mallet")
+
+    base = {"spine": (22, 0, 0), "chest": (10, 0, 0), "neck": (-34, 0, 0), "upper_r": (-24, 0, -6), "fore_r": (-36, 0, 0),
+            "upper_l": (-4, 0, 8), "fore_l": (-20, 0, 0), "thigh_l": (-6, 0, -2), "thigh_r": (-6, 0, 2),
+            "shin_l": (12, 0, 0), "shin_r": (12, 0, 0), "move": (0, 0, -0.05)}
+    stand = [(t, pose_of(base, clapper=(sw, 0, 0), chest=(6 + sw * 0.1, 0, 0))) for t, sw in ((0, 6), (0.5, -6), (1.0, 6))]
+    step = pose_of(base, thigh_l=(-28, 0, -2), shin_l=(18, 0, 0), thigh_r=(12, 0, 2), shin_r=(30, 0, 0), pelvis=(0, 6, -6),
+                   chest=(6, -4, 6), clapper=(-10, 0, 8), move=(0, 0, -0.1))
+    mid = pose_of(base, thigh_l=(-10, 0, -2), shin_l=(12, 0, 0), thigh_r=(-18, 0, 2), shin_r=(55, 0, 0),
+                  clapper=(10, 0, 0), move=(0, 0, -0.02))
+    walk = [(0.0, step), (0.25, mid), (0.5, mirror(step)), (0.75, mirror(mid)), (1.0, step)]
+    # The toll: mallet up and back, then into the bell's flank, and the clapper swings.
+    up = pose_of(base, spine=(-6, 0, 10), chest=(-6, 0, 12), upper_r=(-160, 0, -30), fore_r=(-40, 0, 0),
+                 mallet=(-30, 0, 0), move=(0, 0.04, 0))
+    hit = pose_of(base, spine=(16, 0, -14), chest=(10, 0, -16), upper_r=(-60, 0, 30), fore_r=(-70, 0, 0),
+                  mallet=(-60, 0, 0), clapper=(-25, 0, 20), thigh_r=(-20, 0, 2), move=(0, -0.05, -0.12))
+    ring = pose_of(hit, clapper=(20, 0, -20), chest=(4, 0, -6))
+    toll = [(0.0, base), (0.45, up), (0.6, hit), (0.75, ring), (0.88, pose_of(base, clapper=(-12, 0, 8))), (1.0, base)]
+    back = pose_of(base, spine=(0, 0, -20), chest=(0, 0, -24), upper_l=(-60, 0, -40), fore_l=(-30, 0, 0))
+    lash = pose_of(base, spine=(18, 0, 26), chest=(10, 0, 30), upper_l=(-80, 0, 60), fore_l=(-10, 0, 0),
+                   thigh_l=(-22, 0, -2), shin_l=(24, 0, 0), move=(0, -0.08, -0.08))
+    swing = [(0.0, base), (0.4, back), (0.62, lash), (1.0, base)]
+    reel = pose_of(base, spine=(-8, 0, 10), chest=(-8, 0, 6), neck=(6, 0, 0), clapper=(30, 0, 0), move=(0, 0.06, 0))
+    pain = [(0.0, base), (0.35, reel), (1.0, base)]
+    kneel = pose_of(base, spine=(24, 0, 0), thigh_l=(-80, 0, -2), shin_l=(125, 0, 0), thigh_r=(-70, 0, 2), shin_r=(120, 0, 0),
+                    foot_l=(-40, 0, 0), foot_r=(-40, 0, 0), clapper=(-30, 0, 0), move=(0, 0.1, -0.72))
+    down = pose_of(kneel, pelvis=(70, 0, 0), spine=(14, 0, 0), thigh_l=(-90, 0, -2), shin_l=(60, 0, 0), thigh_r=(-85, 0, 6),
+                   shin_r=(50, 0, 0), upper_r=(-70, 0, -40), upper_l=(-70, 0, 40), clapper=(60, 0, 0), move=(0, -0.4, -1.5))
+    death = [(0.0, base), (0.35, kneel), (0.8, down), (1.0, down)]
+    anims = [
+        ("stand", 8, stand, True, None),
+        ("walk", 12, walk, True, None),
+        ("toll", 14, toll, False, None),
+        ("swing", 10, swing, False, None),
+        ("pain", 5, pain, False, None),
+        ("death", 12, death, False, None),
+    ]
+    build(c, anims)
+
+
 CREATURES = {"ashen": ashen, "censer": censer_bearer, "deacon": deacon, "hound": slag_hound,
              "gauger": gauger, "brute": crucible_brute, "clinker": clinker, "leech": leech,
-             "wraith": ash_wraith}
+             "wraith": ash_wraith, "ringer": bell_ringer}
 
 if __name__ == "__main__":  # weapons.py imports the rest
     for name, make in CREATURES.items():
