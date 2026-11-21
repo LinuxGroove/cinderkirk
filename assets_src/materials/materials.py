@@ -733,7 +733,8 @@ def m_lime(g):
     col = g.mixc(rust, col, (0.30, 0.13, 0.05))
     nubs = g.remap(g.voronoi(26.0, "F1", seed=323), 0.0, 0.3, 1.0, 0.0)
     height = g.add(g.add(g.mul(curtain, 1.0), g.mul(folds, 0.25)), g.sub(g.mul(nubs, 0.12), g.mul(rim, 0.3)))
-    g.finish(col, g.mixf(curtain, 0.6, 0.18), height, bump=1.0)
+    # Soft relief: steeper, the curtains' grooves shade into black bands.
+    g.finish(col, g.mixf(curtain, 0.6, 0.18), height, bump=0.33)
 
 
 def m_verdigris(g):
