@@ -316,6 +316,16 @@ def shade(name):
         col = g.mixc(seam, col, (0.6, 0.18, 0.03))
         glow = g.mixc(seam, (0, 0, 0), (1.0, 0.5, 0.12))
         return g, col, glow
+    if name == "patina":
+        # Bronze gone green: verdigris over most of it, the metal showing
+        # brown where it's worn and running green down from the bands.
+        col, _ = g.tile("bronze1", 0.5, (1.0, 1.0, 1.0))
+        n = g.noise(1.4, 4.0, 0.6, seed=80.0)
+        streak = g.noise(6.0, 2.0, 0.5, seed=81.0)
+        green = g.ramp(g.mixc(0.35, n, streak, blend="ADD"), [(0.40, (0.20, 0.33, 0.26)), (0.75, (0.09, 0.19, 0.15))])
+        wear = g.ramp(g.noise(3.0, 3.0, 0.6, seed=82.0), [(0.58, (1, 1, 1)), (0.68, (0, 0, 0))])
+        col = g.mixc(wear, col, green)
+        return g, col, None
     if name in TILES:
         col, luma = g.tile(*TILES[name])
         return g, col, luma
@@ -338,15 +348,18 @@ def shade(name):
         col = g.ramp(n, [(0.35, (0.25, 0.06, 0.01)), (0.65, (0.6, 0.22, 0.04))])
         glow = g.ramp(n, [(0.3, (0.55, 0.12, 0.01)), (0.7, (1.0, 0.62, 0.22))])
         return g, col, glow
-    if name == "crust":
+    if name in ("crust", "bigcrust"):
         # Slag gone hard: black glassy rock in plates, the cracks between them
-        # still molten and glowing.
+        # still molten and glowing. On something the size of the Throat the
+        # plates are bigger and fewer of the cracks are still hot.
+        big = name == "bigcrust"
         n = g.noise(9.0, 6.0, 0.62, seed=60.0)
         col = g.ramp(n, [(0.3, (0.02, 0.016, 0.014)), (0.6, (0.07, 0.055, 0.045)), (0.8, (0.16, 0.12, 0.09))])
-        crack = g.voronoi(5.0, seed=61.0)
-        c = g.ramp(crack, [(0.0, (1, 1, 1)), (0.025, (0, 0, 0))])
+        crack = g.voronoi(1.6 if big else 5.0, seed=61.0)
+        c = g.ramp(crack, [(0.0, (1, 1, 1)), (0.02 if big else 0.025, (0, 0, 0))])
         col = g.mixc(c, col, (0.30, 0.07, 0.015))
-        heat = g.ramp(g.noise(2.5, 2.0, 0.5, seed=62.0), [(0.45, (0.0, 0.0, 0.0)), (0.65, (1, 1, 1))])
+        heat = g.ramp(g.noise(0.9 if big else 2.5, 2.0, 0.5, seed=62.0),
+                      [(0.55 if big else 0.45, (0.0, 0.0, 0.0)), (0.7 if big else 0.65, (1, 1, 1))])
         glow = g.mixc(g.mixc(heat, (0, 0, 0), c), (0, 0, 0), (1.0, 0.36, 0.05))
         return g, col, glow
     if name == "slag":
@@ -649,13 +662,18 @@ def preview(name, names, positions, tris, st, albedo, out, size=220):
     cam = bpy.data.objects.new("cam", bpy.data.cameras.new("cam"))
     sc.collection.objects.link(cam)
     sc.camera = cam
-    top = max(float(p[:, 2].max()) for p in positions)
-    low = min(float(p[:, 2].min()) for p in positions)
+    want = os.environ.get("PREVIEW_FRAMES")
+    picks = [names.index(n) for n in want.split(",")] if want else list(range(0, len(names), 2))
+    shown = [positions[f] for f in picks]          # frame what's shown, not a death that sinks out of sight
+    top = max(float(p[:, 2].max()) for p in shown)
+    low = min(float(p[:, 2].min()) for p in shown)
     mid = (top + low) / 2
-    d = max(top - low + 30, 60) / 180          # stand back further from the big ones
-    cam.location = (150 * max(d, 1.0), 100 * max(d, 1.0), mid + 30 * max(d, 1.0))
+    wide = max(float(np.abs(p[:, :2]).max()) for p in shown) * 2
+    d = max(top - low + 30, wide + 30, 60) / 110          # stand back further from the big ones
+    cam.location = (150 * max(d, 1.0), -100 * max(d, 1.0), mid + 30 * max(d, 1.0))      # from the front, as creatures face -y
     cam.rotation_euler = (Vector((0, 0, mid)) - Vector(cam.location)).to_track_quat("-Z", "Y").to_euler()
     cam.data.lens = 50 / min(d, 1.0)
+    cam.data.clip_end = 400 * max(d, 1.0)
     sun = bpy.data.objects.new("sun", bpy.data.lights.new("sun", "SUN"))
     sun.data.energy = 7
     sun.rotation_euler = (0.8, 0.2, 2.2)
@@ -665,8 +683,6 @@ def preview(name, names, positions, tris, st, albedo, out, size=220):
     sc.render.resolution_x = sc.render.resolution_y = size
     sc.cycles.samples = 8
     sc.render.film_transparent = False
-    want = os.environ.get("PREVIEW_FRAMES")
-    picks = [names.index(n) for n in want.split(",")] if want else list(range(0, len(names), 2))
     size = int(os.environ.get("PREVIEW_SIZE", size))
     sc.render.resolution_x = sc.render.resolution_y = size
     cols = min(8, len(picks))
@@ -2016,9 +2032,10 @@ def founder():
         if v.co.z < 0:
             v.co.y *= 1.0 + v.co.z * 1.5
     c.add(beard, "crust", "head")
-    for dx in (-0.07, 0.04):
-        top = Vector((hx + dx, hy - 0.29, hz + 0.02))
-        c.add(between("cone", top, top + Vector((0, -0.02, -0.36)), radius1=0.03, radius2=0.004, vertices=6), "slag", "head")
+    for i, dx in enumerate((-0.13, -0.06, 0.0, 0.07, 0.12)):          # short runs of iron through it
+        top = Vector((hx + dx, hy - 0.27 + abs(dx) * 0.4, hz - 0.1 - abs(dx) * 0.3))
+        c.add(between("cone", top, top + Vector((0, -0.01, -0.1 - 0.04 * (i % 2))), radius1=0.018, radius2=0.004,
+                      vertices=6), "slag", "head")
 
     base = {"spine": (10, 0, 0), "chest": (8, 0, 0), "neck": (-16, 0, 0), "head": (-6, 0, 0),
             "upper_l": (-10, 0, 14), "upper_r": (-10, 0, -14), "fore_l": (-30, 0, 0), "fore_r": (-30, 0, 0)}
@@ -2076,7 +2093,7 @@ def great_bell():
             (4.1, 8.8), (3.0, 9.6), (1.2, 9.95), (0.0, 10.0)]
     bell = lathe("bell", prof, segs=72)
     thicken(bell, 0.25)
-    c.add(bell, "bronze", "bell")
+    c.add(bell, "patina", "bell")
     for z, r in ((0.45, 7.75), (3.3, 5.45), (7.7, 4.6)):
         c.add(prim("torus", major_radius=r, minor_radius=0.12, major_segments=72, minor_segments=8, location=(0, 0, z)),
               "bronze", "bell")
@@ -2137,7 +2154,7 @@ def throat():
         return x * r, y * r, z
     col = lathe("column", [(4.4, 0.0), (3.9, 2.0), (3.2, 5.0), (2.9, 8.0), (3.1, 10.5), (3.6, 12.2), (3.4, TOP),
                            (2.6, TOP - 0.3), (1.8, TOP - 1.5)], segs=56, shape=gnarl)
-    c.add(col, "crust", among=["base", "mid", "top"], power=3.0)
+    c.add(col, "bigcrust", among=["base", "mid", "top"], power=3.0)
     cprof = [(4.4, 0.0), (3.9, 2.0), (3.2, 5.0), (2.9, 8.0), (3.1, 10.5), (3.6, 12.2)]
     for i in range(6):                          # veins of live iron running down it
         a, z, pts = i * math.tau / 6 + 0.4, 12.0, []
@@ -2161,15 +2178,23 @@ def throat():
         a = i * math.tau / 8
         _, _, rim, tip = c.bones[c.index["plate%d" % i]]
         rim, tip = Vector(rim), Vector(tip)
-        side = Vector((-math.sin(a), math.cos(a), 0))
-        plate = prim("cube", size=1.0, location=tuple(rim.lerp(tip, 0.5)))
+        # A shard of slag: a lumpy blade, thick at the root and ragged at the tip.
+        plate = prim("ico_sphere", subdivisions=2, radius=1.0, location=(0, 0, 0))
+        ln = (tip - rim).length * 0.62
+        for v in plate.data.vertices:
+            q = v.co * 1.0 + Vector((i * 3.1, 0, 0))
+            taper = 1.0 - 0.75 * max(0.0, v.co.z)
+            v.co.x *= 0.38 * taper
+            v.co.y *= 1.0 * taper
+            v.co.z *= ln
+            v.co += Vector((0.12, 0.25, 0.2)) * noise.noise(q * 1.7)
+        plate.location = tuple(rim.lerp(tip, 0.45))
         plate.rotation_euler = (0, math.atan2(math.hypot(tip.x - rim.x, tip.y - rim.y), tip.z - rim.z), a)
-        plate.scale = (0.35, 1.9, (tip - rim).length * 1.15)
-        c.add(plate, "crust", "plate%d" % i)
+        c.add(plate, "bigcrust", "plate%d" % i)
     for i in range(7):                          # coals for eyes under the lip
         a = i * math.tau / 7 + 0.3
         r = 3.45
-        eye = prim("uv_sphere", radius=0.22, segments=10, ring_count=6, location=(math.cos(a) * r, math.sin(a) * r, TOP - 1.4))
+        eye = prim("uv_sphere", radius=0.38, segments=10, ring_count=6, location=(math.cos(a) * r, math.sin(a) * r, TOP - 1.4))
         c.add(eye, "ember", "top")
 
     def plates(deg):
