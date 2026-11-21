@@ -101,6 +101,7 @@ class Level:
     WALL = 32
 
     def __init__(self, **worldspawn):
+        self.light_wait = worldspawn.pop("light_wait", 1)
         self.world = dict(worldspawn)
         self.solids = []
         self.air = []
@@ -163,6 +164,10 @@ class Level:
         return e
 
     def light(self, origin, light=300, colour=(1.0, 0.75, 0.5), **keys):
+        # A dark level's lights reach further (Level(light_wait=0.6)), so the
+        # floors under lights hung high aren't left black.
+        if self.light_wait != 1:
+            keys.setdefault("wait", self.light_wait)
         return self.add("light", origin, light=light, _color=colour, **keys)
 
     # Output

@@ -24,7 +24,7 @@ GAL = 176                            # the gallery's height
 
 
 def build():
-    L = Level(wad="cinder.wad", sounds=10, message="The Charnel Kiln", worldtype=0,
+    L = Level(wad="cinder.wad", light_wait=0.6, sounds=10, message="The Charnel Kiln", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=22, _range=0.6)
     half = B * 3 // 2
     L.room(-half, -half, 0, half, half, H, wall="kiln_brick1", floor="floor_flag1", ceiling="kiln_tile1")
