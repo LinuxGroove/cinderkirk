@@ -980,9 +980,14 @@ def hood(c, J, k, inner_mat="dark", mat="hood", rag=0.0):
             y += 0.12 * k * (t - 0.9)
         if rag:
             y -= rag * 0.5 * k * max(0.0, t - 0.5)        # the cowl's peak slumps forward
+            if t < -0.2:                                   # and its hem hangs in tatters
+                z -= rag * 0.35 * k * abs(math.sin(a * 7.0) + 0.6 * math.sin(a * 13.0 + 1.0))
         return x + hx, y, z
 
     def skip(a, z):
+        if rag:                                             # an arched opening, not a visor
+            f = abs(a - 1.5 * math.pi) / 0.75
+            return f < 1.0 and hz - 0.06 * k < z < hz + 0.21 * k - 0.12 * k * f * f
         return abs(a - 1.5 * math.pi) < 0.7 and hz - 0.04 * k < z < hz + 0.19 * k
 
     h = lathe("hood", [(0.10 * k, hz - 0.09 * k), (0.14 * k, hz - 0.03 * k), (0.15 * k, hz + 0.06 * k), (0.145 * k, hz + 0.15 * k),

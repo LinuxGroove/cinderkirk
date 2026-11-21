@@ -24,7 +24,7 @@ TEXRES   ?= 1024
 LIGHT_FLAGS ?= -extra4 -bounce -lit -lux
 VIS_FLAGS   ?=
 # World size of each texture, in units (the WAD stand-in's size); 128 unless named.
-WAD_SIZES   ?= kirk_glyph1=64
+WAD_SIZES   ?= kirk_glyph1=64,ore_rock1=256,vein_rock1=256
 
 MAPS     := $(patsubst maps_src/%.py,%,$(wildcard maps_src/*.py))
 BSPS     := $(patsubst %,$(BUILD)/maps/%.bsp,$(MAPS))

@@ -899,35 +899,35 @@ def m_ore_rock(g):
     edge = g.remap(g.voronoi(1.8, "DISTANCE_TO_EDGE", seed=500), 0.0, 0.03, 1.0, 0.0)
     grit = g.noise(12.0, 8.0, 0.65, seed=501)
     col = g.mixc(grit, (0.06, 0.055, 0.05), (0.15, 0.14, 0.125))
-    col = g.mixc(g.mul(g.remap(cells, 0.0, 0.5), 0.5), col, (0.04, 0.036, 0.032))
+    col = g.mixc(g.mul(g.remap(g.noise(2.5, 3.0, 0.5, seed=505), 0.4, 0.7), 0.35), col, (0.04, 0.036, 0.032))
     seam = g.remap(g.math("ABSOLUTE", g.sub(g.noise(1.2, 4.0, 0.55, distort=0.6, seed=502), 0.5)), 0.022, 0.0)
     ore = g.mixc(g.noise(9.0, 4.0, 0.6, seed=503), (0.20, 0.07, 0.03), (0.36, 0.14, 0.06))
     col = g.mixc(seam, col, ore)
     glint = g.mul(g.remap(g.noise(60.0, 2.0, 0.5, seed=504), 0.72, 0.8), g.add(seam, 0.15))
     col = g.mixc(g.clamp(glint), col, (0.55, 0.46, 0.22))
     col = g.mixc(edge, col, (0.02, 0.018, 0.016))
-    height = g.add(g.add(g.mul(g.sub(1.0, g.remap(cells, 0.0, 0.6)), 0.6), g.mul(grit, 0.25)), g.mul(edge, -0.4))
+    tilt = g.noise(1.4, 2.0, 0.5, seed=506)                 # broad planes rather than a dome per block
+    height = g.add(g.add(g.add(g.mul(g.sub(1.0, g.remap(cells, 0.0, 0.6)), 0.15), g.mul(tilt, 0.5)),
+                         g.mul(grit, 0.3)), g.mul(edge, -0.4))
     g.finish(col, g.mixf(g.clamp(g.add(seam, glint)), 0.88, 0.35), height, bump=1.6,
              metal=g.mul(g.clamp(glint), 0.8))
 
 
 def m_mine_prop(g):
     """Pit props: rough-sawn pine gone black with damp and coal dust, split
-    along the grain, with a tally of chalk marks."""
+    along the grain."""
     sep = g.node("ShaderNodeSeparateXYZ")
     g.feed(sep.inputs[0], g.uv)
     n = g.noise(1.5, 5.0, 0.6, seed=510)
-    grain = g.remap(g.math("SINE", g.add(g.mul(sep.outputs["X"], TAU * 22.0), g.mul(n, 14.0))), -1.0, 1.0)
-    split = g.remap(g.math("ABSOLUTE", g.sub(g.noise(0.6, 3.0, 0.5, distort=0.4, seed=511), 0.5)), 0.012, 0.0)
+    n2 = g.noise(7.0, 3.0, 0.5, seed=513)
+    grain = g.remap(g.math("SINE", g.add(g.mul(sep.outputs["X"], TAU * 17.0), g.add(g.mul(n, 26.0), g.mul(n2, 3.0)))), -1.0, 1.0)
+    grain = g.mul(grain, g.remap(g.noise(4.0, 2.0, 0.5, seed=514), 0.2, 0.8, 0.5, 1.0))
+    split = g.mul(g.remap(g.math("ABSOLUTE", g.sub(g.noise(0.6, 3.0, 0.5, distort=0.4, seed=511), 0.5)), 0.012, 0.0),
+                  g.remap(g.noise(1.1, 2.0, 0.5, seed=515), 0.55, 0.65))             # a few checks, not contours
     col = g.mixc(grain, (0.05, 0.035, 0.022), (0.12, 0.08, 0.045))
-    dust = g.remap(g.noise(2.0, 6.0, 0.6, seed=512), 0.4, 0.7)
+    dust = g.remap(g.noise(2.0, 6.0, 0.6, seed=512), 0.3, 0.9)
     col = g.mixc(g.mul(dust, 0.7), col, (0.03, 0.028, 0.026))
     col = g.mixc(split, col, (0.008, 0.006, 0.005))
-    sv = g.math("FRACT", g.mul(sep.outputs["Y"], 2.0))
-    tally = g.mul(g.mul(g.remap(g.math("ABSOLUTE", g.sub(g.math("FRACT", g.mul(sep.outputs["X"], 24.0)), 0.5)), 0.08, 0.04),
-                        g.mul(g.remap(sv, 0.40, 0.42), g.remap(sv, 0.5, 0.48))),
-                  g.mul(g.remap(sep.outputs["X"], 0.30, 0.31), g.remap(sep.outputs["X"], 0.52, 0.51)))
-    col = g.mixc(g.mul(tally, 0.8), col, (0.42, 0.41, 0.38))
     height = g.sub(g.add(g.mul(grain, 0.2), g.mul(dust, 0.05)), g.mul(split, 0.8))
     g.finish(col, 0.85, height, bump=1.0)
 
@@ -939,12 +939,13 @@ def m_vein_rock(g):
     grit = g.noise(10.0, 8.0, 0.65, seed=521)
     col = g.mixc(grit, (0.025, 0.022, 0.022), (0.08, 0.072, 0.068))
     wob = g.mul(g.sub(g.noise(3.0, 3.0, 0.5, seed=522), 0.5), 0.06)
-    d = g.add(g.voronoi(1.6, "DISTANCE_TO_EDGE", seed=523), wob)
-    crack = g.remap(d, 0.0, 0.025, 1.0, 0.0)
-    region = g.remap(g.noise(0.8, 3.0, 0.5, seed=524), 0.4, 0.6)
+    d = g.add(g.voronoi(0.9, "DISTANCE_TO_EDGE", seed=523), wob)
+    crack = g.remap(d, 0.0, 0.02, 1.0, 0.0)
+    region = g.remap(g.noise(0.7, 3.0, 0.5, seed=524), 0.5, 0.62)         # the heat comes through in patches
     vein = g.mul(crack, region)
     scorch = g.mul(region, g.remap(d, 0.0, 0.15, 1.0, 0.0))
     col = g.mixc(g.mul(scorch, 0.6), col, (0.05, 0.02, 0.01))
+    col = g.mixc(g.mul(crack, 0.85), col, (0.01, 0.009, 0.009))          # every crack, hot or cold
     col = g.mixc(vein, col, (0.5, 0.14, 0.03))
     hot = g.mixc(crack, (0.85, 0.18, 0.02), (1.0, 0.6, 0.2))
     emit = g.mixc(vein, (0.0, 0.0, 0.0), hot)
