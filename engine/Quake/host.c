@@ -80,6 +80,7 @@ cvar_t serverprofile = {"serverprofile", "0", CVAR_NONE};
 cvar_t fraglimit = {"fraglimit", "0", CVAR_NOTIFY | CVAR_SERVERINFO};
 cvar_t timelimit = {"timelimit", "0", CVAR_NOTIFY | CVAR_SERVERINFO};
 cvar_t teamplay = {"teamplay", "0", CVAR_NOTIFY | CVAR_SERVERINFO};
+cvar_t bots = {"bots", "0", CVAR_ARCHIVE}; // Cinderkirk: how many bots join a Pit fight (the game code reads it)
 cvar_t samelevel = {"samelevel", "0", CVAR_NONE};
 cvar_t noexit = {"noexit", "0", CVAR_NOTIFY | CVAR_SERVERINFO};
 cvar_t skill = {"skill", "1", CVAR_NONE};			// 0 - 3
@@ -385,6 +386,7 @@ void Host_InitLocal (void)
 	Cvar_RegisterVariable (&fraglimit);
 	Cvar_RegisterVariable (&timelimit);
 	Cvar_RegisterVariable (&teamplay);
+	Cvar_RegisterVariable (&bots);
 	Cvar_SetCallback (&fraglimit, Host_Callback_Notify);
 	Cvar_SetCallback (&timelimit, Host_Callback_Notify);
 	Cvar_SetCallback (&teamplay, Host_Callback_Notify);

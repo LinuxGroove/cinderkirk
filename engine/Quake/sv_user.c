@@ -664,6 +664,14 @@ void SV_RunClients (void)
 			host_client->cmd.viewangles[0] = host_client->edict->v.v_angle[0];
 			host_client->cmd.viewangles[1] = host_client->edict->v.v_angle[1];
 			host_client->cmd.viewangles[2] = host_client->edict->v.v_angle[2];
+			// Cinderkirk: a bot's game code steers it with .movement (forward, side, up), as DP's bots do.
+			eval_t *mv = GetEdictFieldValueByName (host_client->edict, "movement");
+			if (mv)
+			{
+				host_client->cmd.forwardmove = mv->vector[0];
+				host_client->cmd.sidemove = mv->vector[1];
+				host_client->cmd.upmove = mv->vector[2];
+			}
 		}
 
 		// always pause in single player if in console or menus

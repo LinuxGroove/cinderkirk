@@ -4715,50 +4715,40 @@ typedef struct
 } level_t;
 
 static level_t levels[] = {
-	{"start", "Entrance"}, // 0
+	// Cinderkirk: the Pit fight arenas, then the Story's maps by shaft.
+	{"pit1", "The Cooling Yard"}, // 0
+	{"pit2", "The Belfry"},
+	{"pit3", "The Slag Run"},
+	{"pit4", "The Charnel Kiln"},
 
-	{"e1m1", "Slipgate Complex"}, // 1
-	{"e1m2", "Castle of the Damned"},
-	{"e1m3", "The Necropolis"},
-	{"e1m4", "The Grisly Grotto"},
-	{"e1m5", "Gloom Keep"},
-	{"e1m6", "The Door To Chthon"},
-	{"e1m7", "The House of Chthon"},
-	{"e1m8", "Ziggurat Vertigo"},
+	{"start", "The Pithead"}, // 4
 
-	{"e2m1", "The Installation"}, // 9
-	{"e2m2", "Ogre Citadel"},
-	{"e2m3", "Crypt of Decay"},
-	{"e2m4", "The Ebon Fortress"},
-	{"e2m5", "The Wizard's Manse"},
-	{"e2m6", "The Dismal Oubliette"},
-	{"e2m7", "Underearth"},
+	{"foundry1", "The Foundry Gate"}, // 5
+	{"foundry2", "The Moulding Floor"},
+	{"foundry3", "The Furnace Row"},
+	{"foundry4", "The Bell Pit"},
+	{"foundry5", "The Pour"},
 
-	{"e3m1", "Termination Central"}, // 16
-	{"e3m2", "The Vaults of Zin"},
-	{"e3m3", "The Tomb of Terror"},
-	{"e3m4", "Satan's Dark Delight"},
-	{"e3m5", "Wind Tunnels"},
-	{"e3m6", "Chambers of Torment"},
-	{"e3m7", "The Haunted Halls"},
+	{"cisterns1", "The Quench House"}, // 10
+	{"cisterns2", "The Long Vault"},
+	{"cisterns3", "The Settling Tanks"},
+	{"cisterns4", "The Flowstone Stair"},
+	{"cisterns5", "The Great Cistern"},
 
-	{"e4m1", "The Sewage System"}, // 23
-	{"e4m2", "The Tower of Despair"},
-	{"e4m3", "The Elder God Shrine"},
-	{"e4m4", "The Palace of Hate"},
-	{"e4m5", "Hell's Atrium"},
-	{"e4m6", "The Pain Maze"},
-	{"e4m7", "Azure Agony"},
-	{"e4m8", "The Nameless City"},
+	{"kilns1", "The Charnel Stair"}, // 15
+	{"kilns2", "The Bone Kilns"},
+	{"kilns3", "The Ash Galleries"},
+	{"kilns4", "The Sorting House"},
+	{"kilns5", "The Calcining Floor"},
 
-	{"end", "Shub-Niggurath's Pit"}, // 31
+	{"vein1", "The Adit"}, // 20
+	{"vein2", "The Stopes"},
+	{"vein3", "The Winding Engine"},
+	{"vein4", "The Hot Workings"},
+	{"vein5", "The Founder's Mould"},
 
-	{"dm1", "Place of Two Deaths"}, // 32
-	{"dm2", "Claustrophobopolis"},
-	{"dm3", "The Abandoned Base"},
-	{"dm4", "The Bad Place"},
-	{"dm5", "The Cistern"},
-	{"dm6", "The Dark Zone"}};
+	{"throat1", "The Throat"}, // 25
+	{"throat2", "The Casting Floor"}};
 
 // MED 01/06/97 added hipnotic levels
 static level_t hipnoticlevels[] = {
@@ -4802,8 +4792,9 @@ typedef struct
 	int			levels;
 } episode_t;
 
-static episode_t episodes[] = {{"Welcome to Quake", 0, 1}, {"Doomed Dimension", 1, 8}, {"Realm of Black Magic", 9, 7}, {"Netherworld", 16, 7},
-							   {"The Elder World", 23, 8}, {"Final Level", 31, 1},	   {"Deathmatch Arena", 32, 6}};
+static episode_t episodes[] = {{"Pit fights", 0, 4},		 {"The Pithead", 4, 1},	 {"The Foundry", 5, 5}, {"The Cisterns", 10, 5},
+							   {"The Ossuary Kilns", 15, 5}, {"The Undervein", 20, 5}, {"The Throat", 25, 2}};
+#define NUM_EPISODES 7
 
 // MED 01/06/97  added hipnotic episodes
 static episode_t hipnoticepisodes[] = {{"Scourge of Armagon", 0, 1}, {"Fortress of the Dead", 1, 5}, {"Dominion of Darkness", 6, 6},
@@ -4817,8 +4808,8 @@ static int startepisode;
 static int startlevel;
 static int maxplayers;
 
-static int mpgameoptions_cursor_table[] = {40, 56, 64, 72, 80, 88, 96, 112, 120};
-#define NUM_MPGAMEOPTIONS 9
+static int mpgameoptions_cursor_table[] = {40, 56, 64, 72, 80, 88, 96, 104, 112, 120};
+#define NUM_MPGAMEOPTIONS 10
 static int mpgameoptions_cursor;
 
 static void M_Menu_MPGameOptions_f (void)
@@ -4852,9 +4843,9 @@ static void M_MPGameOptions_Draw (cb_context_t *cbx)
 
 	M_Print (cbx, OPTION_NAMES_CX, 64, "Game Type");
 	if (coop.value)
-		M_Print (cbx, OPTION_VALUES_CX, 64, "Cooperative");
+		M_Print (cbx, OPTION_VALUES_CX, 64, "Co-op Story");
 	else
-		M_Print (cbx, OPTION_VALUES_CX, 64, "Deathmatch");
+		M_Print (cbx, OPTION_VALUES_CX, 64, "Pit fight");
 
 	M_Print (cbx, OPTION_NAMES_CX, 72, "Teamplay");
 	if (rogue)
@@ -4908,13 +4899,13 @@ static void M_MPGameOptions_Draw (cb_context_t *cbx)
 
 	M_Print (cbx, OPTION_NAMES_CX, 80, "Skill");
 	if (skill.value == 0)
-		M_Print (cbx, OPTION_VALUES_CX, 80, "Easy difficulty");
+		M_Print (cbx, OPTION_VALUES_CX, 80, "Apprentice");
 	else if (skill.value == 1)
-		M_Print (cbx, OPTION_VALUES_CX, 80, "Normal difficulty");
+		M_Print (cbx, OPTION_VALUES_CX, 80, "Journeyman");
 	else if (skill.value == 2)
-		M_Print (cbx, OPTION_VALUES_CX, 80, "Hard difficulty");
+		M_Print (cbx, OPTION_VALUES_CX, 80, "Master");
 	else
-		M_Print (cbx, OPTION_VALUES_CX, 80, "Nightmare difficulty");
+		M_Print (cbx, OPTION_VALUES_CX, 80, "Founder's");
 
 	M_Print (cbx, OPTION_NAMES_CX, 88, "Frag Limit");
 	if (fraglimit.value == 0)
@@ -4927,6 +4918,12 @@ static void M_MPGameOptions_Draw (cb_context_t *cbx)
 		M_Print (cbx, OPTION_VALUES_CX, 96, "none");
 	else
 		M_Print (cbx, OPTION_VALUES_CX, 96, va ("%i minutes", (int)timelimit.value));
+
+	M_Print (cbx, OPTION_NAMES_CX, 104, "Bots");
+	if (coop.value)
+		M_Print (cbx, OPTION_VALUES_CX, 104, "none in co-op");
+	else
+		M_Print (cbx, OPTION_VALUES_CX, 104, bots.value ? va ("%i", (int)bots.value) : "none");
 
 	M_Print (cbx, OPTION_NAMES_CX, 112, "Episode");
 	// MED 01/06/97 added hipnotic episodes
@@ -5023,6 +5020,15 @@ static void M_NetStart_Change (int dir)
 		break;
 
 	case 7:
+		f = bots.value + dir;
+		if (f > 7)
+			f = 0;
+		else if (f < 0)
+			f = 7;
+		Cvar_SetValue ("bots", f);
+		break;
+
+	case 8:
 		startepisode += dir;
 		// MED 01/06/97 added hipnotic count
 		if (hipnotic)
@@ -5031,10 +5037,8 @@ static void M_NetStart_Change (int dir)
 		// PGM 03/02/97 added 1 for dmatch episode
 		else if (rogue)
 			count = 4;
-		else if (registered.value)
-			count = 7;
 		else
-			count = 2;
+			count = NUM_EPISODES;
 
 		if (startepisode < 0)
 			startepisode = count - 1;
@@ -5045,7 +5049,7 @@ static void M_NetStart_Change (int dir)
 		startlevel = 0;
 		break;
 
-	case 8:
+	case 9:
 		startlevel += dir;
 		// MED 01/06/97 added hipnotic episodes
 		if (hipnotic)

@@ -232,6 +232,7 @@ void ED_PrintEdicts (void);
 void ED_PrintNum (int ent);
 
 eval_t *GetEdictFieldValue (edict_t *ed, int fldofs); // handles invalid offsets with a null
+eval_t *GetEdictFieldValueByName (edict_t *ed, const char *name);
 int		ED_FindFieldOffset (const char *name);
 
 #define GetEdictFieldValid(fld)	   (qcvm->extfields.fld >= 0)

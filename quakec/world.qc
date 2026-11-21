@@ -365,6 +365,8 @@ void() worldspawn =
 	Arsenal_Precache ();
 };
 
+void() Bots_Update;
+
 void() StartFrame =
 {
 	timelimit = cvar("timelimit") * 60;
@@ -373,6 +375,9 @@ void() StartFrame =
 	teamplay = cvar("teamplay");
 	skill = cvar("skill");
 	framecount = framecount + 1;
+#ifndef __QW__
+	Bots_Update ();
+#endif
 };
 
 /*

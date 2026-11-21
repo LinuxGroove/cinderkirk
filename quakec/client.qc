@@ -1116,8 +1116,17 @@ PlayerPreThink
 
 Called every frame before physics are run
 ================*/
+#ifndef __QW__
+float(entity e) Bot_IsBot;
+void() Bot_Think;
+#endif
+
 void() PlayerPreThink =
 {
+#ifndef __QW__
+	if (Bot_IsBot (self))
+		Bot_Think ();
+#endif
 	if (intermission_running)
 	{
 		IntermissionThink ();	// otherwise a button could be missed between

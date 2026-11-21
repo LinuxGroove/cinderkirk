@@ -31,6 +31,9 @@ This folder is [vkQuake](https://github.com/Novum/vkQuake) at tag **1.37.0**, wi
 | `Makefile` (repository) | `light` runs with `-lux`, and the pak carries the `.lux` and the `_norm` and `_gloss` pictures |
 | `Quake/view.c` | Under water the view is tinted the Cisterns' black-green, not brown |
 | `Quake/cl_main.c` | `cl_spawncmd`: console commands to run each time the player enters a level (`tools/shoot.sh` uses it for screenshots) |
+| `Quake/sv_user.c`, `Quake/progs.h` | Bots (the engine's botclients) are steered by the game code's `.movement` vector (forward, side, up), as DarkPlaces' bots are. **Upstream** |
+| `Quake/host.c`, `Quake/server.h` | `bots`: how many bots the game code keeps in a Pit fight |
+| `Quake/menu.c` | Host a game lists Cinderkirk's maps (the Pit fight arenas, then the Story by shaft), the game types are Pit fight and Co-op Story, the skills are the lift's (Apprentice to Founder's), and there's a Bots setting; none of id's map names are left |
 | `Misc/vq_pak/` | The built-in pak keeps only the crosshairs: vkQuake's console background (which carries id's logo), menus and fixes for id's maps are gone, so Cinderkirk's own are used |
 | `meson_options.txt` | User folders are on by default |
 
