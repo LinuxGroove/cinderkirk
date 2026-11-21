@@ -622,9 +622,11 @@ def m_plaster(g):
     gone = g.remap(g.noise(1.1, 5.0, 0.6, seed=252), 0.58, 0.61)
     crack = g.mul(g.remap(g.voronoi(2.5, "DISTANCE_TO_EDGE", seed=253), 0.0, 0.01, 1.0, 0.0),
                   g.remap(g.noise(1.5, 2.0, 0.5, seed=254), 0.5, 0.6))
-    col = g.mixc(n, (0.28, 0.26, 0.21), (0.40, 0.37, 0.31))
-    col = g.mixc(crack, col, (0.08, 0.07, 0.06))
-    s = soot(g, 0.8, seed=255, lo=0.4)
+    col = g.mixc(n, (0.20, 0.185, 0.15), (0.31, 0.285, 0.235))
+    damp = vstreak(g, 256.0, 5.0, 0.52, 0.66)
+    col = g.mixc(g.mul(damp, 0.6), col, (0.15, 0.12, 0.08))
+    col = g.mixc(crack, col, (0.06, 0.05, 0.04))
+    s = soot(g, 0.8, seed=255, lo=0.3)
     col = g.mixc(1.0, col, g.mixc(s, (0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), blend="MULTIPLY")
     col = g.mixc(gone, col, col_b)
     height = g.mixf(gone, g.sub(g.add(1.2, g.mul(n, 0.1)), g.mul(crack, 0.4)), g.mul(height_b, 0.6))
@@ -663,12 +665,14 @@ def m_brass(g):
 
 # ------------------------------------------------------------------ the Cisterns
 
-def vstreak(g, seed, across=14.0, lo=0.55, hi=0.75):
+def vstreak(g, seed, across=14.0, lo=0.55, hi=0.75, warp=None):
     """Vertical runs down a wall: noise on the tiling torus, many features
-    across and few down, so it streaks and still tiles."""
+    across and few down, so it streaks and still tiles. `warp` (a tiling
+    value, in tile widths) pushes the runs sideways so they wander."""
     sep = g.node("ShaderNodeSeparateXYZ")
     g.feed(sep.inputs[0], g.uv)
-    a = g.mul(sep.outputs["X"], TAU)
+    x = sep.outputs["X"] if warp is None else g.add(sep.outputs["X"], warp)
+    a = g.mul(x, TAU)
     b = g.mul(sep.outputs["Y"], TAU)
     ra, rb = across / 4.0, 0.35
     comb = g.node("ShaderNodeCombineXYZ")
@@ -711,16 +715,25 @@ def m_brick_wet(g):
 
 def m_lime(g):
     """Flowstone: lime that has run down the walls for two hundred years in
-    cream curtains, wet and shining, stained rust where iron drips into it."""
-    folds = vstreak(g, 320.0, 22.0, 0.3, 0.8)
-    big = vstreak(g, 321.0, 5.0, 0.35, 0.75)
-    col = g.mixc(folds, (0.17, 0.155, 0.125), (0.29, 0.265, 0.22))
-    col = g.mixc(g.mul(big, 0.4), col, (0.30, 0.22, 0.14))
-    rust = g.mul(vstreak(g, 322.0, 9.0, 0.62, 0.8), 0.8)
-    col = g.mixc(rust, col, (0.30, 0.14, 0.06))
+    cream curtains, wet and shining, stained rust where iron drips into it.
+    The curtains wander and overlap, with growth rims across them, so the
+    wall doesn't read as brushed metal."""
+    warp = g.mul(g.sub(g.noise(1.6, 3.0, 0.5, seed=324), 0.5), 0.10)
+    curtain = vstreak(g, 321.0, 6.0, 0.44, 0.56, warp)
+    folds = vstreak(g, 320.0, 16.0, 0.35, 0.75, warp)
+    sep = g.node("ShaderNodeSeparateXYZ")
+    g.feed(sep.inputs[0], g.uv)
+    wob = g.mul(g.noise(2.0, 4.0, 0.5, seed=325), 5.0)
+    rim = g.remap(g.math("SINE", g.add(g.mul(sep.outputs["Y"], TAU * 7.0), wob)), 0.80, 0.98)
+    rim = g.mul(rim, g.remap(g.noise(1.3, 3.0, 0.5, seed=326), 0.45, 0.65))
+    col = g.mixc(curtain, (0.10, 0.095, 0.08), (0.30, 0.27, 0.21))
+    col = g.mixc(g.mul(folds, 0.35), col, (0.38, 0.34, 0.27))
+    col = g.mixc(g.mul(rim, 0.5), col, (0.08, 0.07, 0.06))
+    rust = g.mul(vstreak(g, 322.0, 4.0, 0.56, 0.68, warp), 0.85)
+    col = g.mixc(rust, col, (0.30, 0.13, 0.05))
     nubs = g.remap(g.voronoi(26.0, "F1", seed=323), 0.0, 0.3, 1.0, 0.0)
-    height = g.add(g.add(g.mul(folds, 0.6), g.mul(big, 0.8)), g.mul(nubs, 0.15))
-    g.finish(col, g.mixf(folds, 0.35, 0.15), height, bump=1.0)
+    height = g.add(g.add(g.mul(curtain, 1.0), g.mul(folds, 0.25)), g.sub(g.mul(nubs, 0.12), g.mul(rim, 0.3)))
+    g.finish(col, g.mixf(curtain, 0.6, 0.18), height, bump=1.0)
 
 
 def m_verdigris(g):
