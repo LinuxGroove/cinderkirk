@@ -58,6 +58,7 @@ void() multi_trigger =
 			return;
 		found_secrets = found_secrets + 1;
 		WriteByte (MSG_ALL, SVC_FOUNDSECRET);
+		Rumble (self.enemy, "secret");
 	}
 
 	if (self.noise != string_null)

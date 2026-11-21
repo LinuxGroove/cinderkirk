@@ -178,6 +178,7 @@ void() W_FireAxe =
 	traceline (source, source + v_forward*64, FALSE, self);
 	if (trace_fraction == 1.0)
 		return;
+	Rumble (self, "pick");
 
 	org = trace_endpos - v_forward*4;
 
@@ -574,6 +575,7 @@ void() W_FireLightning =
 	local	vector		org;
 	local   float       cells;
 
+	Rumble (self, "toll");
 	if (self.ammo_cells < 1)
 	{
 		self.weapon = W_BestWeapon ();
@@ -763,6 +765,7 @@ void() W_FireSuperSpikes =
 {
 	local vector	dir;
 
+	Rumble (self, "bolt");
 	sound (self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM);
 	self.attack_finished = time + 0.2;
 
@@ -783,6 +786,7 @@ void(float ox) W_FireSpikes =
 {
 	local vector	dir;
 
+	Rumble (self, "spitter");
 	makevectors (self.v_angle);
 
 	if (self.ammo_nails >= 2 && self.weapon == IT_SUPER_NAILGUN)
@@ -1071,6 +1075,7 @@ void() W_Attack =
 
 	else if (self.weapon == IT_SHOTGUN)
 	{
+		Rumble (self, "scattergun");
 		player_shot1 ();
 		W_FireShotgun ();
 		self.attack_finished = time + 0.5;
@@ -1078,6 +1083,7 @@ void() W_Attack =
 
 	else if (self.weapon == IT_SUPER_SHOTGUN)
 	{
+		Rumble (self, "steam");
 		player_shot1 ();
 		W_FireSuperShotgun ();
 		self.attack_finished = time + 0.7;
@@ -1095,6 +1101,7 @@ void() W_Attack =
 
 	else if (self.weapon == IT_GRENADE_LAUNCHER)
 	{
+		Rumble (self, "crucible");
 		player_rocket1();
 		W_FireGrenade();
 		self.attack_finished = time + 0.6;
@@ -1102,6 +1109,7 @@ void() W_Attack =
 
 	else if (self.weapon == IT_ROCKET_LAUNCHER)
 	{
+		Rumble (self, "mortar");
 		player_rocket1();
 		W_FireRocket();
 		self.attack_finished = time + 0.8;
