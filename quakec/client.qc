@@ -1181,7 +1181,7 @@ void() CheckPowerups =
 		// sound and screen flash when items starts to run out
 		if (self.invisible_sound < time)
 		{
-			sound (self, CHAN_AUTO, "items/inv3.wav", 0.5, ATTN_IDLE);
+			sound (self, CHAN_AUTO, "cinder/veil_idle.wav", 0.5, ATTN_IDLE);
 			self.invisible_sound = time + ((random() * 3) + 1);
 		}
 
@@ -1193,7 +1193,7 @@ void() CheckPowerups =
 				sprint (self, PRINT_HIGH, LOC_ITEM_FADE_SHADRING);
 				sprint (self, PRINT_HIGH, "\n");
 				stuffcmd (self, "bf\n");
-				sound (self, CHAN_AUTO, "items/inv2.wav", 1, ATTN_NORM);
+				sound (self, CHAN_AUTO, "cinder/veil_fade.wav", 1, ATTN_NORM);
 				self.invisible_time = time + 1;
 			}
 
@@ -1230,7 +1230,7 @@ void() CheckPowerups =
 				sprint (self, PRINT_HIGH, LOC_ITEM_FADE_PENTPROT);
 				sprint (self, PRINT_HIGH, "\n");
 				stuffcmd (self, "bf\n");
-				sound (self, CHAN_AUTO, "items/protect2.wav", 1, ATTN_NORM);
+				sound (self, CHAN_AUTO, "cinder/mantle_fade.wav", 1, ATTN_NORM);
 				self.invincible_time = time + 1;
 			}
 
@@ -1278,7 +1278,7 @@ void() CheckPowerups =
 					sprint (self, PRINT_HIGH, LOC_ITEM_FADE_QUADDMG);
 				sprint (self, PRINT_HIGH, "\n");
 				stuffcmd (self, "bf\n");
-				sound (self, CHAN_AUTO, "items/damage2.wav", 1, ATTN_NORM);
+				sound (self, CHAN_AUTO, "cinder/heart_fade.wav", 1, ATTN_NORM);
 				self.super_time = time + 1;
 			}
 
@@ -1332,7 +1332,7 @@ void() CheckPowerups =
 				sprint (self, PRINT_HIGH, LOC_ITEM_FADE_BIOSUIT);
 				sprint (self, PRINT_HIGH, "\n");
 				stuffcmd (self, "bf\n");
-				sound (self, CHAN_AUTO, "items/suit2.wav", 1, ATTN_NORM);
+				sound (self, CHAN_AUTO, "cinder/suit_fade.wav", 1, ATTN_NORM);
 				self.rad_time = time + 1;
 			}
 

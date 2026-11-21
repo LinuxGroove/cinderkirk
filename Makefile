@@ -154,7 +154,8 @@ $(addprefix weapon-,$(WEAPONS)): weapon-%:
 # the weapons as they lie on the floor (g_*.md3, weapons.py with WORLD=1), one
 # Blender run each, so make -j8 pickups.
 PICKUPS := health_small health health_mega shells shells_big slag slag_big iron iron_big \
-	clappers clappers_big armour_leather armour_iron armour_bronze key_silver key_gold backpack
+	clappers clappers_big armour_leather armour_iron armour_bronze key_silver key_gold backpack \
+	forge_heart mantle veil quench_suit
 GROUND  := steam spitter bolt crucible mortar toll
 .PHONY: pickups $(addprefix pickup-,$(PICKUPS)) $(addprefix ground-,$(GROUND))
 pickups: $(addprefix pickup-,$(PICKUPS)) $(addprefix ground-,$(GROUND))

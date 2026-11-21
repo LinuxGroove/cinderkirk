@@ -54,7 +54,7 @@ def build():
     L.brush_entity("trigger_changelevel", [Box(1312, -64, 192, 1392, 64, 288, "trigger")], map="foundry4")
     # Steps from the floor to the north ledge, and the Forge Heart at its end.
     L.steps(1120, 256, 1184, 416, 0, 192, axis="y", base=0, tex="kirk_stone1")
-    L.add("item_artifact_super_damage", (360, 464, 192))
+    L.add("item_artifact_super_damage", (360, 464, 192 + 24))       # powerups stand 24 over the floor
     L.add("item_health", (300, 464, 192), spawnflags=2)
     L.add("item_spikes", (300, -464, 192))
     L.add("item_rockets", (600, -464, 192))

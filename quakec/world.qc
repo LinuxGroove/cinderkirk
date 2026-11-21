@@ -230,8 +230,8 @@ void() worldspawn =
 	precache_sound ("items/armor1.wav");		// armor up
 	precache_sound ("weapons/lhit.wav");		//lightning
 	precache_sound ("weapons/lstart.wav");		//lightning start
-	precache_sound ("items/damage2.wav");
-	precache_sound ("items/damage3.wav");
+	precache_sound ("cinder/heart_fade.wav");
+	precache_sound ("cinder/heart_hit.wav");
 
 
 	precache_sound ("misc/power.wav");			//lightning for boss
@@ -271,9 +271,9 @@ void() worldspawn =
 	precache_sound ("misc/outwater.wav");		// leaving water sound
 
 // Invulnerability sounds
-	precache_sound ("items/protect.wav");
-	precache_sound ("items/protect2.wav");
-	precache_sound ("items/protect3.wav");
+	precache_sound ("cinder/mantle.wav");
+	precache_sound ("cinder/mantle_fade.wav");
+	precache_sound ("cinder/mantle_hit.wav");
 
 	precache_sound ("player/lburn1.wav");		// lava burn
 	precache_sound ("player/lburn2.wav");		// lava burn

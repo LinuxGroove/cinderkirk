@@ -41,7 +41,7 @@ def build():
     L.solid(0, -224, -256, 96, 224, 0, "cist_stone1")
     L.solid(896, -224, -256, 1152, 224, 0, "cist_stone1")                 # the chancel
     L.solid(960, -96, 0, 1088, 96, 32, "kirk_stone1")                      # the altar
-    L.add("item_artifact_envirosuit", (1024, 0, 32))
+    L.add("item_artifact_envirosuit", (1024, 0, 32 + 24))       # powerups stand 24 over the floor
     L.steps(816, -64, 896, 64, -48, 0)
     for x in range(192, 832, 96):                                          # the pews' backs
         for y0, y1 in ((-200, -40), (40, 200)):

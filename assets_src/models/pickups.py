@@ -230,6 +230,78 @@ def backpack():
     p.done()
 
 
+# The powerups hang in the air over where they lie (the game gives them a box
+# from 24 under the origin), turning, each with something hot in it.
+
+def forge_heart():
+    """The Forge Heart: a lump of live iron the size of a fist, beating in an iron cage."""
+    p = Pickup("forge_heart", spin=True)
+    core = C.prim("uv_sphere", radius=0.13, segments=20, ring_count=12, location=(0, 0, 0.12))
+    core.scale = (1.0, 0.85, 1.15)
+    p.put(core, "slag")
+    for sx in (-1, 1):  # the heart's two lobes and its point
+        lobe = C.prim("uv_sphere", radius=0.08, segments=14, ring_count=8, location=(sx * 0.07, 0, 0.22))
+        p.put(lobe, "slag")
+    p.put(C.between("cone", P((0, 0, 0.04)), P((0, 0, -0.07)), radius1=0.1, radius2=0.01, vertices=14), "slag")
+    crust = C.prim("ico_sphere", subdivisions=2, radius=0.15, location=(0.03, -0.02, 0.1))
+    crust.scale = (0.9, 0.7, 1.1)
+    p.put(crust, "crust")
+    for i in range(6):  # the cage: six bars from a ring at the foot to a ring at the crown
+        a = math.tau * i / 6
+        mid = P((0.21 * math.cos(a), 0.21 * math.sin(a), 0.12))
+        p.put(W.rod(P((0.1 * math.cos(a), 0.1 * math.sin(a), -0.14)), mid, 0.01, segs=8), "iron")
+        p.put(W.rod(mid, P((0.08 * math.cos(a), 0.08 * math.sin(a), 0.38)), 0.01, segs=8), "iron")
+    for z, r in ((-0.14, 0.1), (0.12, 0.21), (0.38, 0.08)):
+        p.put(W.ring(P((0, 0, z)), P((0, 0, 1)), r, 0.014), "iron")
+    p.put(W.ring(P((0, 0, 0.44)), P((1, 0, 0)), 0.05, 0.012), "iron")       # the hook it hung from
+    p.done()
+
+
+def mantle():
+    """The Founder's Mantle: a little bronze cope, cast for nothing to stand in, glowing at its seams."""
+    p = Pickup("mantle", spin=True)
+    prof = [(0.24, -0.16), (0.25, -0.13), (0.2, 0.0), (0.16, 0.16), (0.13, 0.28), (0.07, 0.34), (0.0, 0.35)]
+    cope = C.lathe("cope", prof, segs=40)
+    p.put(C.thicken(cope, 0.015), "cope")
+    p.put(W.ring(P((0, 0, -0.13)), P((0, 0, 1)), 0.245, 0.016), "bronze")
+    p.put(W.ring(P((0, 0, 0.16)), P((0, 0, 1)), 0.162, 0.012), "bronze")
+    p.put(W.ring(P((0, 0, 0.4)), P((1, 0, 0)), 0.05, 0.014), "iron")
+    p.put(C.prim("uv_sphere", radius=0.07, segments=12, ring_count=8, location=(0, 0, -0.04)), "ember")  # hot inside
+    p.done()
+
+
+def veil():
+    """The Soot Veil: a shroud of charred cloth hanging on nothing, its hem going to ash."""
+    p = Pickup("veil", spin=True)
+    prof = [(0.0, 0.36), (0.07, 0.34), (0.12, 0.27), (0.15, 0.12), (0.19, -0.05), (0.24, -0.2), (0.27, -0.3)]
+    sh = C.lathe("veil", prof, segs=40,
+                 shape=lambda a, z, x, y: (x * (1 + 0.18 * math.sin(a * 5 + z * 7)) , y * (1 + 0.18 * math.sin(a * 5 + z * 7)),
+                                           z - (0.06 * (1 + math.sin(a * 7)) if z < -0.25 else 0.0)))
+    p.put(C.thicken(sh, 0.012), "hood")
+    for sx in (-1, 1):  # two coals where a face would be
+        p.put(C.prim("uv_sphere", radius=0.022, segments=8, ring_count=5, location=(sx * 0.05, -0.135, 0.17)), "ember")
+    p.done()
+
+
+def quench_suit():
+    """The Quench Suit's helmet: a brass diving bell for a head, with a glass port and a hose."""
+    p = Pickup("quench_suit", spin=True)
+    dome = C.prim("uv_sphere", radius=0.19, segments=28, ring_count=16, location=(0, 0, 0.14))
+    p.put(dome, "brass")
+    p.put(W.rod(P((0, 0, -0.1)), P((0, 0, -0.02)), 0.21, segs=32), "brass", bevel=0.01)   # the collar
+    for i in range(8):
+        a = math.tau * i / 8
+        p.put(C.prim("uv_sphere", radius=0.016, segments=8, ring_count=5, location=(0.21 * math.cos(a), 0.21 * math.sin(a), -0.06)), "iron")
+    p.put(W.rod(P((0, -0.17, 0.15)), P((0, -0.21, 0.15)), 0.1, segs=24), "brass")              # the port's frame
+    p.put(W.rod(P((0, -0.205, 0.15)), P((0, -0.212, 0.15)), 0.08, segs=24), "glass")
+    for ang in (0, 60, 120):
+        a = math.radians(ang)
+        d = P((math.cos(a), 0, math.sin(a))) * 0.08
+        p.put(W.rod(P((0, -0.215, 0.15)) - d, P((0, -0.215, 0.15)) + d, 0.006, segs=6), "brass")  # its grille
+    p.put(W.tube([(0.12, 0.1, 0.2), (0.22, 0.16, 0.1), (0.24, 0.2, -0.12)], 0.025), "leather")    # the air hose
+    p.done()
+
+
 PICKUPS = {
     "health_small": health_small, "health": health, "health_mega": health_mega,
     "shells": shells, "shells_big": lambda: shells(True), "slag": slag, "slag_big": lambda: slag(True),
@@ -238,6 +310,7 @@ PICKUPS = {
     "armour_bronze": lambda: armour("armour_bronze", "bronze", 4),
     "key_silver": lambda: key("key_silver", "steel"), "key_gold": lambda: key("key_gold", "brass"),
     "backpack": backpack,
+    "forge_heart": forge_heart, "mantle": mantle, "veil": veil, "quench_suit": quench_suit,
 }
 
 if __name__ == "__main__":

@@ -106,8 +106,8 @@ void(float timeleft) DropQuad =
 	item.flags = FL_ITEM;
 	item.solid = SOLID_TRIGGER;
 	item.movetype = MOVETYPE_TOSS;
-	item.noise = "items/damage.wav";
-	setmodel (item, "progs/quaddama.mdl");
+	item.noise = "cinder/heart.wav";
+	setmodel (item, "progs/forge_heart.md3");
 	setsize (item, '-16 -16 -24', '16 16 32');
 	item.cnt = time + timeleft;
 	item.touch = q_touch;
@@ -171,8 +171,8 @@ void(float timeleft) DropRing =
 	item.flags = FL_ITEM;
 	item.solid = SOLID_TRIGGER;
 	item.movetype = MOVETYPE_TOSS;
-	item.noise = "items/inv1.wav";
-	setmodel (item, "progs/invisibl.mdl");
+	item.noise = "cinder/veil.wav";
+	setmodel (item, "progs/veil.md3");
 	setsize (item, '-16 -16 -24', '16 16 32');
 	item.cnt = time + timeleft;
 	item.touch = r_touch;
@@ -1536,7 +1536,7 @@ void() powerup_touch =
 
 /*QUAKED item_artifact_invulnerability (0 .5 .8) (-16 -16 -24) (16 16 32)
 {
-    model({"path": "progs/invulner.mdl", "skin": 0, "frame": 0});
+    model({"path": "progs/mantle.md3", "skin": 0, "frame": 0});
 }
 Player is invulnerable for 30 seconds
 */
@@ -1547,12 +1547,12 @@ void() item_artifact_invulnerability =
 
 	self.touch = powerup_touch;
 
-	precache_model ("progs/invulner.mdl");
-	precache_sound ("items/protect.wav");
-	precache_sound ("items/protect2.wav");
-	precache_sound ("items/protect3.wav");
-	self.noise = "items/protect.wav";
-	setmodel (self, "progs/invulner.mdl");
+	precache_model ("progs/mantle.md3");
+	precache_sound ("cinder/mantle.wav");
+	precache_sound ("cinder/mantle_fade.wav");
+	precache_sound ("cinder/mantle_hit.wav");
+	self.noise = "cinder/mantle.wav";
+	setmodel (self, "progs/mantle.md3");
 	self.netname = LOC_ITEM_NAME_PENTPROT;
 
 #ifdef __QW__ // EF_RED is not supported in NQ
@@ -1566,7 +1566,7 @@ void() item_artifact_invulnerability =
 
 /*QUAKED item_artifact_envirosuit (0 .5 .8) (-16 -16 -24) (16 16 32)
 {
-    model({"path": "progs/suit.mdl", "skin": 0, "frame": 0});
+    model({"path": "progs/quench_suit.md3", "skin": 0, "frame": 0});
 }
 Player takes no damage from water or slime for 30 seconds
 */
@@ -1574,11 +1574,11 @@ void() item_artifact_envirosuit =
 {
 	self.touch = powerup_touch;
 
-	precache_model ("progs/suit.mdl");
-	precache_sound ("items/suit.wav");
-	precache_sound ("items/suit2.wav");
-	self.noise = "items/suit.wav";
-	setmodel (self, "progs/suit.mdl");
+	precache_model ("progs/quench_suit.md3");
+	precache_sound ("cinder/suit.wav");
+	precache_sound ("cinder/suit_fade.wav");
+	self.noise = "cinder/suit.wav";
+	setmodel (self, "progs/quench_suit.md3");
 	self.netname = LOC_ITEM_NAME_BIOSUIT;
 	self.items = IT_SUIT;
 	setsize (self, '-16 -16 -24', '16 16 32');
@@ -1588,7 +1588,7 @@ void() item_artifact_envirosuit =
 
 /*QUAKED item_artifact_invisibility (0 .5 .8) (-16 -16 -24) (16 16 32)
 {
-    model({"path": "progs/invisibl.mdl", "skin": 0, "frame": 0});
+    model({"path": "progs/veil.md3", "skin": 0, "frame": 0});
 }
 Player is invisible for 30 seconds
 */
@@ -1599,12 +1599,12 @@ void() item_artifact_invisibility =
 
 	self.touch = powerup_touch;
 
-	precache_model ("progs/invisibl.mdl");
-	precache_sound ("items/inv1.wav");
-	precache_sound ("items/inv2.wav");
-	precache_sound ("items/inv3.wav");
-	self.noise = "items/inv1.wav";
-	setmodel (self, "progs/invisibl.mdl");
+	precache_model ("progs/veil.md3");
+	precache_sound ("cinder/veil.wav");
+	precache_sound ("cinder/veil_fade.wav");
+	precache_sound ("cinder/veil_idle.wav");
+	self.noise = "cinder/veil.wav";
+	setmodel (self, "progs/veil.md3");
 	self.netname = LOC_ITEM_NAME_SHADRING;
 	self.items = IT_INVISIBILITY;
 	setsize (self, '-16 -16 -24', '16 16 32');
@@ -1614,7 +1614,7 @@ void() item_artifact_invisibility =
 
 /*QUAKED item_artifact_super_damage (0 .5 .8) (-16 -16 -24) (16 16 32)
 {
-    model({"path": "progs/quaddama.mdl", "skin": 0, "frame": 0});
+    model({"path": "progs/forge_heart.md3", "skin": 0, "frame": 0});
 }
 The next attack from the player will do 4x damage
 */
@@ -1625,10 +1625,10 @@ void() item_artifact_super_damage =
 
 	self.touch = powerup_touch;
 
-	precache_model ("progs/quaddama.mdl");
-	precache_sound ("items/damage.wav");
-	self.noise = "items/damage.wav";
-	setmodel (self, "progs/quaddama.mdl");
+	precache_model ("progs/forge_heart.md3");
+	precache_sound ("cinder/heart.wav");
+	self.noise = "cinder/heart.wav";
+	setmodel (self, "progs/forge_heart.md3");
 
 	if (deathmatch_supermode())
 		self.netname = LOC_ITEM_NAME_OCTDMG;
@@ -1684,7 +1684,7 @@ void() BackpackTouch =
 		sprint (other, PRINT_LOW, LOC_ITEM_PICKUP_ADD_HEALTH);
 		sprint (other, PRINT_LOW, "\n");
 		if ((other.health > 250) && (other.health < 300))
-			sound (other, CHAN_ITEM, "items/protect3.wav", 1, ATTN_NORM);
+			sound (other, CHAN_ITEM, "cinder/mantle_hit.wav", 1, ATTN_NORM);
 		else
 			sound (other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
 		stuffcmd (other, "bf\n");

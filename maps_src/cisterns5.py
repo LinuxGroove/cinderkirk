@@ -112,7 +112,7 @@ def build():
     L.add("item_health", (1240, -200, 0))
     L.add("item_cells", (1600, 0, 0))
     L.add("item_armor2", (1900, 32, 0))
-    L.add("item_artifact_envirosuit", (300, 600, BED + 8))
+    L.add("item_artifact_envirosuit", (300, 600, BED + 24))
 
     # The congregation, and the water full of leeches.
     for x, y in ((300, 400), (300, -400), (700, 560), (700, -560), (1400, 420), (1400, -420),

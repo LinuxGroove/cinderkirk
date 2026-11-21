@@ -51,7 +51,7 @@ def build():
         L.solid(x0, y0, 32, x1, y1, 144, "bronze1")
     L.solid(504, -72, 144, 648, 72, 160, "bronze1")
     L.solid(528, -40, 160, 624, 40, 192, "bronze1")
-    L.add("item_artifact_invisibility", (576, 0, 40))
+    L.add("item_artifact_invisibility", (576, 0, 32 + 24))       # powerups stand 24 over the floor
     # Ossuary niches with candles down the transepts.
     for y in (-520, 520):
         L.solid(512, y - 16, 0, 640, y + 16, 48, "crypt_stone1")

@@ -1334,7 +1334,7 @@ void() SuperDamageSound =
 		if (self.super_sound < time)
 		{
 			self.super_sound = time + 1;
-			sound (self, CHAN_BODY, "items/damage3.wav", 1, ATTN_NORM);
+			sound (self, CHAN_BODY, "cinder/heart_hit.wav", 1, ATTN_NORM);
 		}
 	}
 	return;

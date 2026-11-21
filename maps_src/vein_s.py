@@ -3,7 +3,7 @@
 
 Behind the cracked wall in the old workings: the pocket of pure iron the
 Founder found and kept to himself, its walls still bright with ore, his
-pick and his own tally stone in the middle, and the Founder's Mark that
+pick and his own tally stone in the middle, and the Founder's Mantle that
 was cast from it. The way on comes out in the Hot Workings.
 
     python3 maps_src/vein_s.py maps_src/vein_s.map
@@ -53,7 +53,7 @@ def build():
     L.solid(cx - 48, -48, 0, cx + 48, 48, 40, "crypt_stone1")
     L.solid(cx - 4, 40, 40, cx + 4, 48, 120, PROP)
     L.solid(cx - 28, 36, 112, cx + 28, 52, 124, "iron_rust1")
-    L.add("item_artifact_invulnerability", (cx, 0, 56))
+    L.add("item_artifact_invulnerability", (cx, 0, 40 + 24))       # powerups stand 24 over the floor
     for x, y in ((cx - 220, -200), (cx + 160, 220), (cx - 60, 240)):
         for i in range(3):
             k = 80 - i * 24

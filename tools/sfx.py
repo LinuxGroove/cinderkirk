@@ -287,6 +287,27 @@ def sounds():
     yield "founder_pain", normalise(lay((groan(0.8, 182, 60, 42, 0.9), 0), (crackle(0.5, 183, 0.05, 6) * 0.4, 0)))
     yield "founder_death", normalise(lay((groan(3.0, 184, 55, 24, 0.9) * envelope(len(t(3.0)), 0.05, 1.2), 0),
                                          (crackle(2.5, 185, 0.06, 1.5) * 0.6, 0.4), (bell(3.0, 61, 186, 0.6) * 0.5, 1.2)))
+    # The powerups: the Forge Heart beats, the Founder's Mantle rings deep, the
+    # Soot Veil breathes ash, and the Quench Suit hisses its air.
+    tt = t(1.4)
+    beat = np.zeros(len(tt))
+    for at in (0.0, 0.22, 0.7, 0.92):
+        i = int(at * RATE)
+        k = lowpass(noise(0.18, 200 + i), 120) * envelope(int(0.18 * RATE), 0.004, 14)
+        beat[i:i + len(k)] += k[:len(beat) - i]
+    yield "heart", normalise(lay((beat, 0), (steam(1.4, 201, 200, 1800, 0.05, 2.5) * 0.35, 0), (bell(1.2, 330, 202, 2.5) * 0.25, 0)))
+    yield "heart_fade", normalise(lay((beat[:int(0.5 * RATE)] * 0.8, 0), (steam(0.5, 203, 150, 900, 0.01, 7) * 0.3, 0)), 0.6)
+    yield "heart_hit", normalise(lay((clank(0.35, [140, 377], 204), 0), (lowpass(noise(0.3, 205), 300) * envelope(len(t(0.3)), 0.002, 12), 0)))
+    yield "mantle", normalise(lay((bell(2.8, 82, 206, 0.8), 0), (bell(2.2, 164, 207, 1.2) * 0.35, 0.05), (chant(2.0, 208, 110) * 0.15, 0.3)))
+    yield "mantle_fade", normalise(bell(1.2, 82, 209, 2.5) * 0.7, 0.6)
+    yield "mantle_hit", normalise(lay((bell(0.8, 247, 210, 4.0), 0), (clank(0.3, [500, 1210], 211) * 0.4, 0)), 0.7)
+    tt = t(1.6)
+    yield "veil", normalise(lowpass(noise(1.6, 212), 1400) * np.sin(np.pi * tt / 1.6) ** 2 + crackle(1.6, 213, 0.01, 3) * 0.3, 0.6)
+    yield "veil_fade", normalise(lowpass(noise(0.7, 214), 900) * envelope(len(t(0.7)), 0.2, 4), 0.5)
+    tt = t(1.2)
+    yield "veil_idle", normalise(lowpass(noise(1.2, 215), 600) * np.sin(np.pi * tt / 1.2) ** 2, 0.35)
+    yield "suit", normalise(lay((clank(0.4, [300, 820], 216) * 0.5, 0), (steam(1.2, 217, 400, 5000, 0.02, 2, 0.4), 0.1)))
+    yield "suit_fade", normalise(steam(0.6, 218, 600, 3000, 0.01, 5) * (1 + 0.8 * np.sign(np.sin(2 * np.pi * 6 * t(0.6)))), 0.6)
     yield "deacon_throw", normalise(steam(0.6, 60, 300, 2000, 0.2, 4) + crackle(0.6, 61, 0.01, 4) * 0.6)
 
 
