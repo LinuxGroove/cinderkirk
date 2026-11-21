@@ -27,7 +27,7 @@ BF = -256                           # its floor
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=7, message="The Stopes", worldtype=0,
+    L = Level(wad="cinder.wad", light_wait=0.6, sounds=7, message="The Stopes", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=12, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="crypt_stone1", floor="iron_plate1", ceiling="iron_rust1")
