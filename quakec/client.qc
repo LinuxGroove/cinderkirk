@@ -828,35 +828,7 @@ void() NextLevel =
 
 	if (mapname == "start")
 	{
-		if (!cvar("registered"))
-		{
-			mapname = "lq_e1m1";
-		}
-
-		else if (!(serverflags & 1))
-		{
-			mapname = "lq_e1m1";
-			serverflags = serverflags | 1;
-		}
-
-		else if (!(serverflags & 2))
-		{
-			mapname = "lq_e2m1";
-			serverflags = serverflags | 2;
-		}
-
-		else if (!(serverflags & 4))
-		{
-			mapname = "lq_e3m1";
-			serverflags = serverflags | 4;
-		}
-
-		else if (!(serverflags & 8))
-		{
-			mapname = "lq_e4m1";
-			serverflags = serverflags - 7;
-		}
-
+		mapname = "foundry1";
 		o = spawn();
 		o.map = mapname;
 	}
