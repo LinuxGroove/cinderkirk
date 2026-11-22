@@ -8,7 +8,7 @@ A first person shooter in the old style on a vkQuake fork, with QuakeC game code
 make                       # engine, progs.dat, levels, dist/cinder/pak0.pak (first run builds the deps)
 make run ARGS="+map start" # play from the Pithead (+map foundry1 for the Foundry Gate)
 make map MAP=start         # one level again
-make check                 # scripts compile, no level leaks
+make check                 # scripts compile, no level leaks, nothing the game drops at load (tools/spawncheck.py)
 make playtest              # with a GPU, not in CI: every level and the finale played unattended (PLAYTEST="--maps throat2"); build/playtest/report.md
 make textures              # bake the world textures in Blender (BLENDER=..., TEXRES=2048 for more)
 VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.json tools/shoot.sh /tmp/shot "3 20" +map start   # screenshots with no GPU

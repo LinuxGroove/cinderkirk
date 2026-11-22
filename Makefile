@@ -204,6 +204,7 @@ check:
 	$(PYTHON) -m py_compile tools/*.py maps_src/*.py assets_src/models/*.py
 	for m in $(MAPS); do grep -q "LEAK" $(BUILD)/maps/$$m.log && { echo "$$m leaks"; exit 1; } || true; done
 	$(PYTHON) tools/stuck.py
+	$(PYTHON) tools/spawncheck.py
 
 # Plays every level and the finale with nobody at the keys, on this machine's
 # GPU (not in CI): make playtest PLAYTEST="--maps throat2 --skill 3"; see
