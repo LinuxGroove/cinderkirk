@@ -154,6 +154,35 @@ class Level:
             else:
                 self.solid(x0, y0 + run * i, bottom, x1, y0 + run * (i + 1), top, tex)
 
+    def nook(self, x, y, z, side, items=(), w=96, d=96, h=96, wall="kirk_stone1", floor="coal1",
+             light=(1.0, 0.82, 0.62)):
+        """A secret closet behind cracked stone. (x, y) is the middle of the
+        room's wall face, z its floor, and `side` the way out through the
+        wall: "n", "s", "e" or "w". The Pick's Overpressure blow breaks the
+        crack; walking in counts the secret. `items` are classnames, set out
+        along the closet's back."""
+        t = self.WALL
+        hw = w / 2
+        if side in ("n", "s"):
+            sy = 1 if side == "n" else -1
+            crack = Box(x - hw, min(y, y + sy * t), z, x + hw, max(y, y + sy * t), z + h, "kirk_crack1")
+            y0, y1 = sorted((y + sy * t, y + sy * (t + d)))
+            inner = Box(x - hw, y0, z, x + hw, y1, z + h)
+            back = [(x - hw + (i + 1) * w / (len(items) + 1), y + sy * (t + d - 28)) for i in range(len(items))]
+        else:
+            sx = 1 if side == "e" else -1
+            crack = Box(min(x, x + sx * t), y - hw, z, max(x, x + sx * t), y + hw, z + h, "kirk_crack1")
+            x0, x1 = sorted((x + sx * t, x + sx * (t + d)))
+            inner = Box(x0, y - hw, z, x1, y + hw, z + h)
+            back = [(x + sx * (t + d - 28), y - hw + (i + 1) * w / (len(items) + 1)) for i in range(len(items))]
+        self.opening(crack.x0, crack.y0, crack.z0, crack.x1, crack.y1, crack.z1)
+        self.brush_entity("func_cracked", [crack])
+        self.room(inner.x0, inner.y0, inner.z0, inner.x1, inner.y1, inner.z1, wall=wall, floor=floor)
+        self.brush_entity("trigger_secret", [Box(inner.x0 + 8, inner.y0 + 8, z, inner.x1 - 8, inner.y1 - 8, z + 56, "trigger")])
+        for cls, (ix, iy) in zip(items, back):
+            self.add(cls, (ix, iy, z))
+        self.light(((inner.x0 + inner.x1) / 2, (inner.y0 + inner.y1) / 2, z + h - 24), 180, light)
+
     def liquid(self, x0, y0, z0, x1, y1, z1, tex="*lava_slag1"):
         self.details.append(Box(x0, y0, z0, x1, y1, z1, tex))
 

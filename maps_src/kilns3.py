@@ -126,6 +126,7 @@ def build():
     L.light((X1 + 112, 0, 160), 160, CANDLE)
     L.brush_entity("trigger_changelevel", [Box(X1 + 64, -64, 0, X1 + 160, 64, 96, "trigger")], map="kilns4")
     L.add("info_intermission", (1100, -500, 700), mangle=(30, 150, 0))
+    L.nook(1280, 528, 0, "e", ('item_armor1', 'item_cells'), wall="crypt_stone1", floor="crypt_stone1")   # a secret behind cracked stone
     return L
 
 

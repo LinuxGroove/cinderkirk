@@ -141,6 +141,7 @@ def build():
     L.light((0, R + 112, BOT + 160), 160, EMBER)
     L.brush_entity("trigger_changelevel", [Box(-64, R + 64, BOT, 64, R + 160, BOT + 96, "trigger")], map="throat2")
     L.add("info_intermission", (-R + 64, R - 64, 260), mangle=(50, -45, 0))
+    L.nook(864, -464, -1536, "e", ('item_armor2', 'item_health'), wall="vein_rock1", floor="vein_rock1")   # a secret behind cracked stone
     return L
 
 

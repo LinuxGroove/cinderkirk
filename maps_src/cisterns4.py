@@ -108,6 +108,7 @@ def build():
     L.brush_entity("trigger_changelevel", [Box(R + 64, -64, BOTTOM, R + 160, 64, BOTTOM + 96, "trigger")],
                    map="cisterns5")
     L.add("info_intermission", (-300, 300, 200), mangle=(45, -45, 0))
+    L.nook(272, -384, -1024, "s", ('item_armor1', 'item_rockets'), wall="cist_lime1", floor="cist_stone1")   # a secret behind cracked stone
     return L
 
 

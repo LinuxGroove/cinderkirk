@@ -125,6 +125,7 @@ def build():
     L.light((2080, 0, 96), 160, WARM)
     L.brush_entity("trigger_changelevel", [Box(2048, -64, -64, 2128, 64, 32, "trigger")], map="foundry4")
     L.add("info_intermission", (300, -300, 300), mangle=(25, 30, 0))
+    L.nook(1984, 208, -64, "e", ('item_health', 'item_spikes'), wall="kirk_stone1", floor="coal1")   # a secret behind cracked stone
     return L
 
 
