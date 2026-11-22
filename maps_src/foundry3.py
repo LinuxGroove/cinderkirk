@@ -26,7 +26,7 @@ FURNACES = (448, 800, 1152)
 
 
 def build():
-    L = Level(start_light=120, wad="cinder.wad", light_wait=0.65, sounds=4, message="The Furnace Row", worldtype=0,
+    L = Level(start_light=130, wad="cinder.wad", light_wait=0.65, sounds=4, message="The Furnace Row", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The cage's landing, at the west end.

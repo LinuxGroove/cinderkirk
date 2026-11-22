@@ -25,7 +25,7 @@ FLOOR, GAL = -256, 0
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.7, sounds=4, message="The Pour", worldtype=0,
+    L = Level(start_light=160, wad="cinder.wad", light_wait=0.7, sounds=4, message="The Pour", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The cage's landing on the west side, at gallery height.

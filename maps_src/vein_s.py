@@ -22,7 +22,7 @@ COLD = (0.62, 0.70, 0.95)
 
 
 def build():
-    L = Level(start_light=180, wad="cinder.wad", light_wait=0.6, sounds=7, message="The Lode", worldtype=0,
+    L = Level(start_light=200, wad="cinder.wad", light_wait=0.6, sounds=7, message="The Lode", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=8, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="ore_rock1", floor="ore_rock1", ceiling="ore_rock1")

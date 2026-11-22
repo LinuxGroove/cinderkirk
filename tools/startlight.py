@@ -7,10 +7,9 @@ light on every face within 256 units of info_player_start, on the same
 
     tools/startlight.py [map ...]      # default: every built level but the arenas
 
-Tune a level's Level(start_light=N) until its start reads about 80, close
-to the rest of the level: under 60 the first view is a dark corner, over
-100 pale walls blow out to white (about 106 on screen with an NVIDIA card,
-where 80 here is about 65 there). MAPS=dir reads another build's levels.
+Textures change how bright the same light looks, so tune a level's
+Level(start_light=N) against a screenshot (about 60-75 on an NVIDIA card,
+with no wall clipped to white) and use this for the steps between. MAPS=dir reads another build's levels.
 """
 import glob
 import math

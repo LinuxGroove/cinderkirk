@@ -240,7 +240,7 @@ class Level:
         """A lamp over the player start, as bright as Level(start_light=N)
         says: the first thing a player sees shouldn't be a dark corner, nor
         a wall blown out to white. Each level's value is tuned so its start
-        is about as bright as the rest of it (tools/startlight.py measures)."""
+        is about as bright as the rest of it (see tools/startlight.py)."""
         if not self.start_light:
             return
         for e in list(self.entities):
