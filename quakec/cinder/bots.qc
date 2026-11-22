@@ -108,10 +108,10 @@ float(entity it) Bot_ItemWorth =
 	{
 		if (self.items & it.weapon)
 			return 10;
-		return 90;
+		return 160;			// a weapon it hasn't got is worth a detour
 	}
 	if (substring (it.classname, 0, 14) == "item_artifact_")
-		return 100;
+		return 150;
 	if (it.classname == "item_shells" || it.classname == "item_spikes" || it.classname == "item_rockets"
 		|| it.classname == "item_cells")
 		return 20;
@@ -162,7 +162,7 @@ void() Bot_PickGoal =
 	self.enemy = world;
 
 	// Else the best pickup in sight, nearer is better.
-	e = findradius (self.origin, 1200);
+	e = findradius (self.origin, 2000);
 	while (e)
 	{
 		if (e.flags & FL_ITEM)
@@ -208,10 +208,24 @@ float(float dist) Bot_Weapon =
 
 float bot_wall;				// set by Bot_Clear: it was a wall in the way, not a drop or slag
 
-// How far it can walk along a yaw before a wall, a drop or slag (0 to 1 of 64).
+// Slag or nothing under a point a little ahead: 0 slag, 0.1 a drop, 1 floor.
+float(vector at) Bot_Ground =
+{
+	traceline (at, at - '0 0 160', TRUE, self);
+	if (trace_fraction == 1)
+		return 0.1;
+	if (pointcontents (trace_endpos + '0 0 4') == CONTENT_LAVA || pointcontents (trace_endpos + '0 0 4') == CONTENT_SLIME)
+		return 0;
+	return 1;
+};
+
+// How far it can walk along a yaw before a wall, a drop or slag (0 to 1 of
+// 64). Slag is looked for further ahead the faster it's going, since a
+// running stoker slides a good way before it stops.
 float(float yaw) Bot_Clear =
 {
-	local vector dir, from, to;
+	local vector dir, from, to, v;
+	local float g, far;
 
 	dir = [cos (yaw * M_PI / 180), sin (yaw * M_PI / 180), 0];
 	from = self.origin;
@@ -223,13 +237,104 @@ float(float yaw) Bot_Clear =
 		bot_wall = TRUE;
 		return trace_fraction * 0.5;
 	}
-	// Ground under the next step, and nothing hot there.
-	traceline (to, to - '0 0 160', TRUE, self);
-	if (trace_fraction == 1)
-		return 0.1;
-	if (pointcontents (trace_endpos + '0 0 4') == CONTENT_LAVA || pointcontents (trace_endpos + '0 0 4') == CONTENT_SLIME)
-		return 0;
+	g = Bot_Ground (from + dir * 32);
+	if (g < 1)
+		return g;
+	g = Bot_Ground (to);
+	if (g < 1)
+		return g;
+	v = self.velocity;
+	v_z = 0;
+	far = 64 + vlen (v) * 0.3;
+	if (far > 96)
+	{
+		traceline (from, from + dir * far, TRUE, self);
+		if (trace_fraction == 1 && Bot_Ground (from + dir * far) == 0)
+			return 0.3;		// slag further on: fine to walk, not to run at
+	}
 	return 1;
+};
+
+// In the slag: head for the nearest bank and swim up, so the water-jump
+// at the edge throws it out.
+float() Bot_OutOfSlag =
+{
+	local float i, y, d, best_d, best_y;
+	local vector dir;
+
+	if (self.watertype != CONTENT_LAVA && self.watertype != CONTENT_SLIME)
+		return FALSE;
+	best_d = 9999;
+	best_y = self.v_angle_y;
+	for (i = 0; i < 16; i++)
+	{
+		y = i * 22.5;
+		dir = [cos (y * M_PI / 180), sin (y * M_PI / 180), 0];
+		for (d = 32; d <= 256 && d < best_d; d = d + 32)
+		{
+			traceline (self.origin + '0 0 40', self.origin + '0 0 40' + dir * d, TRUE, self);
+			if (trace_fraction < 1)
+				break;
+			traceline (self.origin + '0 0 40' + dir * d, self.origin + dir * d - '0 0 200', TRUE, self);
+			if (pointcontents (trace_endpos + '0 0 4') != CONTENT_LAVA && pointcontents (trace_endpos + '0 0 4') != CONTENT_SLIME
+				&& trace_fraction < 1)
+			{
+				best_d = d;
+				best_y = y;
+				break;
+			}
+		}
+	}
+	self.bot_yaw = best_y;
+	self.v_angle_y = best_y;
+	self.v_angle_x = -30;
+	self.movement = '320 0 0';
+	self.button2 = TRUE;
+	return TRUE;
+};
+
+void() Bot_EdgeRepel =
+{
+	local vector away, dir, w, fwd, right;
+	local float i, y, n, d;
+
+	away = '0 0 0';
+	n = 0;
+	for (i = 0; i < 8; i++)
+	{
+		y = i * 45;
+		dir = [cos (y * M_PI / 180), sin (y * M_PI / 180), 0];
+		for (d = 40; d <= 80; d = d + 40)
+		{
+			traceline (self.origin, self.origin + dir * d, TRUE, self);
+			if (trace_fraction == 1 && Bot_Ground (self.origin + dir * d) == 0)
+			{
+				away = away - dir * (d == 40 ? 1 : 0.5);
+				n = n + 1;
+				break;
+			}
+		}
+	}
+	if (!n)
+		return;
+	y = self.v_angle_y * M_PI / 180;
+	fwd = [cos (y), sin (y), 0];
+	right = [sin (y), 0 - cos (y), 0];
+	w = fwd * self.movement_x + right * self.movement_y;
+	if (away != '0 0 0')
+	{
+		away = normalize (away);
+		// Take out whatever part of the walk heads toward the slag, then step away.
+		if (w * away < 0)
+			w = w - away * (w * away);
+		w = w + away * 240;
+	}
+	// On a bridge or a narrow lip, walk: a run carries it over the side.
+	d = n >= 3 ? 200 : 320;
+	if (vlen (w) > d)
+		w = normalize (w) * d;
+	self.movement_x = w * fwd;
+	self.movement_y = w * right;
 };
 
 void() Bot_Move =
@@ -310,8 +415,9 @@ void() Bot_Move =
 	}
 
 	// Walk the chosen way, whichever way it's looking.
+	// (The engine's sidemove is to the right, so a way to the left is negative.)
 	y = (self.bot_yaw - self.v_angle_y) * M_PI / 180;
-	self.movement = [cos (y), sin (y), 0] * 320;
+	self.movement = [cos (y), 0 - sin (y), 0] * 320;
 
 	// In a fight, sidestep, and keep a distance that suits the weapon.
 	if (self.enemy)
@@ -329,9 +435,36 @@ void() Bot_Move =
 		if (dist < 140 && self.weapon != IT_AXE && Bot_Clear (self.v_angle_y + 180) >= 0.99)
 			self.movement_x = -200;
 	}
-	// Whatever it ended up doing, don't walk it into the slag.
-	if (self.movement != '0 0 0' && Bot_Clear (self.v_angle_y + vectoyaw ([self.movement_x, 0 - self.movement_y, 0])) < 0.15)
-		self.movement = '0 0 0';
+	// Whatever it ended up doing, don't walk it toward slag: the way it
+	// actually goes is forward and sidestep together. Drop the sidestep,
+	// then stop.
+	if (self.movement != '0 0 0' && Bot_Clear (self.v_angle_y + vectoyaw ([self.movement_x, 0 - self.movement_y, 0])) < 0.35)
+	{
+		self.movement_y = 0;
+		if (self.movement_x == 0 || Bot_Clear (self.v_angle_y + vectoyaw ([self.movement_x, 0, 0])) < 0.35)
+			self.movement = '0 0 0';
+	}
+	// Keep a step back from the slag's edge, since a hit can knock it in:
+	// wherever slag is close, lean the walk away from it.
+	Bot_EdgeRepel ();
+	// Never jump with slag ahead: a running jump clears the kerb and lands in it.
+	if (self.button2 && self.watertype != CONTENT_LAVA)
+	{
+		to = self.velocity;
+		to_z = 0;
+		if (Bot_Clear (self.bot_yaw) < 0.99 && !best_wall)
+			self.button2 = FALSE;
+		if (vlen (to) > 60 && Bot_Clear (vectoyaw (to)) < 0.99 && !bot_wall)
+			self.button2 = FALSE;
+	}
+	// Sliding (or knocked) toward slag: push back against it.
+	to = self.velocity;
+	to_z = 0;
+	if (vlen (to) > 120 && (self.flags & FL_ONGROUND) && Bot_Clear (vectoyaw (to)) < 0.35)
+	{
+		y = (vectoyaw (to) + 180 - self.v_angle_y) * M_PI / 180;
+		self.movement = [cos (y), 0 - sin (y), 0] * 320;
+	}
 };
 
 void() Bot_Aim =
@@ -400,6 +533,8 @@ void() Bot_Think =
 			W_SetCurrentAmmo ();
 		}
 	}
+	if (Bot_OutOfSlag ())
+		return;
 	Bot_Aim ();
 	Bot_Move ();
 };
