@@ -92,7 +92,9 @@ void() Bell_Toll =
 
 void() bell_stop =
 {
+	// The think can come a frame early or late, so land on the mark, not near it.
 	self.velocity = '0 0 0';
+	setorigin (self, [self.origin_x, self.origin_y, self.oldorigin_z]);
 	if (self.bell_stage >= 4)
 	{
 		sound (self, CHAN_BODY, "cinder/founder_slam.wav", 1, ATTN_NONE);
@@ -125,6 +127,7 @@ void() bell_use =
 		sound (self, CHAN_VOICE, "cinder/ringer_toll.wav", 1, ATTN_NONE);
 	}
 	self.velocity = [0, 0, -speed];
+	self.oldorigin = self.origin - [0, 0, d];		// where it stops (bell_stop puts it there exactly)
 	self.think = bell_stop;
 	self.nextthink = time + d / speed;
 };
