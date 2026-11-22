@@ -38,7 +38,7 @@ def chain(L, x0, y0, x1, y1, z, every=20):
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.6, sounds=9, message="The Casting Floor", worldtype=0,
+    L = Level(wad="cinder.wad", light_wait=0.45, sounds=9, message="The Casting Floor", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=16, _range=0.6)
 
     # In from the Throat's stair, on the south side.

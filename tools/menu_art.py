@@ -248,16 +248,18 @@ def help_page(tex_dir, n, heading, rows):
     page.alpha_composite(head, (0, 8 * SCALE))
     d.line((80 * SCALE, 36 * SCALE, 240 * SCALE, 36 * SCALE), fill=(214, 150, 70, 255), width=SCALE // 2)
 
-    body = ImageFont.truetype(TEXT, int(11 * SCALE))
+    body = ImageFont.truetype(TEXT, int((10.5 if rows and rows[0][0] is None else 11) * SCALE))
     label = ImageFont.truetype(TEXT_BOLD, int(11 * SCALE))
     ink, gold = (236, 222, 200, 255), (246, 176, 82, 255)
     y = 43 * SCALE
     if rows and rows[0][0] is None:
+        # Paragraphs fill the panel from x 22 to 298 and must stop above the pager.
         for _, text in rows:
-            for line in wrap(d, text, body, 264 * SCALE):
-                d.text((28 * SCALE, y), line, font=body, fill=ink)
-                y += 14 * SCALE
-            y += 6 * SCALE
+            for line in wrap(d, text, body, 276 * SCALE):
+                d.text((22 * SCALE, y), line, font=body, fill=ink)
+                y += 12 * SCALE
+            y += 4 * SCALE
+        assert y <= (200 - 22) * SCALE, f"How to Play page {n + 1} runs into the pager"
     else:
         for name, text in rows:
             d.text((150 * SCALE, y), name, font=label, fill=gold, anchor="ra")

@@ -123,7 +123,7 @@ $(BUILD)/hud/.done: tools/hud_svg.py $(wildcard assets_src/fonts/*.woff)
 # Music made by tools/lemonade/generate.py: music/trackNN.ogg, NN a map's worldspawn sounds.
 MUSIC := $(wildcard assets_src/music/track*.ogg)
 
-$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BUILD)/sound/.done $(BUILD)/sprites/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) $(MATERIALS) $(MODELS) $(GLYPHS) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py $(MUSIC)
+$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BUILD)/sound/.done $(BUILD)/sprites/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) $(MATERIALS) $(MODELS) $(GLYPHS) gfx/splash.png cinder/default.cfg cinder/quake.rc cinder/particles/cinder.cfg tools/pak.py $(MUSIC)
 	rm -rf $(STAGE)
 	mkdir -p $(STAGE)/maps $(STAGE)/textures $(STAGE)/gfx
 	cp -r $(LQ)/gfx.wad $(LQ)/gfx $(LQ)/progs $(LQ)/sound $(LQ)/maps $(STAGE)/
@@ -139,6 +139,7 @@ $(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BU
 	mkdir -p $(STAGE)/gfx/hud && cp $(BUILD)/hud/*.svg $(STAGE)/gfx/hud/
 	cp -r assets/glyphs $(STAGE)/gfx/hud/g && rm $(STAGE)/gfx/hud/g/License.txt
 	cp cinder/default.cfg cinder/quake.rc $(STAGE)/
+	mkdir -p $(STAGE)/particles && cp cinder/particles/*.cfg $(STAGE)/particles/
 	mkdir -p $(DIST)/cinder
 	$(PYTHON) tools/pak.py $@ $(STAGE)
 
