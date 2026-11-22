@@ -51,7 +51,7 @@ def rail(L, x0, y0, x1, y1, z_from, z_to, axis):
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.6, sounds=8, message="The Throat", worldtype=0,
+    L = Level(start_light=160, wad="cinder.wad", light_wait=0.6, sounds=8, message="The Throat", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=10, _range=0.6)
 
     L.room(-R, -R, BOT, R, R, 320, wall="vein_rock1", floor="vein_rock1", ceiling="kirk_vbrick1", floor_depth=64)
@@ -103,7 +103,7 @@ def build():
     L.opening(R, -R + 16, sz, R + 32, -R + 112, sz + 112)
     L.room(R + 32, -R - 64, sz, R + 352, -R + 192, sz + 192, wall="kirk_vbrick1", floor="floor_flag1", ceiling="kirk_stone1")
     L.solid(R + 160, -R + 32, sz, R + 256, -R + 96, sz + 48, "bronze1")
-    L.add("item_key1", (R + 208, -R + 64, sz + 48))
+    L.add("item_key1", (R + 208, -R + 64, sz + 48), target="ash_wakes")
     L.light((R + 200, -R + 64, sz + 160), 220, EMBER)
     L.add("monster_deacon", (R + 280, -R + 140, sz + 24), angle=180)
     L.add("monster_ashen", (R + 120, -R - 20, sz + 24), angle=180)
@@ -121,7 +121,7 @@ def build():
     L.add("monster_ashen", (0, -R + 64, -DROP * 6 - 104), angle=0)
     L.add("monster_bell_ringer", (0, -R + 64, BOT + 24), angle=90)
     L.add("monster_crucible_brute", (R - 64, 0, BOT + 24), angle=180)
-    L.add("monster_censer", (-R + 64, 0, BOT + 24), angle=0)
+    L.add("monster_censer", (-220, -R + 64, BOT + 24), angle=90)
 
     L.add("item_shells", (-R + 64, R - 100, 0))
     L.add("item_health", (R - 64, R - 64, -DROP))
@@ -141,6 +141,10 @@ def build():
     L.light((0, R + 112, BOT + 160), 160, EMBER)
     L.brush_entity("trigger_changelevel", [Box(-64, R + 64, BOT, 64, R + 160, BOT + 96, "trigger")], map="throat2")
     L.add("info_intermission", (-R + 64, R - 64, 260), mangle=(50, -45, 0))
+    L.nook(864, -464, -1536, "e", ('item_armor2', 'item_health'), wall="vein_rock1", floor="vein_rock1")   # a secret behind cracked stone
+    # Taking the key wakes the dead lying in the ash round it.
+    L.add("monster_ashen", (480, -463, -1536 + 24), angle=4, spawnflags=64, targetname="ash_wakes")
+    L.add("monster_ashen", (589, -356, -1536 + 24), angle=325, spawnflags=64, targetname="ash_wakes")
     return L
 
 

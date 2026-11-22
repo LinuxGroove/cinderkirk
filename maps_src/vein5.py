@@ -25,7 +25,7 @@ CX = 960                             # the casting pit's middle
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.6, sounds=9, message="The Founder's Mould", worldtype=0,
+    L = Level(start_light=160, wad="cinder.wad", light_wait=0.6, sounds=9, message="The Founder's Mould", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=12, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="ore_rock1", floor="iron_plate1", ceiling="iron_rust1")
@@ -118,6 +118,7 @@ def build():
     L.light((G + 112, 0, 160), 160, CANDLE)
     L.brush_entity("trigger_changelevel", [Box(G + 64, -64, 0, G + 160, 64, 96, "trigger")], map="start")
     L.add("info_intermission", (420, -680, 520), mangle=(25, 25, 0))
+    L.nook(1904, 192, 0, "n", ('item_health', 'item_cells'), wall="ore_rock1", floor="ore_rock1")   # a secret behind cracked stone
     return L
 
 

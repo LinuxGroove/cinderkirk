@@ -123,7 +123,7 @@ $(BUILD)/hud/.done: tools/hud_svg.py $(wildcard assets_src/fonts/*.woff)
 # Music made by tools/lemonade/generate.py: music/trackNN.ogg, NN a map's worldspawn sounds.
 MUSIC := $(wildcard assets_src/music/track*.ogg)
 
-$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BUILD)/sound/.done $(BUILD)/sprites/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) $(MATERIALS) $(MODELS) $(GLYPHS) gfx/splash.png cinder/default.cfg cinder/quake.rc tools/pak.py $(MUSIC)
+$(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BUILD)/sound/.done $(BUILD)/sprites/.done $(BUILD)/progs.dat $(BSPS) $(TEXTURES) $(MATERIALS) $(MODELS) $(GLYPHS) gfx/splash.png cinder/default.cfg cinder/quake.rc cinder/particles/cinder.cfg tools/pak.py tools/tame.py $(MUSIC)
 	rm -rf $(STAGE)
 	mkdir -p $(STAGE)/maps $(STAGE)/textures $(STAGE)/gfx
 	cp -r $(LQ)/gfx.wad $(LQ)/gfx $(LQ)/progs $(LQ)/sound $(LQ)/maps $(STAGE)/
@@ -134,11 +134,13 @@ $(DIST)/cinder/pak0.pak: $(LQ)/.done $(BUILD)/menu/.done $(BUILD)/hud/.done $(BU
 	cp -r $(BUILD)/sound/* $(STAGE)/sound/
 	mkdir -p $(STAGE)/music && for f in $(MUSIC); do cp $$f $(STAGE)/music/; done
 	cp $(TEXTURES) $(MATERIALS) $(STAGE)/textures/
+	$(PYTHON) tools/tame.py $(STAGE)/textures
 	cp $(MODELS) $(BUILD)/sprites/*.spr $(STAGE)/progs/
 	cp $(BUILD)/menu/gfx/* gfx/splash.png $(STAGE)/gfx/
 	mkdir -p $(STAGE)/gfx/hud && cp $(BUILD)/hud/*.svg $(STAGE)/gfx/hud/
 	cp -r assets/glyphs $(STAGE)/gfx/hud/g && rm $(STAGE)/gfx/hud/g/License.txt
 	cp cinder/default.cfg cinder/quake.rc $(STAGE)/
+	mkdir -p $(STAGE)/particles && cp cinder/particles/*.cfg $(STAGE)/particles/
 	mkdir -p $(DIST)/cinder
 	$(PYTHON) tools/pak.py $@ $(STAGE)
 
@@ -203,6 +205,14 @@ check:
 	$(PYTHON) -m py_compile tools/*.py maps_src/*.py assets_src/models/*.py
 	for m in $(MAPS); do grep -q "LEAK" $(BUILD)/maps/$$m.log && { echo "$$m leaks"; exit 1; } || true; done
 	$(PYTHON) tools/stuck.py
+	$(PYTHON) tools/spawncheck.py
+
+# Plays every level and the finale with nobody at the keys, on this machine's
+# GPU (not in CI): make playtest PLAYTEST="--maps throat2 --skill 3"; see
+# tools/playtest/playtest.py. The report goes to build/playtest/report.md.
+.PHONY: playtest
+playtest: all
+	$(PYTHON) tools/playtest/playtest.py $(PLAYTEST)
 
 clean:
 	rm -rf $(BUILD)/engine $(BUILD)/maps $(BUILD)/stage $(BUILD)/progs.dat $(BUILD)/progs.lno $(DIST)

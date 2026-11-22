@@ -24,7 +24,7 @@ CANDLE = (1.0, 0.8, 0.55)
 
 
 def build():
-    L = Level(wad="cinder.wad", sounds=4, message="The Moulding Floor", worldtype=0,
+    L = Level(start_light=220, wad="cinder.wad", light_wait=0.8, sounds=4, message="The Moulding Floor", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The cage's landing, and a passage east.
@@ -154,6 +154,7 @@ def build():
     L.light((2400, 0, 32), 160, WARM)
     L.brush_entity("trigger_changelevel", [Box(2368, -64, -128, 2448, 64, -32, "trigger")], map="foundry3")
     L.add("info_intermission", (700, -380, 160), mangle=(20, 20, 0))
+    L.nook(1552, 448, 0, "n", ('item_armor1', 'item_shells'), wall="kirk_stone1", floor="coal1")   # a secret behind cracked stone
     return L
 
 

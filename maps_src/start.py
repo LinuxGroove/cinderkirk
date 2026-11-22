@@ -37,7 +37,7 @@ CAGES = (
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=2, message="The Pithead", worldtype=0,
+    L = Level(start_light=140, wad="cinder.wad", light_wait=0.8, sounds=2, message="The Pithead", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=8, _range=0.6)
 
     # The hall under the headframe: x 0..1024, y -512..512, floor 0, roof 512.

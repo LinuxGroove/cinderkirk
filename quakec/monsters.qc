@@ -91,7 +91,7 @@ void() walkmonster_start_go =
 	self.origin_z = self.origin_z + 1;	// raise off floor a bit
 	droptofloor();
 	
-	if (!walkmove(0,0))
+	if (!walkmove(0,0) && !Place_Nudge (self.origin, TRUE))	// Cinderkirk: nudge it free first
 	{
 		dprint ("walkmonster in wall at: ");
 		dprint (vtos(self.origin));

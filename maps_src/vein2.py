@@ -27,7 +27,7 @@ BF = -256                           # its floor
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.6, sounds=7, message="The Stopes", worldtype=0,
+    L = Level(start_light=140, wad="cinder.wad", light_wait=0.6, sounds=7, message="The Stopes", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=12, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="crypt_stone1", floor="iron_plate1", ceiling="iron_rust1")
@@ -64,7 +64,7 @@ def build():
     # Stulls wedged across the stope's upper reaches.
     for x, z in ((900, 520), (1180, 460), (1040, 580)):
         L.solid(x, -AY, z, x + 24, AY, z + 24, PROP)
-    L.add("item_key2", (A1 - 64, 288, S2))
+    L.add("item_key2", (A1 - 64, 288, S2), target="ash_wakes")
     for x in (800, 1100):
         lamp(L, x, -288, S1 + 120)
         lamp(L, x + 200, 288, S2 + 120)
@@ -130,6 +130,10 @@ def build():
     L.light((B1 + 112, 0, BF + 160), 160, CANDLE)
     L.brush_entity("trigger_changelevel", [Box(B1 + 64, -64, BF, B1 + 160, 64, BF + 96, "trigger")], map="vein3")
     L.add("info_intermission", (A0 + 60, -330, 560), mangle=(25, 30, 0))
+    L.nook(2656, 336, -256, "e", ('item_health', 'item_cells'), wall="ore_rock1", floor="ore_rock1")   # a secret behind cracked stone
+    # Taking the key wakes the dead lying in the ash round it.
+    L.add("monster_ashen", (1133, 220, 400 + 24), angle=21, spawnflags=64, targetname="ash_wakes")
+    L.add("monster_ashen", (1032, 357, 400 + 24), angle=346, spawnflags=64, targetname="ash_wakes")
     return L
 
 

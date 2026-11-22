@@ -41,7 +41,7 @@ def deck(L, z, hole):
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.6, sounds=6, message="The Ash Galleries", worldtype=0,
+    L = Level(start_light=170, wad="cinder.wad", light_wait=0.6, sounds=6, message="The Ash Galleries", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=12, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="crypt_stone1", floor="iron_plate1", ceiling="iron_rust1")
@@ -73,7 +73,7 @@ def build():
         L.solid(x - 24, y - 24, 656, x + 24, y + 24, 704, "iron_rust1")
         L.solid(x - 4, y - 4, 768, x + 4, y + 4, 800, "iron_plate1")
 
-    L.add("item_key1", (64, 0, 576))
+    L.add("item_key1", (64, 0, 576), target="ash_wakes")
     for z in TIERS:
         for x, y in ((64, -400), (64, 400), (X1 - 64, -400), (X1 - 64, 400)):
             L.light((x, y, z + 96), 240, CANDLE)
@@ -126,6 +126,10 @@ def build():
     L.light((X1 + 112, 0, 160), 160, CANDLE)
     L.brush_entity("trigger_changelevel", [Box(X1 + 64, -64, 0, X1 + 160, 64, 96, "trigger")], map="kilns4")
     L.add("info_intermission", (1100, -500, 700), mangle=(30, 150, 0))
+    L.nook(1280, 528, 0, "e", ('item_armor1', 'item_cells'), wall="crypt_stone1", floor="crypt_stone1")   # a secret behind cracked stone
+    # Taking the key wakes the dead lying in the ash round it.
+    L.add("monster_ashen", (58, -192, 576 + 24), angle=88, spawnflags=64, targetname="ash_wakes")
+    L.add("monster_ashen", (21, 285, 576 + 24), angle=279, spawnflags=64, targetname="ash_wakes")
     return L
 
 

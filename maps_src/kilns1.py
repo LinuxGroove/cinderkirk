@@ -34,7 +34,7 @@ def pilasters(L, x0, x1, y0, y1, z0, z1, side, step=256):
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=6, message="The Charnel Stair", worldtype=0,
+    L = Level(start_light=180, wad="cinder.wad", light_wait=0.7, sounds=6, message="The Charnel Stair", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=8, _range=0.6)
 
     # The cage's landing, north of the crypt.
@@ -91,7 +91,7 @@ def build():
             L.solid(x - 48, y - 24, HALL, x + 48, y + 24, HALL + 32, "oak1")
     L.solid(-64, -1504, HALL, 64, -1440, HALL + 40, "crypt_stone1")             # the bier at the south end
     L.solid(-72, -1512, HALL + 40, 72, -1432, HALL + 48, "kirk_trim1")
-    L.add("item_key1", (0, -1472, HALL + 48))
+    L.add("item_key1", (0, -1472, HALL + 48), target="ash_wakes")
     L.light((0, -1400, HALL + 120), 240, EMBER)
     for x in (-400, 400):
         for y in (-896, -1152, -1408):
@@ -126,6 +126,12 @@ def build():
     L.light((624, -1152, HALL + 160), 160, CANDLE)
     L.brush_entity("trigger_changelevel", [Box(576, -1216, HALL, 672, -1088, HALL + 96, "trigger")], map="kilns2")
     L.add("info_intermission", (-400, -800, -120), mangle=(25, -60, 0))
+    L.nook(400, -1536, -384, "s", ('item_armor1', 'item_spikes'), wall="crypt_stone1", floor="crypt_stone1")   # a secret behind cracked stone
+    # Taking the key wakes the dead lying in the ash round it.
+    L.add("monster_ashen", (192, -1478, -384 + 24), angle=178, spawnflags=64, targetname="ash_wakes")
+    L.add("monster_ashen", (140, -1340, -352 + 24), angle=223, spawnflags=64, targetname="ash_wakes")
+    L.add("monster_ashen", (6, -1280, -384 + 24), angle=268, spawnflags=64, targetname="ash_wakes")
+    L.add("monster_ashen", (-175, -1393, -384 + 24), angle=336, spawnflags=64, targetname="ash_wakes")
     return L
 
 

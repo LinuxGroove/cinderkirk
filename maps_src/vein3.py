@@ -28,7 +28,7 @@ CAGE_H = 136
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=7, message="The Winding Engine", worldtype=0,
+    L = Level(start_light=190, wad="cinder.wad", light_wait=0.7, sounds=7, message="The Winding Engine", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=12, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="crypt_stone1", floor="iron_plate1", ceiling="iron_rust1")
@@ -156,6 +156,7 @@ def build():
     L.light((st1 + 112, 0, BOT + 160), 160, CANDLE)
     L.brush_entity("trigger_changelevel", [Box(st1 + 64, -64, BOT, st1 + 160, 64, BOT + 96, "trigger")], map="vein4")
     L.add("info_intermission", (60, 280, 360), mangle=(25, -30, 0))
+    L.nook(2048, 1488, -832, "e", ('item_health', 'item_rockets'), wall="ore_rock1", floor="ore_rock1")   # a secret behind cracked stone
     return L
 
 

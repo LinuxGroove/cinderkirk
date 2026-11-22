@@ -26,7 +26,7 @@ FURNACES = (448, 800, 1152)
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=4, message="The Furnace Row", worldtype=0,
+    L = Level(start_light=130, wad="cinder.wad", light_wait=0.65, sounds=4, message="The Furnace Row", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The cage's landing, at the west end.
@@ -125,6 +125,7 @@ def build():
     L.light((2080, 0, 96), 160, WARM)
     L.brush_entity("trigger_changelevel", [Box(2048, -64, -64, 2128, 64, 32, "trigger")], map="foundry4")
     L.add("info_intermission", (300, -300, 300), mangle=(25, 30, 0))
+    L.nook(1984, 208, -64, "e", ('item_health', 'item_spikes'), wall="kirk_stone1", floor="coal1")   # a secret behind cracked stone
     return L
 
 

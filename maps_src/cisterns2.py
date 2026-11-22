@@ -23,7 +23,7 @@ X1 = 2048
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=5, message="The Long Vault", worldtype=0,
+    L = Level(start_light=240, wad="cinder.wad", light_wait=0.8, sounds=5, message="The Long Vault", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The landing at the west end.
@@ -113,6 +113,7 @@ def build():
     L.light((304, 368, 160), 160, LAMP)
     L.brush_entity("trigger_changelevel", [Box(256, 336, 0, 352, 432, 96, "trigger")], map="cisterns3")
     L.add("info_intermission", (100, -200, 200), mangle=(20, 20, 0))
+    L.nook(2048, 144, 0, "e", ('item_health', 'item_shells'), wall="cist_brick1", floor="cist_stone1")   # a secret behind cracked stone
     return L
 
 

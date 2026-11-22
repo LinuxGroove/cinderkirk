@@ -25,7 +25,7 @@ FLOOR, GAL = -256, 0
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=4, message="The Pour", worldtype=0,
+    L = Level(start_light=160, wad="cinder.wad", light_wait=0.7, sounds=4, message="The Pour", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The cage's landing on the west side, at gallery height.
@@ -144,6 +144,7 @@ def build():
     L.light((X1 + 112, -544, GAL + 160), 160, WARM)
     L.brush_entity("trigger_changelevel", [Box(X1 + 64, -608, GAL, X1 + 160, -480, GAL + 96, "trigger")], map="start")
     L.add("info_intermission", (100, -400, 300), mangle=(30, 30, 0))
+    L.nook(1536, 528, 8, "e", ('item_armor2', 'item_health'), wall="kirk_stone1", floor="coal1")   # a secret behind cracked stone
     return L
 
 

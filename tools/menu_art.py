@@ -248,16 +248,18 @@ def help_page(tex_dir, n, heading, rows):
     page.alpha_composite(head, (0, 8 * SCALE))
     d.line((80 * SCALE, 36 * SCALE, 240 * SCALE, 36 * SCALE), fill=(214, 150, 70, 255), width=SCALE // 2)
 
-    body = ImageFont.truetype(TEXT, int(11 * SCALE))
+    body = ImageFont.truetype(TEXT, int((10.5 if rows and rows[0][0] is None else 11) * SCALE))
     label = ImageFont.truetype(TEXT_BOLD, int(11 * SCALE))
     ink, gold = (236, 222, 200, 255), (246, 176, 82, 255)
     y = 43 * SCALE
     if rows and rows[0][0] is None:
+        # Paragraphs fill the panel from x 22 to 298 and must stop above the pager.
         for _, text in rows:
-            for line in wrap(d, text, body, 264 * SCALE):
-                d.text((28 * SCALE, y), line, font=body, fill=ink)
-                y += 14 * SCALE
-            y += 6 * SCALE
+            for line in wrap(d, text, body, 276 * SCALE):
+                d.text((22 * SCALE, y), line, font=body, fill=ink)
+                y += 12 * SCALE
+            y += 4 * SCALE
+        assert y <= (200 - 22) * SCALE, f"How to Play page {n + 1} runs into the pager"
     else:
         for name, text in rows:
             d.text((150 * SCALE, y), name, font=label, fill=gold, anchor="ra")
@@ -267,6 +269,71 @@ def help_page(tex_dir, n, heading, rows):
     d.text((W // 2, H - 18 * SCALE), f"<   {n + 1} of {len(HELP)}   >", font=foot,
            fill=(214, 150, 70, 255), anchor="ma")
     return page.convert("RGB")
+
+
+def menuplyr(path, palette):
+    """The setup screen's stoker, 48x56, in palette indices: the coat in the
+    shirt colour's range (16-31) and the trousers in the pants' (96-111), so
+    the engine recolours it as the player picks colours. Drawn at 4x as
+    regions with a light value, then taken down to one index a pixel."""
+    S, W, H = 4, 48, 56
+    reg = Image.new("L", (W * S, H * S), 0)      # 0 empty, 1 iron, 2 coat, 3 trousers, 4 leather, 5 glow
+    d = ImageDraw.Draw(reg)
+    cx = W * S // 2
+    def box(x0, y0, x1, y1, r, rad=0):
+        d.rounded_rectangle((cx + x0 * S, y0 * S, cx + x1 * S, y1 * S), radius=rad * S, fill=r)
+    box(-14, 52, -3, 55, 4, 1)                    # boots
+    box(3, 52, 14, 55, 4, 1)
+    box(-11, 32, -2, 53, 3, 1)                    # trousers
+    box(2, 32, 11, 53, 3, 1)
+    box(-12, 15, 12, 36, 2, 3)                    # the coat, open at the front
+    box(-13, 33, -4, 40, 2, 1)                    # its skirts
+    box(4, 33, 13, 40, 2, 1)
+    box(-2, 17, 2, 36, 4)                         # leather apron down the middle
+    box(-12, 29, 12, 31, 4)                       # belt
+    box(-19, 16, -12, 34, 2, 2)                   # sleeves
+    box(12, 16, 19, 34, 2, 2)
+    box(-20, 33, -13, 38, 4, 2)                   # gloves
+    box(13, 33, 20, 38, 4, 2)
+    box(-8, 2, 8, 16, 1, 3)                       # the iron hood
+    box(-6, 7, 6, 10, 5)                          # its eye slit, lit
+    box(-11, 14, 11, 17, 1, 1)                    # collar
+    r = np.asarray(reg).reshape(H, S, W, S)
+    xs = np.linspace(-1, 1, W * S)[None, :]
+    ys = np.linspace(0, 1, H * S)[:, None]
+    light = np.clip(0.75 - 0.45 * np.abs(xs + 0.25) - 0.25 * ys, 0.05, 1).reshape(H, S, W, S)
+    out = np.full((H, W), 255, np.uint8)
+    pal = palette
+    fixed = [i for i in range(224) if not (16 <= i < 32 or 96 <= i < 112)]   # never recoloured
+
+    def nearest(rgb):
+        return fixed[int(((pal[fixed] - np.array(rgb)) ** 2).sum(axis=1).argmin())]
+    iron = [nearest((v, v, v + 4)) for v in range(16, 120, 7)]
+    leather = [nearest((v, int(v * 0.62), int(v * 0.4))) for v in range(20, 140, 8)]
+    glow = nearest((255, 170, 60))
+    for y in range(H):
+        for x in range(W):
+            cell = r[y, :, x, :]
+            vals, counts = np.unique(cell, return_counts=True)
+            k = int(vals[counts.argmax()])
+            if k == 0:
+                continue
+            l = float(light[y, :, x, :].mean())
+            # Edges of each region darker, so shapes read at this size.
+            if (cell != k).any():
+                l *= 0.6
+            if k == 1:
+                out[y, x] = iron[min(len(iron) - 1, int(l * len(iron)))]
+            elif k == 2:
+                out[y, x] = 16 + min(15, int(l * 16))
+            elif k == 3:
+                out[y, x] = 96 + min(15, int(l * 16))
+            elif k == 4:
+                out[y, x] = leather[min(len(leather) - 1, int(l * len(leather)))]
+            else:
+                out[y, x] = glow
+    with open(path, "wb") as f:
+        f.write(struct.pack("<ii", W, H) + out.tobytes())
 
 
 def menudot(frame):
@@ -329,6 +396,7 @@ def main():
     for name, text in NET_DIM.items():
         save(out, name, net_row(text, True), palette)
     save(out, "inter", inter(), palette)
+    menuplyr(os.path.join(out, "menuplyr.lmp"), palette)
     for n, (heading, rows) in enumerate(HELP):
         save(out, f"help{n}", help_page(tex_dir, n, heading, rows), palette)
     print(f"menu art in {out}")

@@ -4962,7 +4962,7 @@ void R_TranslateNewPlayerSkin (int playernum)
 		if (!warned)
 		{
 			warned = true;
-			Con_Warning ("can't recolor non-indexed player skin\n");
+			Con_DPrintf ("can't recolor non-indexed player skin\n");	// Cinderkirk: eyes and gibs have no colour mask
 		}
 		return;
 	}

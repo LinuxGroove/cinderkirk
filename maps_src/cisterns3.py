@@ -23,7 +23,7 @@ CAT = 224                                                        # the catwalks'
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=5, message="The Settling Tanks", worldtype=0,
+    L = Level(start_light=230, wad="cinder.wad", light_wait=0.6, sounds=5, message="The Settling Tanks", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="cist_brick1", floor="iron_plate1", ceiling="iron_rust1")
@@ -86,6 +86,7 @@ def build():
     L.light((1776, 0, CAT + 160), 160, LAMP)
     L.brush_entity("trigger_changelevel", [Box(1728, -64, CAT, 1824, 64, CAT + 96, "trigger")], map="cisterns4")
     L.add("info_intermission", (100, -440, 380), mangle=(25, 25, 0))
+    L.nook(1664, 400, 0, "e", ('item_health', 'item_spikes'), wall="cist_brick1", floor="cist_stone1")   # a secret behind cracked stone
     return L
 
 

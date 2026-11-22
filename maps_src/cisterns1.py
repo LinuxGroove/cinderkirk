@@ -22,7 +22,7 @@ CANDLE = (1.0, 0.8, 0.55)
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=5, message="The Quench House", worldtype=0,
+    L = Level(start_light=200, wad="cinder.wad", light_wait=0.8, sounds=5, message="The Quench House", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The cage's landing, north of the house.
@@ -91,6 +91,7 @@ def build():
     L.light((-384, -528, 360), 200, DAMP)
     L.brush_entity("trigger_changelevel", [Box(-448, -608, 208, -320, -480, 304, "trigger")], map="cisterns2")
     L.add("info_intermission", (400, 500, 300), mangle=(30, 225, 0))
+    L.nook(512, -272, 0, "e", ('item_armor1', 'item_shells'), wall="cist_tile1", floor="cist_stone1")   # a secret behind cracked stone
     return L
 
 

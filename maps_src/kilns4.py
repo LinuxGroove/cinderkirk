@@ -25,7 +25,7 @@ STAGES = ((96, -672, 416, -480), (1120, -672, 1440, -480), (96, 480, 416, 672), 
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=6, message="The Sorting House", worldtype=0,
+    L = Level(start_light=240, wad="cinder.wad", light_wait=0.8, sounds=6, message="The Sorting House", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=14, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="crypt_stone1", floor="iron_plate1", ceiling="iron_rust1")
@@ -64,7 +64,7 @@ def build():
             cage.append(Box(x0, y0, 0, x0 + 8, y0 + 8, 128, "iron_rust1"))
     cage.append(Box(696, -72, 128, 832, 72, 144, "iron_rust1"))
     L.brush_entity("func_door", cage, angle=-1, targetname="cage", speed=80, wait=-1, lip=-256, sounds=1)
-    L.add("item_key2", (768, 0, 8))
+    L.add("item_key2", (768, 0, 8), target="ash_wakes")
     L.solid(704, -64, 0, 832, 64, 8, "kirk_trim1")
 
     # Long tables down the floor, between the stages.
@@ -111,6 +111,12 @@ def build():
     L.light((X1 + 112, 0, 160), 160, CANDLE)
     L.brush_entity("trigger_changelevel", [Box(X1 + 64, -64, 0, X1 + 160, 64, 96, "trigger")], map="kilns5")
     L.add("info_intermission", (100, -700, 400), mangle=(25, 40, 0))
+    L.nook(1536, 656, 0, "e", ('item_armor2', 'item_cells'), wall="crypt_stone1", floor="crypt_stone1")   # a secret behind cracked stone
+    # Taking the key wakes the dead lying in the ash round it.
+    L.add("monster_ashen", (589, -68, 0 + 24), angle=21, spawnflags=64, targetname="ash_wakes")
+    L.add("monster_ashen", (689, -175, 0 + 24), angle=66, spawnflags=64, targetname="ash_wakes")
+    L.add("monster_ashen", (836, -179, 0 + 24), angle=111, spawnflags=64, targetname="ash_wakes")
+    L.add("monster_ashen", (943, -79, 0 + 24), angle=156, spawnflags=64, targetname="ash_wakes")
     return L
 
 

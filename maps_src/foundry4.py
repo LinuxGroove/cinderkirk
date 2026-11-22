@@ -33,7 +33,7 @@ def frame(L, inset0, inset1, top, tex, bottom=-384):
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=4, message="The Bell Pit", worldtype=0,
+    L = Level(start_light=190, wad="cinder.wad", light_wait=0.7, sounds=4, message="The Bell Pit", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The cage's landing on the west side, at the top.
@@ -105,6 +105,7 @@ def build():
     L.light((1120, 0, 160), 160, WARM)
     L.brush_entity("trigger_changelevel", [Box(1088, -64, 0, 1168, 64, 96, "trigger")], map="foundry5")
     L.add("info_intermission", (100, -420, 300), mangle=(35, 35, 0))
+    L.nook(1024, 336, 0, "e", ('item_armor1', 'item_rockets'), wall="kirk_stone1", floor="coal1")   # a secret behind cracked stone
     return L
 
 

@@ -43,7 +43,7 @@ def kiln(L, x0, north):
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.6, sounds=6, message="The Bone Kilns", worldtype=0,
+    L = Level(start_light=180, wad="cinder.wad", light_wait=0.6, sounds=6, message="The Bone Kilns", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="crypt_stone1", floor="iron_plate1", ceiling="iron_rust1")
@@ -58,7 +58,7 @@ def build():
     # The gold key on a pedestal in the far north kiln's hearth.
     kx, ky = hearths[-2]
     L.solid(kx - 24, ky - 24, -40, kx + 24, ky + 24, 8, "crypt_stone1")
-    L.add("item_key2", (kx, ky, 8))
+    L.add("item_key2", (kx, ky, 8), target="ash_wakes")
     # Bone carts down the aisle, and a chute from the charnel hall above.
     for x in (320, 800, 1280):
         for y in (-128, 128):
@@ -110,6 +110,12 @@ def build():
     L.light((X1 + 112, 0, 160), 160, CANDLE)
     L.brush_entity("trigger_changelevel", [Box(X1 + 64, -64, 0, X1 + 160, 64, 96, "trigger")], map="kilns3")
     L.add("info_intermission", (100, -420, 380), mangle=(25, 20, 0))
+    L.nook(1792, 400, 0, "e", ('item_health', 'item_rockets'), wall="crypt_stone1", floor="crypt_stone1")   # a secret behind cracked stone
+    # Taking the key wakes the dead lying in the ash round it.
+    L.add("monster_ashen", (1373, 360, 0 + 24), angle=21, spawnflags=64, targetname="ash_wakes")
+    L.add("monster_ashen", (1620, 249, 0 + 24), angle=111, spawnflags=64, targetname="ash_wakes")
+    L.add("monster_ashen", (1727, 349, 0 + 24), angle=156, spawnflags=64, targetname="ash_wakes")
+    L.add("monster_ashen", (1393, 248, 0 + 24), angle=49, spawnflags=64, targetname="ash_wakes")
     return L
 
 

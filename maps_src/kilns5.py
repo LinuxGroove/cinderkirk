@@ -25,7 +25,7 @@ GAL = 192                           # the galleries' height
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.6, sounds=6, message="The Calcining Floor", worldtype=0,
+    L = Level(start_light=210, wad="cinder.wad", light_wait=0.7, sounds=6, message="The Calcining Floor", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=12, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="crypt_stone1", floor="iron_plate1", ceiling="iron_rust1")
@@ -115,6 +115,7 @@ def build():
     L.light((X1 + 112, 0, 160), 160, CANDLE)
     L.brush_entity("trigger_changelevel", [Box(X1 + 64, -64, 0, X1 + 160, 64, 96, "trigger")], map="start")
     L.add("info_intermission", (100, -650, 450), mangle=(25, 25, 0))
+    L.nook(1792, 656, 0, "e", ('item_health', 'item_rockets'), wall="crypt_stone1", floor="crypt_stone1")   # a secret behind cracked stone
     return L
 
 

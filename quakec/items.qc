@@ -194,7 +194,7 @@ void() PlaceItem =
 	self.origin_z = self.origin_z + 6;
 	oldz = self.origin_z;
 
-	if (!droptofloor())
+	if (!droptofloor() && !Place_Nudge (self.origin, FALSE))	// Cinderkirk: nudge it free first
 	{
 		dprint ("Bonus item fell out of level at ");
 		dprint (vtos(self.origin));
