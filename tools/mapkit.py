@@ -235,8 +235,25 @@ class Level:
             if n % 3 == 0:
                 e.keys["spawnflags"] = flags | NOT_EASY
 
+    def start_lamp(self):
+        """A player start nobody lit gets a lamp over it: the first thing a
+        player sees shouldn't be a dark corner."""
+        if self.light_wait >= 1:
+            return          # a bright level (cisterns4) needs no help
+        lights = [e.keys["origin"] for e in self.entities if e.classname == "light" and e.keys.get("light", 300) >= 240]
+        for e in list(self.entities):
+            if e.classname != "info_player_start":
+                continue
+            x, y, z = e.keys["origin"]
+            if any((lx - x) ** 2 + (ly - y) ** 2 + (lz - z) ** 2 < 128 ** 2 for lx, ly, lz in lights):
+                continue
+            room = next((a for a in self.air if a.x0 <= x <= a.x1 and a.y0 <= y <= a.y1 and a.z0 <= z <= a.z1), None)
+            top = min(z + 120, room.z1 - 16) if room else z + 96
+            self.light((x, y, top), 260, (1.0, 0.8, 0.58))
+
     def text(self):
         self.skill_flags()
+        self.start_lamp()
         world = Entity("worldspawn", self.world, self.world_brushes())
         return "\n".join([world.text()] + [e.text() for e in self.entities]) + "\n"
 

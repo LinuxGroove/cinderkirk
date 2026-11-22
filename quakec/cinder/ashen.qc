@@ -161,12 +161,17 @@ void() ashen_die =
 };
 
 // Back up from the pile, raised by a Deacon (self is the pile).
+// Lying in the ash until something fires it ("Lie" and a targetname).
+#define ASHEN_LIE	64
+
 void() ashen_up =
 {
 	self.classname = "monster_ashen";
 	self.solid = SOLID_SLIDEBOX;
 	setsize (self, '-16 -16 -24', '16 16 40');
 	self.health = ASHEN_HEALTH * 0.7;
+	if (self.max_health == ASHEN_HEALTH && !self.ash_raised && self.spawnflags & ASHEN_LIE)
+		self.health = ASHEN_HEALTH;
 	self.takedamage = DAMAGE_AIM;
 	self.deadflag = DEAD_NO;
 	self.ash_raised = TRUE;
@@ -215,8 +220,45 @@ float(entity p, entity foe) Ashen_Raise =
 	return TRUE;
 };
 
-/*QUAKED monster_ashen (1 0 0) (-16 -16 -24) (16 16 40) Ambush
+void() ashen_lie_use =
+{
+	local entity e;
+
+	if (self.health <= 0 || self.solid != SOLID_NOT)
+		return;
+	if (activator.classname == "player")
+		self.enemy = activator;
+	// Wait for anyone standing on the pile to step off it.
+	for (e = findradius (self.origin, 40); e; e = e.chain)
+		if (e != self && e.solid == SOLID_SLIDEBOX && e.health > 0)
+		{
+			self.think = ashen_lie_use;
+			self.nextthink = time + 0.3;
+			return;
+		}
+	self.solid = SOLID_SLIDEBOX;
+	setsize (self, '-16 -16 -24', '16 16 40');
+	setorigin (self, self.origin);
+	ashen_rise1 ();
+	// They come up whole, unlike the ones a Deacon raises.
+	self.max_health = ASHEN_HEALTH;
+};
+
+void() ashen_lie =
+{
+	walkmonster_start_go ();
+	self.frame = $death12;
+	self.solid = SOLID_NOT;
+	self.takedamage = DAMAGE_NO;
+	setorigin (self, self.origin);
+	self.use = ashen_lie_use;
+	self.think = SUB_Null;
+	self.nextthink = 0;
+};
+
+/*QUAKED monster_ashen (1 0 0) (-16 -16 -24) (16 16 40) Ambush ? ? ? ? Lie
 The dead risen from the ash. Slow, and they come in crowds.
+"Lie": a pile of ash until its targetname is fired, then it rises.
 */
 void() monster_ashen =
 {
@@ -253,4 +295,6 @@ void() monster_ashen =
 	self.th_die = ashen_die;
 
 	walkmonster_start ();
+	if ((self.spawnflags & ASHEN_LIE) && self.targetname != string_null)
+		self.think = ashen_lie;
 };
