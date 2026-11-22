@@ -32,7 +32,7 @@ def walkway(L, x0, y0, x1, y1, tex="cist_stone1"):
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.75, sounds=5, message="The Great Cistern", worldtype=0,
+    L = Level(start_light=170, wad="cinder.wad", light_wait=0.75, sounds=5, message="The Great Cistern", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     L.room(-224, -96, 0, -32, 96, 192, wall="cist_brick1", floor="iron_plate1", ceiling="iron_rust1")

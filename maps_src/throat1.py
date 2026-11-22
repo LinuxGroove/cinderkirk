@@ -51,7 +51,7 @@ def rail(L, x0, y0, x1, y1, z_from, z_to, axis):
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.6, sounds=8, message="The Throat", worldtype=0,
+    L = Level(start_light=150, wad="cinder.wad", light_wait=0.6, sounds=8, message="The Throat", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=10, _range=0.6)
 
     L.room(-R, -R, BOT, R, R, 320, wall="vein_rock1", floor="vein_rock1", ceiling="kirk_vbrick1", floor_depth=64)

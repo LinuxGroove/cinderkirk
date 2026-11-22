@@ -24,7 +24,7 @@ CANDLE = (1.0, 0.8, 0.55)
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=4, message="The Moulding Floor", worldtype=0,
+    L = Level(start_light=190, wad="cinder.wad", light_wait=0.8, sounds=4, message="The Moulding Floor", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The cage's landing, and a passage east.

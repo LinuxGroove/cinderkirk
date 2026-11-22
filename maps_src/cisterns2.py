@@ -23,7 +23,7 @@ X1 = 2048
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=5, message="The Long Vault", worldtype=0,
+    L = Level(start_light=160, wad="cinder.wad", light_wait=0.8, sounds=5, message="The Long Vault", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=6, _range=0.6)
 
     # The landing at the west end.

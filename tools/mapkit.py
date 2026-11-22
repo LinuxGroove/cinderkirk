@@ -108,6 +108,7 @@ class Level:
 
     def __init__(self, **worldspawn):
         self.light_wait = worldspawn.pop("light_wait", 1)
+        self.start_light = worldspawn.pop("start_light", 0)
         self.world = dict(worldspawn)
         self.solids = []
         self.air = []
@@ -236,20 +237,19 @@ class Level:
                 e.keys["spawnflags"] = flags | NOT_EASY
 
     def start_lamp(self):
-        """A player start nobody lit gets a lamp over it: the first thing a
-        player sees shouldn't be a dark corner."""
-        if self.light_wait >= 1:
-            return          # a bright level (cisterns4) needs no help
-        lights = [e.keys["origin"] for e in self.entities if e.classname == "light" and e.keys.get("light", 300) >= 240]
+        """A lamp over the player start, as bright as Level(start_light=N)
+        says: the first thing a player sees shouldn't be a dark corner, nor
+        a wall blown out to white. Each level's value is tuned so its start
+        is about as bright as the rest of it (tools/startlight.py measures)."""
+        if not self.start_light:
+            return
         for e in list(self.entities):
             if e.classname != "info_player_start":
                 continue
             x, y, z = e.keys["origin"]
-            if any((lx - x) ** 2 + (ly - y) ** 2 + (lz - z) ** 2 < 128 ** 2 for lx, ly, lz in lights):
-                continue
             room = next((a for a in self.air if a.x0 <= x <= a.x1 and a.y0 <= y <= a.y1 and a.z0 <= z <= a.z1), None)
             top = min(z + 120, room.z1 - 16) if room else z + 96
-            self.light((x, y, top), 260, (1.0, 0.8, 0.58))
+            self.light((x, y, top), self.start_light, (1.0, 0.82, 0.62))
 
     def text(self):
         self.skill_flags()
