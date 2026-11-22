@@ -204,6 +204,13 @@ check:
 	for m in $(MAPS); do grep -q "LEAK" $(BUILD)/maps/$$m.log && { echo "$$m leaks"; exit 1; } || true; done
 	$(PYTHON) tools/stuck.py
 
+# Plays every level and the finale with nobody at the keys, on this machine's
+# GPU (not in CI): make playtest PLAYTEST="--maps throat2 --skill 3"; see
+# tools/playtest/playtest.py. The report goes to build/playtest/report.md.
+.PHONY: playtest
+playtest: all
+	$(PYTHON) tools/playtest/playtest.py $(PLAYTEST)
+
 clean:
 	rm -rf $(BUILD)/engine $(BUILD)/maps $(BUILD)/stage $(BUILD)/progs.dat $(BUILD)/progs.lno $(DIST)
 
