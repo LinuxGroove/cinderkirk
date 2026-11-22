@@ -1663,6 +1663,11 @@ void Sbar_IntermissionOverlay (cb_context_t *cbx)
 	pic = Draw_CachePic ("gfx/inter.lmp");
 	total += pic->width + 24;
 	total = q_min (320, total);
+	// Cinderkirk: a dark panel behind the records, so they read over a bright room.
+	{
+		int w = q_min (320, total + 32);
+		Draw_Fill (cbx, 160 - w / 2, 16, w, 176, 0, 0.6f);
+	}
 	Draw_Pic (cbx, 160 - total / 2, 56, pic, 1.0f, false);
 
 	pic = Draw_CachePic ("gfx/complete.lmp");

@@ -23,7 +23,7 @@ STEP = 96                            # the firing steps' height
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=10, message="The Slag Run", worldtype=0,
+    L = Level(wad="cinder.wad", light_wait=0.6, sounds=10, message="The Slag Run", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=20, _range=0.6)
     L.room(-X, -Y, 0, X, Y, H, wall="firebrick1", floor="iron_plate1", ceiling="iron_rust1", floor_depth=96)
     # The run of slag down the middle, sunk into the floor.

@@ -34,7 +34,7 @@ def pilasters(L, x0, x1, y0, y1, z0, z1, side, step=256):
 
 
 def build():
-    L = Level(wad="cinder.wad", light_wait=0.8, sounds=6, message="The Charnel Stair", worldtype=0,
+    L = Level(wad="cinder.wad", light_wait=0.7, sounds=6, message="The Charnel Stair", worldtype=0,
               _bounce=1, _bouncescale=1.0, _minlight=8, _range=0.6)
 
     # The cage's landing, north of the crypt.
